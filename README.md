@@ -29,6 +29,8 @@ Bulkheads with minimum floor height defined and hull plates separated into indiv
 ![](images/2019_09_19_v06.png)
 Example hull shape with longitudal stringers added and notched automatically with bulkheds for easy integration.
 
+![](images/2019_10_15_v05.png)
+Example showing bulkheads and stringers and one stringer removed to show notching in both bulkhead and stringer.
 
 
 ## Usage
