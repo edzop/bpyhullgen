@@ -1,0 +1,47 @@
+
+
+==============================================
+boat_ui.py ----------> boat_curve_2.py
+==============================================
+boat_curve.test()
+boat_curve.clean()
+
+
+
+
+
+
+
+curve_test.py
+curve_test3D.py
+===============================================
+curve_helper.py
+===============================================
+
+
+
+Blender UV Map -> export UV Map as (Svg)
+import into inkscape (small boxes) - not working
+
+import SVG into blender (works as lines)
+
+convert curve to mesh (assign material)
+delete vertices inside object (maintain perimeter only)
+
+join individual islands to single mesh object
+remove doubles
+select all
+select boundry loop
+select inverse
+delete edges (selected)
+
+
+
+export as DXF
+
+
+
+
+
+
+/home/blender/scripts/addons/boat/render_tests.sh
