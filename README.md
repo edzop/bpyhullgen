@@ -9,6 +9,4 @@ One of the design goals of the project is to generate hulls with curves and surf
 
 It has been tested on Linux. I have not tried it on other platforms yet. 
 
-
-
-
+![](images/2019_10_13_v07.png)
