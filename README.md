@@ -10,3 +10,13 @@ One of the design goals of the project is to generate hulls with curves and surf
 It has been tested on Linux. I have not tried it on other platforms yet. 
 
 ![](images/2019_10_13_v07.png)
+Example hull generated with bulkheads following parametric curves.
+
+![](images/2019_09_20_v01.png)
+Example bulkheads with minimum floor height defined to allow for a level floor surface between bulkheads.
+
+![](images/2019_09_19_v06.png)
+Example hull shape with longitudal stringers added and notched automatically with bulkheds for easy integration.
+
+
+
