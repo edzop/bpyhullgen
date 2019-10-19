@@ -7,7 +7,7 @@ One of the design goals of the project is to generate hulls with curves and surf
 
 
 ## Requirements
-- bpyhullgen [Blender](https://www.blender.org/) (version 2.8 or later) to generate the mesh geometry.
+- bpyhullgen uses [Blender](https://www.blender.org/) (version 2.8 or later) to generate the mesh geometry.
 
 Under the hood bpyhullgen uses [Blender Python API](https://docs.blender.org/api/current/index.html) 
 
@@ -38,3 +38,11 @@ To use bpyhullgen launch blender from the command line with the `-P` command lin
 blender -P tests/hull_test_7.py
 ```
 
+In the tests directory there are several unit test scripts that you can look at or modify.
+
+There is a `render_tests.sh` script that will run and render all the unit tests in the tests directory and produce a series of .png image files in the `tests/output` directory. 
+
+If you are able to generate these output images it's probally working correctly.
+
+## Todo
+More documentation on how to use the python classes and more examples on what parameters tweak what. 
