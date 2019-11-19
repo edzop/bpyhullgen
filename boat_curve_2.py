@@ -21,7 +21,8 @@ import imp
 import numpy
 import math
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
+from . import curve_helper as curve_helper
+#curve_helper = imp.load_source('curve_helper','curve_helper.py')
 
 def make_rounded(ob):
     bpy.context.view_layer.objects.active=ob

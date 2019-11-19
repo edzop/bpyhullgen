@@ -2,9 +2,7 @@ import bpy
 import imp   
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
-
 material_helper = imp.load_source('material_helper','material_helper.py')
-
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
 
 def make_chines(the_hull):

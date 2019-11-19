@@ -20,9 +20,13 @@
 
 import imp
 
-boat_curve 		= imp.load_source('boat_curve','boat_curve_2.py')
-measure_helper 	= imp.load_source('measure_helper','measure_helper.py')
-geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
+from . import measure_helper as measure_helper
+from . import boat_curve_2 as boat_curve
+from . import geometry_helper as geometry_helper
+
+#boat_curve 		= imp.load_source('boat_curve','boat_curve_2.py')
+#measure_helper 	= imp.load_source('measure_helper','measure_helper.py')
+#geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 
 bl_info = {
     "name": "BoatCurve",
@@ -36,6 +40,10 @@ bl_info = {
     "tracker_url": "",
     "category": "Development"
 }
+
+#from . import auto_load
+
+#auto_load.init()
 
 
 import bpy
@@ -312,6 +320,7 @@ class OBJECT_PT_my_panel (Panel):
 # ------------------------------------------------------------------------
 
 def register():
+    #auto_load.register()
     bpy.utils.register_class( MyProperties )
     bpy.types.Scene.my_tool = PointerProperty( type = MyProperties )
     #
@@ -326,6 +335,7 @@ def register():
     bpy.utils.register_class( DeleteAllOperator )
 
 def unregister():
+    #auto_load.unregister()
     bpy.utils.unregister_class( BasicMenu )
     bpy.utils.unregister_class( HelloWorldOperator )
     bpy.utils.unregister_class( SeparateSolidifyOperator )
@@ -344,6 +354,6 @@ def unregister():
 
 
 
-if __name__ == "__main__":
-    pass
-    #register()
+#if __name__ == "__main__":
+#    pass
+#    #register()

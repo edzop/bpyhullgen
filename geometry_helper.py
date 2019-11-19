@@ -23,9 +23,11 @@ import hashlib
 from math import radians, degrees
 from mathutils import Vector
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
+from . import curve_helper as curve_helper
+from . import material_helper as material_helper
 
-material_helper = imp.load_source('material_helper','material_helper.py')
+#curve_helper = imp.load_source('curve_helper','curve_helper.py')
+#material_helper = imp.load_source('material_helper','material_helper.py')
 
 def separate_solidify():
 	selected_object=bpy.context.view_layer.objects.active

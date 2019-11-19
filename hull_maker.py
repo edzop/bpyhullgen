@@ -20,7 +20,12 @@ import bpy
 import imp
 import math
 
+#from . import curve_helper as curve_helper
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+
+#from . import curve_helper as curve_helper
+#from . import material_helper as cumaterial_helperrve_helper
+#from . import bulkhead as bulkhead
 
 material_helper = imp.load_source('material_helper','material_helper.py')
 bulkhead = imp.load_source('bulkhead','bulkhead.py')
