@@ -277,5 +277,3 @@ class Curve_Helper:
 			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z')
 		else:
 			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
-
-
