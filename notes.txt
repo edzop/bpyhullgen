@@ -1,24 +1,15 @@
 
-
 ==============================================
 boat_ui.py ----------> boat_curve_2.py
 ==============================================
 boat_curve.test()
 boat_curve.clean()
 
-
-
-
-
-
-
 curve_test.py
 curve_test3D.py
 ===============================================
 curve_helper.py
 ===============================================
-
-
 
 Blender UV Map -> export UV Map as (Svg)
 import into inkscape (small boxes) - not working
@@ -35,13 +26,6 @@ select boundry loop
 select inverse
 delete edges (selected)
 
-
-
 export as DXF
-
-
-
-
-
 
 /home/blender/scripts/addons/boat/render_tests.sh

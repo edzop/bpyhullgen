@@ -66,7 +66,8 @@ classes = (
     ui.DeleteAllOperator,
     ui.Export_CSV_Operator,
     ui.ExportPlatesOperator,
-    ui.ImportPlatesOperator
+    ui.ImportPlatesOperator,
+    ui.ExportHulldxfOperator
 )
 
 def register():

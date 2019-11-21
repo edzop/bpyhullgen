@@ -280,6 +280,21 @@ class ExportPlatesOperator (bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ExportHulldxfOperator (bpy.types.Operator):
+    """Export plate geometry to DXF file"""
+    bl_idname = "wm.exporthulldxf"
+    bl_label = "ExportDXF"
+
+    def execute(self, context):
+        #scene = context.scene
+        #mytool = scene.my_tool
+
+        measure_helper.export_dxf("plates2.dxf")
+
+        return {'FINISHED'}
+
+
+
 class ImportPlatesOperator (bpy.types.Operator):
     """Import plate geometry from SVG file"""
     bl_idname = "wm.importplates"
@@ -338,10 +353,10 @@ class BasicMenu (bpy.types.Menu):
 
 class OBJECT_PT_my_panel (Panel):
 
-    bl_label = "BezierBoat"
+    bl_label = "bpyHullGen"
     bl_space_type = "VIEW_3D"   
     bl_region_type = "UI"
-    bl_category = "paraBC"
+    bl_category = "bpyHullGen"
 
 
     @classmethod
@@ -366,6 +381,8 @@ class OBJECT_PT_my_panel (Panel):
         rowsub = layout.row(align=True)
         rowsub.operator( "wm.exportcsv")
         rowsub.operator( "wm.exportplates")
+        rowsub = layout.row(align=True)
+        rowsub.operator( "wm.exporthulldxf")
 
         row = layout.row()
         row.label(text="Import:")
