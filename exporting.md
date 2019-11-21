@@ -33,8 +33,10 @@ This function deletes all the mesh objects but leaves lights, empties and camera
 This assigns a solidify modifer to each selected panel for visualization and rendering purposes. The current thickness is 0.1 but should be adjustable in the future. For now if you want a different thickness you can modify the code.
 
 #### exportCSV
-This function will export a hull_export.csv file showing the area and volume of each face for calculating material weight and cost. 
+This function will export a hull_export.csv file showing the area and volume of each face for calculating material weight and cost.
+
 ![Quick Hull](images/2019_11_20_export/csv_export.png)
+
 You can use a spreadsheet program to calculate total weight based on the chosen material. The numbers displayed are cubic meters (m3).
 
 ## Example exported hull model
