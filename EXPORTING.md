@@ -1,7 +1,7 @@
 # bpyhullgen Exporting
 
 ## Introduction
-A simple UI with some features to manipulate and export the hull model for production has been provided for testing and experimenting. 
+A simple UI with some features to manipulate and export the hull model for production has been provided for testing and experimenting.   
 ![Quick Hull Plates](images/2019_11_20_export/export.png)
 
 ## Status
@@ -41,12 +41,15 @@ You can use a spreadsheet program to calculate total weight based on the chosen 
 
 ## Example exported hull model
 ![Quick Hull](images/2019_11_20_export/quick_hull.png)
+
 Quick Hull sample model from included tests directory
 
 ![Quick Hull Plates](images/2019_11_20_export/export_plate_svg.png)
+
 Plate file SVG showing bend creases
 
 ![Quick Hull Plates](images/2019_11_20_export/export_dxf.png)
+
 Preview of DXF file output for CAD/CAM cutting
 
 [Exported DXF file](images/2019_11_20_export/export.dxf) 
