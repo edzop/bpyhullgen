@@ -22,6 +22,7 @@ import csv
 import imp
 
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+material_helper = imp.load_source('material_helper','material_helper.py')
 
 
 
@@ -134,8 +135,9 @@ def import_plates(filename):
 		print("SS:"+obj.name)
 		obj.data.edges[0].select=True
 		bpy.ops.object.mode_set(mode='EDIT')
-		bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
-
+		#bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
+		bpy.ops.mesh.select_similar(type='FACE', threshold=1)
+		
 		bpy.ops.mesh.select_all(action='INVERT')
 		bpy.ops.mesh.delete(type='EDGE')
 		
@@ -149,12 +151,31 @@ def import_plates(filename):
 		bpy.ops.mesh.select_mode(type="EDGE")
 
 		bpy.ops.object.mode_set(mode='OBJECT')
+
+def export_dxf(filename):
+
+	# For some reason it doens't work if there is no material in slot 0
+	# even when you specify entitycolor from obj.layer 
+
+	default_material=material_helper.make_diffuse_material("export_default",(1,1,1,1))
+
+	for obj in bpy.data.objects:
+		if obj.type=="MESH":
+			print(obj.name + " slots: %s"%len(obj.material_slots))
+			if obj.data.materials[0]==None:
+				material_helper.assign_material(obj,default_material)
+	
+	bpy.ops.export.dxf(filepath="test.dxf", 
+		projectionThrough='NO', 
+		onlySelected=False, 
+		apply_modifiers=True, 
+		mesh_as='3DFACEs', 
+		entitylayer_from='obj.data.name', 
+		entitycolor_from='obj.layer', 
+		entityltype_from='CONTINUOUS', 
+		layerName_from='LAYERNAME_DEF', 
+		verbose=True)
 		
-		
-
-
-		#bpy.ops.mesh.delete_loose(use_verts=True, use_edges=False, use_faces=False)
-
 
 
 def export_plates(filename):
@@ -165,7 +186,7 @@ def export_plates(filename):
 	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
 
 	bpy.ops.uv.smart_project(stretch_to_bounds=False,island_margin=0.3)
-	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(1024, 1024))
+	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(10000, 10000))
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -180,12 +201,12 @@ def exportCSV():
 
 		csv_row = []
 
-		csv_row.append("Name")
+		csv_row.append("name")
 		csv_row.append("X")
 		csv_row.append("Y")
 		csv_row.append("Z")
 
-		csv_row.append("Vol")
+		csv_row.append("volume")
 
 		csv_row.append("face_count")
 		csv_row.append("surface_area")
