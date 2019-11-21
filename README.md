@@ -47,9 +47,7 @@ There is a `render_tests.sh` script that will run and render all the unit tests 
 If you are able to generate these output images it's probally working correctly.
 
 ## Exporting
-Once a hull shape is defined you can [Export a DXF file]](exporting .md) for CAD / CAM cutting. 
-
-[Blender Python API](https://docs.blender.org/api/current/index.html) 
+Once a hull shape is defined you can [Export a DXF file]](EXPORTING.md) for CAD / CAM cutting. 
 
 ## Todo
 More documentation on how to use the python classes and more examples on what parameters tweak what. 
