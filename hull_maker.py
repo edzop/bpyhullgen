@@ -144,9 +144,11 @@ class chine_helper:
 
 
     def make_slicer_plane(self,wall_curve,name,height,thickness,z_offset):
+
+        name_prefix="cutter"
         
         # Add first plane
-        slicer1=self.create_slicer_plane_mesh(name+".a",height-(thickness/2),z_offset)
+        slicer1=self.create_slicer_plane_mesh(name_prefix+name+".a",height-(thickness/2),z_offset)
         
         slicer1.select_set(True)
         bpy.context.view_layer.objects.active=slicer1
@@ -162,7 +164,7 @@ class chine_helper:
         slicer1.select_set(False)
         
         # Add second plane
-        slicer2=self.create_slicer_plane_mesh(name+".b",height+(thickness/2),z_offset)
+        slicer2=self.create_slicer_plane_mesh(name_prefix+name+".b",height+(thickness/2),z_offset)
 
         slicer2.select_set(True)
         bpy.context.view_layer.objects.active=slicer2
@@ -189,10 +191,14 @@ class chine_helper:
         #bpy.ops.mesh.select_all(action='DESELECT')
         
         # second object selected is left over after join
-        slicer2.name=name
+        slicer2.name=name_prefix+name
         return slicer2
 
     def make_chine(self,twist=None):
+
+        bpy.ops.object.select_all(action='DESELECT')
+
+        name_prefix="chine_"
 
         theCurveHelper = curve_helper.Curve_Helper()
 
@@ -204,7 +210,7 @@ class chine_helper:
         # ================================================================================================ 
         # First curve is Left Side or non-symmetrical "single side"
         # ================================================================================================
-        first_curve_name=self.name
+        first_curve_name=name_prefix+self.name
 
         if self.symmetrical:
             first_curve_name+=".L"
@@ -261,7 +267,7 @@ class chine_helper:
                 theCurveHelper.curve_twist[1]=-twist[1]
                 theCurveHelper.curve_twist[2]=-twist[2]
 
-            theCurveHelper.generate_curve(self.name+".R")
+            theCurveHelper.generate_curve(name_prefix+self.name+".R")
             self.curve_object_2=theCurveHelper.curve_object
             theCurveHelper.convert_to_mesh()
             material_helper.assign_material(self.curve_object_2,material_helper.get_material_bool())

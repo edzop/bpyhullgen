@@ -23,13 +23,18 @@ import hashlib
 from math import radians, degrees
 from mathutils import Vector
 
+#from . import (
+#		curve_helper,
+#		material_helper
+#		)
+
 #from . import curve_helper as curve_helper
 #from . import material_helper as material_helper
 
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 
-def separate_solidify():
+def separate_active_by_material():
 	selected_object=bpy.context.view_layer.objects.active
 
 	if selected_object==None:
@@ -37,24 +42,37 @@ def separate_solidify():
 
 	object_name=selected_object.name
 
+	view_collection_separated=curve_helper.make_collection(object_name,bpy.context.scene.collection.children)
+
 	bpy.ops.mesh.separate(type='MATERIAL')
 
 	for obj in bpy.data.objects:
-		if obj.name.startswith(object_name):
-			modifier=obj.modifiers.new(name="solidify", type='SOLIDIFY')
-			modifier.thickness=-0.1
+		if obj.type=="MESH":
+			if obj.name.startswith(object_name):
+				curve_helper.move_object_to_collection(view_collection_separated,obj)
 
+
+def solidify_selected_objects():
+	for obj in bpy.context.selected_objects:
+		if obj.type=="MESH":
+			has_solidify_modifier=False
+
+			for modifier in obj.modifiers:
+				if modifier.type=='SOLIDIFY':
+					has_solidify_modifier=True
+
+			if has_solidify_modifier==False:
+				modifier=obj.modifiers.new(name="solidify", type='SOLIDIFY')
+				modifier.thickness=-0.1
 
 
 # Generate unique color RGV values based on input string 
 # Returns list of 3 values between 0 and 1
 def get_color_from_hash_string(input_string,add_alpha_value=True):
-    print(input_string)
     hash_string=str((hash(input_string) % 10**9))
     m = hashlib.md5()
     m.update(input_string.encode())
     hash_string=m.hexdigest()
-    print(int(hash_string,16))
 
     color_value_list=[]
         
@@ -62,11 +80,8 @@ def get_color_from_hash_string(input_string,add_alpha_value=True):
     color_value_list.append(int(str(int(hash_string, 16))[3:6])/999)
     color_value_list.append(int(str(int(hash_string, 16))[6:9])/999)
 
-
     if add_alpha_value==True:
         color_value_list.append(1)
-
-    print(color_value_list)
         
     return color_value_list
 

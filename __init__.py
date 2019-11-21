@@ -16,17 +16,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-# bpy.ops.script.reload()
 
-import imp
-
-from . import measure_helper as measure_helper
-from . import boat_curve_2 as boat_curve
-from . import geometry_helper as geometry_helper
-
-#boat_curve 		= imp.load_source('boat_curve','boat_curve_2.py')
-#measure_helper 	= imp.load_source('measure_helper','measure_helper.py')
-#geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 
 bl_info = {
     "name": "BoatCurve",
@@ -41,319 +31,53 @@ bl_info = {
     "category": "Development"
 }
 
-#from . import auto_load
-
-#auto_load.init()
-
-
-import bpy
-
-from bpy.props import (StringProperty,
-                       BoolProperty,
-                       IntProperty,
-                       FloatProperty,
-                       FloatVectorProperty,
-                       EnumProperty,
-                       PointerProperty,
-                       )
-from bpy.types import (Panel,
-                       Operator,
-                       PropertyGroup,
-                       )
-
-
-# ------------------------------------------------------------------------
-#    store properties in the active scene
-# ------------------------------------------------------------------------
-
-class MyProperties (PropertyGroup):
-
-    my_bool : BoolProperty(
-        name="Enable or Disable",
-        description="A bool property",
-        default = False
-        )
-
-    my_int : IntProperty(
-        name = "Int Value",
-        description="A integer property",
-        default = 23,
-        min = 10,
-        max = 100
-        )
-
-    my_float : FloatProperty(
-        name = "Float Value",
-        description = "A float property",
-        default = 23.7,
-        min = 0.01,
-        max = 30.0
-        )
-
-    my_float_vector : FloatVectorProperty(
-        name = "Float Vector Value",
-        description="Something",
-        default=(0.0, 0.0, 0.0), 
-        min= 0.0, # float
-        max = 0.1
-    ) 
-
-    my_string : StringProperty(
-        name="User Input",
-        description=":",
-        default="",
-        maxlen=1024,
-        )
-
-    my_enum : EnumProperty(
-        name="Dropdown:",
-        description="Apply Data to attribute.",
-        items=[ ('OP1', "Option 1", ""),
-                ('OP2', "Option 2", ""),
-                ('OP3', "Option 3", ""),
-               ]
-        )
-
-
-
-
-# ------------------------------------------------------------------------
-#    Build
-# ------------------------------------------------------------------------
-
-class GenSceneOperator (bpy.types.Operator):
-    bl_idname = "wm.build"
-    bl_label = "GenScene"
-
-    def execute(self, context):
-
-        geometry_helper.make_backdrop()
-
-        return {'FINISHED'}
-
-
-# ------------------------------------------------------------------------
-#    Apply All Bool
-# ------------------------------------------------------------------------
-
-class ApplyAllBoolOperator (bpy.types.Operator):
-    bl_idname = "wm.apply_all_bool"
-    bl_label = "ApplyAllBool"
-
-    def execute(self, context):
-
-        print("Apply All Bool")
-
-        geometry_helper.apply_all_bool_modifiers()
-
-     
-        return {'FINISHED'}
-
-
-### TODO ADD bpy.ops.mesh.separate(type='SELECTED') operator
-
-
-# ------------------------------------------------------------------------
-#    DeleteAll
-# ------------------------------------------------------------------------
-
-class DeleteAllOperator (bpy.types.Operator):
-    bl_idname = "wm.deleteall"
-    bl_label = "DeleteAll"
-
-    def execute(self, context):
-
-        print("DeleteAll")
-
-        for obj in bpy.data.objects:
-            if obj.type!="CAMERA":
-                if obj.type!="LIGHT":
-                    if obj.type!="EMPTY":
-                        bpy.data.objects.remove(obj)    
-    
-        return {'FINISHED'}
-
-
-
-# ------------------------------------------------------------------------
-#    Measure
-# ------------------------------------------------------------------------
-
-class MeasureAreaOperator (bpy.types.Operator):
-    bl_idname = "wm.measure_area"
-    bl_label = "MeasureArea"
-
-    def execute(self, context):
-
-        print("MeasureArea")
-
-        obj = bpy.context.active_object
-        face_data=measure_helper.measure_selected_faces_area(obj)
-
-        self.report({'INFO'}, "faces %d: area %f"%(face_data[0],face_data[1]))
-
-        return {'FINISHED'}
-
-
-class MeasureVolumeOperator (bpy.types.Operator):
-    bl_idname = "wm.measure_volume"
-    bl_label = "MeasureVolume"
-
-    def execute(self, context):
-
-        print("MeasureVolume")
-
-        obj = bpy.context.active_object
-        volume=measure_helper.measure_object_volume(obj)
-
-        self.report({'INFO'}, "Volume: %f"%volume)
-
-        return {'FINISHED'}
-
-
-
-# ------------------------------------------------------------------------
-#    Cleanup
-# ------------------------------------------------------------------------
-
-class SeparateSolidifyOperator (bpy.types.Operator):
-    bl_idname = "wm.separatesolidify"
-    bl_label = "SeparateSolidify"
-
-    def execute(self, context):
-        scene = context.scene
-        mytool = scene.my_tool
-
-        # print the values to the console
-        print("SeparateSolidify")
-
-        geometry_helper.separate_solidify()
-
-        return {'FINISHED'}
-
-
-
-# ------------------------------------------------------------------------
-#    operators
-# ------------------------------------------------------------------------
-
-class HelloWorldOperator (bpy.types.Operator):
-    bl_idname = "wm.hello_world"
-    bl_label = "Print Values Operator"
-
-    def execute(self, context):
-        scene = context.scene
-        mytool = scene.my_tool
-
-        # print the values to the console
-        print("Hello World")
-        print("bool state:", mytool.my_bool)
-        print("int value:", mytool.my_int)
-        print("float value:", mytool.my_float)
-        print("string value:", mytool.my_string)
-        print("enum state:", mytool.my_enum)
-
-        return {'FINISHED'}
-
-# ------------------------------------------------------------------------
-#    menus
-# ------------------------------------------------------------------------
-
-class BasicMenu (bpy.types.Menu):
-    bl_idname = "OBJECT_MT_select_test"
-    bl_label = "Select"
-
-    def draw(self, context):
-        layout = self.layout
-
-        # built-in example operators
-        layout.operator("object.select_all", text="Select/Deselect All").action = 'TOGGLE'
-        layout.operator("object.select_all", text="Inverse").action = 'INVERT'
-        layout.operator("object.select_random", text="Random")
-
-# ------------------------------------------------------------------------
-#    my tool in objectmode
-# ------------------------------------------------------------------------
-
-class OBJECT_PT_my_panel (Panel):
-    bl_idname = "OBJECT_PT_my_panel"
-    bl_label = "BezierBoat"
-    bl_space_type = "VIEW_3D"   
-    bl_region_type = "UI"
-    bl_category = "paraBC"
-#    bl_category = 'View'
-    bl_context = "objectmode"   
-
-
-    @classmethod
-    def poll(self,context):
-        return context.object is not None
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        mytool = scene.my_tool
-
-        layout.prop( mytool, "my_bool")
-        layout.prop( mytool, "my_enum", text="") 
-        layout.prop( mytool, "my_int")
-        layout.prop( mytool, "my_float")
-        layout.prop( mytool, "my_float_vector", text="")
-        layout.prop( mytool, "my_string")
-        layout.operator( "wm.hello_world")
-        layout.operator( "wm.separatesolidify")
-        layout.operator( "wm.build")
-        layout.operator( "wm.measure_area")
-        layout.operator( "wm.measure_volume")
-        layout.operator( "wm.apply_all_bool")
-        layout.operator( "wm.deleteall")
-
-        layout.menu( "OBJECT_MT_select_test", text="Presets", icon="SCENE")
-        
-
-
-
-
-
 # ------------------------------------------------------------------------
 # register and unregister
 # ------------------------------------------------------------------------
 
+if "bpy" in locals():
+    import importlib
+    importlib.reload(ui)
+else:
+
+    import bpy
+
+    from bpy.props import PointerProperty
+
+    from . import (
+            ui
+            )
+
+
+
+
+classes = (
+    ui.MyProperties,
+    ui.OBJECT_PT_my_panel,
+    ui.HelloWorldOperator,
+    ui.SolidifySelectedObjectsOperator,
+    ui.SeparateMaterialOperator,
+    ui.GenSceneOperator,
+    ui.BasicMenu,
+    ui.MeasureVolumeOperator,
+    ui.MeasureAreaSelectedOperator,
+    ui.MeasureAreaAllOperator,
+    ui.ApplyAllBoolOperator,
+    ui.DeleteAllOperator,
+    ui.Export_CSV_Operator,
+    ui.ExportPlatesOperator,
+    ui.ImportPlatesOperator
+)
+
 def register():
-    #auto_load.register()
-    bpy.utils.register_class( MyProperties )
-    bpy.types.Scene.my_tool = PointerProperty( type = MyProperties )
-    #
-    bpy.utils.register_class( OBJECT_PT_my_panel )
-    bpy.utils.register_class( HelloWorldOperator )
-    bpy.utils.register_class( SeparateSolidifyOperator )
-    bpy.utils.register_class( GenSceneOperator )
-    bpy.utils.register_class( BasicMenu )
-    bpy.utils.register_class( MeasureVolumeOperator )
-    bpy.utils.register_class( MeasureAreaOperator )
-    bpy.utils.register_class( ApplyAllBoolOperator )
-    bpy.utils.register_class( DeleteAllOperator )
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Scene.my_tool = PointerProperty( type = ui.MyProperties )
+
 
 def unregister():
-    #auto_load.unregister()
-    bpy.utils.unregister_class( BasicMenu )
-    bpy.utils.unregister_class( HelloWorldOperator )
-    bpy.utils.unregister_class( SeparateSolidifyOperator )
-    bpy.utils.unregister_class( GenSceneOperator )
-    bpy.utils.unregister_class( OBJECT_PT_my_panel )
-    #
-    bpy.utils.unregister_class( MyProperties )
-
-    bpy.utils.unregister_class( MeasureVolumeOperator )
-    bpy.utils.unregister_class( MeasureAreaOperator )
-    bpy.utils.unregister_class( ApplyAllBoolOperator )
-    bpy.utils.unregister_class( DeleteAllOperator )
-
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.my_tool
-
-
-
-#if __name__ == "__main__":
-#    pass
-#    #register()

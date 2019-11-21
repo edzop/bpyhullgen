@@ -18,6 +18,11 @@
 
 import bpy
 import bmesh
+import csv
+import imp
+
+curve_helper = imp.load_source('curve_helper','curve_helper.py')
+
 
 
 # =======================================================================================
@@ -27,62 +32,184 @@ import bmesh
 # Credit due to whoever the author is. 
 # =======================================================================================
 def bmesh_copy_from_object(obj, transform=True, triangulate=True, apply_modifiers=False):
-    """
-    Returns a transformed, triangulated copy of the mesh
-    """
+	"""
+	Returns a transformed, triangulated copy of the mesh
+	"""
 
-    assert obj.type == 'MESH'
+	assert obj.type == 'MESH'
 
-    if apply_modifiers and obj.modifiers:
-        import bpy
-        depsgraph = bpy.context.evaluated_depsgraph_get()
-        obj_eval = obj.evaluated_get(depsgraph)
-        me = obj_eval.to_mesh()
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        obj_eval.to_mesh_clear()
-        del bpy
-    else:
-        me = obj.data
-        if obj.mode == 'EDIT':
-            bm_orig = bmesh.from_edit_mesh(me)
-            bm = bm_orig.copy()
-        else:
-            bm = bmesh.new()
-            bm.from_mesh(me)
+	if apply_modifiers and obj.modifiers:
+		import bpy
+		depsgraph = bpy.context.evaluated_depsgraph_get()
+		obj_eval = obj.evaluated_get(depsgraph)
+		me = obj_eval.to_mesh()
+		bm = bmesh.new()
+		bm.from_mesh(me)
+		obj_eval.to_mesh_clear()
+		del bpy
+	else:
+		me = obj.data
+		if obj.mode == 'EDIT':
+			bm_orig = bmesh.from_edit_mesh(me)
+			bm = bm_orig.copy()
+		else:
+			bm = bmesh.new()
+			bm.from_mesh(me)
 
-    # TODO. remove all customdata layers.
-    # would save ram
+	# TODO. remove all customdata layers.
+	# would save ram
 
-    if transform:
-        bm.transform(obj.matrix_world)
+	if transform:
+		bm.transform(obj.matrix_world)
 
-    if triangulate:
-        bmesh.ops.triangulate(bm, faces=bm.faces)
+	if triangulate:
+		bmesh.ops.triangulate(bm, faces=bm.faces)
 
-    return bm
+	return bm
 
 
 def measure_object_volume(obj):
 
-    bm = bmesh_copy_from_object(obj, apply_modifiers=True)
-    volume = bm.calc_volume()
-    bm.free()
+	bm = bmesh_copy_from_object(obj, apply_modifiers=True)
+	volume = bm.calc_volume()
+	bm.free()
 
-    return volume
+	return volume
+
+def measure_selected_faces_area(obj,SelectAll=False):
+
+	selected_face_count=0
+	total_area=0
+
+	print(obj.name)
+
+	if SelectAll==True:
+		curve_helper.select_object(obj,True)
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+	for f in obj.data.polygons:
+		if f.select:
+			selected_face_count+=1
+			total_area+=f.area
+			#print(f.area)
+
+	face_data=[selected_face_count,total_area]
+
+	return face_data
+
+def import_plates(filename):
+
+	bpy.ops.import_curve.svg(filepath=filename)
+
+#	bpy.ops.object.select_all(action='SELECT')
+
+	found_curve=False
+
+	for obj in bpy.data.objects:
+		if obj.type=="CURVE":
+			if obj.name.startswith("Curve"):
+
+				if found_curve==False:
+					bpy.context.view_layer.objects.active = obj
+					found_curve=True
+				
+				obj.select_set(state=True)
+
+	if found_curve==True:
+		obj = bpy.context.view_layer.objects.active
+		print("found curve: %s"%obj.name)
+		bpy.ops.object.join()
+		bpy.ops.object.convert(target='MESH')
+
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.mesh.remove_doubles()
+		bpy.ops.mesh.select_mode(type="EDGE")
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+		
+		print("SS:"+obj.name)
+		obj.data.edges[0].select=True
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
+
+		bpy.ops.mesh.select_all(action='INVERT')
+		bpy.ops.mesh.delete(type='EDGE')
+		
+		bpy.ops.mesh.select_mode(type="VERT")
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.mesh.select_loose()
+		bpy.ops.mesh.delete(type='VERT')
+
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.mesh.separate(type='LOOSE')
+		bpy.ops.mesh.select_mode(type="EDGE")
+
+		bpy.ops.object.mode_set(mode='OBJECT')
+		
+		
 
 
-def measure_selected_faces_area(obj):
+		#bpy.ops.mesh.delete_loose(use_verts=True, use_edges=False, use_faces=False)
 
-    selected_face_count=0
-    total_area=0
 
-    for f in obj.data.polygons:
-        if f.select:
-            selected_face_count+=1
-            total_area+=f.area
-            #print(f.area)
 
-    face_data=[selected_face_count,total_area]
+def export_plates(filename):
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_all(action='SELECT')
 
-    return face_data
+	#bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
+	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
+
+	bpy.ops.uv.smart_project(stretch_to_bounds=False,island_margin=0.3)
+	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(1024, 1024))
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def exportCSV():
+
+	# aluminum 5083 density 2650 KG / M3
+
+	with open('hull_export.csv', 'w', newline='') as csvfile:
+		csvWriter = csv.writer(csvfile, delimiter=',',
+					quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+		csv_row = []
+
+		csv_row.append("Name")
+		csv_row.append("X")
+		csv_row.append("Y")
+		csv_row.append("Z")
+
+		csv_row.append("Vol")
+
+		csv_row.append("face_count")
+		csv_row.append("surface_area")
+
+		csvWriter.writerow(csv_row)
+
+		#for obj in bpy.context.selected_objects:
+		for obj in bpy.data.objects:
+
+			if obj.type=="MESH":
+
+				if obj.hide_viewport==False:
+
+					csv_row = []
+					csv_row.append(obj.name)
+					csv_row.append(obj.location.x)
+					csv_row.append(obj.location.y)
+					csv_row.append(obj.location.z)
+
+					vol=measure_object_volume(obj)
+					csv_row.append(vol)
+
+					face_data=measure_selected_faces_area(obj,True)
+					csv_row.append(face_data[0])
+					csv_row.append(face_data[1])
+
+					csvWriter.writerow(csv_row)
