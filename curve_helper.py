@@ -228,7 +228,9 @@ class Curve_Helper:
 	def add_boolean(self,hull_object):
 		select_object(hull_object,True)
 
-		bool_new = hull_object.modifiers.new(type="BOOLEAN", name="slice")
+		slicename="slice.%s"%self.curve_object.name
+
+		bool_new = hull_object.modifiers.new(type="BOOLEAN", name=slicename)
 		bool_new.object = self.curve_object
 		bool_new.operation = 'DIFFERENCE'
 

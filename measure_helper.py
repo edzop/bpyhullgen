@@ -94,7 +94,6 @@ def measure_selected_faces_area(obj,SelectAll=False):
 		if f.select:
 			selected_face_count+=1
 			total_area+=f.area
-			#print(f.area)
 
 	face_data=[selected_face_count,total_area]
 
@@ -103,8 +102,6 @@ def measure_selected_faces_area(obj,SelectAll=False):
 def import_plates(filename):
 
 	bpy.ops.import_curve.svg(filepath=filename)
-
-#	bpy.ops.object.select_all(action='SELECT')
 
 	found_curve=False
 
@@ -121,9 +118,9 @@ def import_plates(filename):
 	if found_curve==True:
 		obj = bpy.context.view_layer.objects.active
 		print("found curve: %s"%obj.name)
-		bpy.ops.object.join()
 		bpy.ops.object.convert(target='MESH')
-
+		bpy.ops.object.join()
+		
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='SELECT')
 		bpy.ops.mesh.remove_doubles()
@@ -186,7 +183,7 @@ def export_plates(filename):
 	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
 
 	bpy.ops.uv.smart_project(stretch_to_bounds=False,island_margin=0.3)
-	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(10000, 10000))
+	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(2400, 2400),opacity=1)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -214,9 +211,12 @@ def exportCSV():
 		csvWriter.writerow(csv_row)
 
 		#for obj in bpy.context.selected_objects:
-		for obj in bpy.data.objects:
+		#for obj in bpy.data.objects:
+		for obj in bpy.context.view_layer.objects:
 
 			if obj.type=="MESH":
+
+				print("export: %s %s"%(obj.name,obj.type))
 
 				if obj.hide_viewport==False:
 

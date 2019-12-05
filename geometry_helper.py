@@ -51,6 +51,10 @@ def separate_active_by_material():
 			if obj.name.startswith(object_name):
 				curve_helper.move_object_to_collection(view_collection_separated,obj)
 
+				if len(obj.data.materials)>0:
+					first_material_name=obj.data.materials[0].name
+					obj.name="%s_%s"%(object_name,first_material_name)
+
 
 def solidify_selected_objects():
 	for obj in bpy.context.selected_objects:

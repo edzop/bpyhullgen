@@ -39,7 +39,7 @@ This function will export a hull_export.csv file showing the area and volume of 
 
 You can use a spreadsheet program to calculate total weight based on the chosen material. The numbers displayed are cubic meters (m3).
 
-## Example exported hull model
+## Example exported hull model (hull test 7)
 ![Quick Hull](images/2019_11_20_export/quick_hull.png)
 
 Quick Hull sample model from included tests directory
@@ -54,8 +54,19 @@ Preview of DXF file output for CAD/CAM cutting
 
 [Exported DXF file](images/2019_11_20_export/export.dxf) 
 
+## Example exported hull model (hull test 11_2)
+
+![hull 11_2 example rendered](images/2019_11_20_export/2019_11_20_hull_11_2_rendered.png)
+rendered example
+
+![hull 11_2 example plates exported](images/2019_11_20_export/2019_11_20_hull_11_2_plates.png)
+plates exported 
+
+![hull 11_2 plates nested](images/2019_11_20_export/2019_11_20_deepnest.png) 
+Plates nested with [deepnest](https://deepnest.io/)
 
 ## TODO
 Laser cut a paper or wood sheet model to produce a real object to validate the model is working correctly and all the panels fit together correctly.
 
 I have not tested exporting bulkheads and stringers yet... This work focuses on the exterior panel sheets only for now.
+
