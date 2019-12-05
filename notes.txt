@@ -29,3 +29,8 @@ delete edges (selected)
 export as DXF
 
 /home/blender/scripts/addons/boat/render_tests.sh
+
+
+TODO: cleanup bulkheads function - delete based on normals - forward or backward based on Z station
+
+

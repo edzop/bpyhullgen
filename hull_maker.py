@@ -73,7 +73,7 @@ class chine_helper:
         self.view_collection_longitudals=curve_helper.make_collection("longitudals",bpy.context.scene.collection.children)
         self.view_collection_longitudal_slicers=curve_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
 
-        curve_helper.hide_object(self.view_collection_longitudal_slicers)
+        #curve_helper.hide_object(self.view_collection_longitudal_slicers)
  
     # After the boolean operation is complete the vertices can be removed that are on the other side
     # of the plane used for the boolean operation. 
@@ -240,6 +240,7 @@ class chine_helper:
             slicer_plane.location.y=-0.005
 
             curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
+            curve_helper.hide_object(slicer_plane)
             curve_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
             
         theCurveHelper.extrude_curve(self.curve_object_1)
@@ -290,6 +291,7 @@ class chine_helper:
                 slicer_plane.location.y=-0.005
 
                 curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
+                curve_helper.hide_object(slicer_plane)
                 curve_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
 
             curve_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
@@ -451,5 +453,6 @@ class hull_maker:
                 modifier.object=object_end_clean
                 modifier.operation="DIFFERENCE"
                 modifier.double_threshold=0
+                curve_helper.hide_object(object_end_clean)
 
-        curve_helper.hide_object(view_collection_cleaner)
+        #curve_helper.hide_object(view_collection_cleaner)

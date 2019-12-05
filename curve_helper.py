@@ -75,6 +75,16 @@ def find_collection(context, item):
 		return collections[0]
 	return context.scene.collection
 
+def is_object_hidden_from_view(the_object):
+	if the_object.hide_viewport==True:
+		return True
+
+	C_collection = find_collection(bpy, the_object)
+	if C_collection.hide_viewport==True:
+		return True
+
+	return False
+
 def move_object_to_collection(new_collection,the_object):
 
 	C_collection = find_collection(bpy, the_object)
@@ -152,7 +162,6 @@ class Curve_Helper:
 
 		x=handle_width*math.cos(angle)
 		y=handle_width*math.sin(angle)
-
 
 		# Curve handle = point, handle_left of point, handle right of point
 

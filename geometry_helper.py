@@ -177,10 +177,6 @@ def apply_all_bool_modifiers():
 			bpy.ops.object.editmode_toggle()
 
 
-
-
-
-
 def mesh_deselect_all():
 	old_mode=bpy.context.active_object.mode
 	bpy.ops.object.mode_set(mode='EDIT')

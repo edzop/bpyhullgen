@@ -220,7 +220,8 @@ def exportCSV():
 
 				print("export: %s %s"%(obj.name,obj.type))
 
-				if obj.hide_viewport==False:
+				if curve_helper.is_object_hidden_from_view(obj)==False:
+				#if obj.hide_viewport==False:
 
 					csv_row = []
 					csv_row.append(obj.name)
