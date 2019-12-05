@@ -190,8 +190,6 @@ def export_plates(filename):
 
 def exportCSV():
 
-	# aluminum 5083 density 2650 KG / M3
-
 	with open('hull_export.csv', 'w', newline='') as csvfile:
 		csvWriter = csv.writer(csvfile, delimiter=',',
 					quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -199,14 +197,18 @@ def exportCSV():
 		csv_row = []
 
 		csv_row.append("name")
-		csv_row.append("X")
-		csv_row.append("Y")
-		csv_row.append("Z")
+		csv_row.append("posX")
+		csv_row.append("posY")
+		csv_row.append("posZ")
 
 		csv_row.append("volume")
 
 		csv_row.append("face_count")
 		csv_row.append("surface_area")
+
+		csv_row.append("sizeX")
+		csv_row.append("sizeY")
+		csv_row.append("sizeZ")
 
 		csvWriter.writerow(csv_row)
 
@@ -233,4 +235,28 @@ def exportCSV():
 					csv_row.append(face_data[0])
 					csv_row.append(face_data[1])
 
+					csv_row.append(obj.dimensions.x)
+					csv_row.append(obj.dimensions.y)
+					csv_row.append(obj.dimensions.z)
+
 					csvWriter.writerow(csv_row)
+
+		csv_row = [" "]
+		csvWriter.writerow(csv_row)
+
+		csv_row = ["mm","0.001"]
+		csvWriter.writerow(csv_row)
+
+		csv_row = ["5083 aluminum","2653","KG per M3"]
+		csvWriter.writerow(csv_row)
+
+		csv_row = ["steel","7900","KG per M3"]
+		csvWriter.writerow(csv_row)
+
+		csv_row = ["wood","400","KG per M3"]
+		csvWriter.writerow(csv_row)
+
+
+
+
+
