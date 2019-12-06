@@ -65,8 +65,16 @@ plates exported
 ![hull 11_2 plates nested](images/2019_11_20_export/2019_11_20_deepnest.png) 
 Plates nested with [deepnest](https://deepnest.io/)
 
+
+## 06 Dec 2019 update
+Added plate normal isolation functions to cleanup bulkheads and stringers for export. 
+![Plates exported](images/2019_12_06/plates_export.png)
+The DeleteNonUp button should be used for selected stringers and DeleteNonFront button for selected bulkheads (selected objects only).
+
+This function can be automated more in future so buth functions are called on objects addressed by name but for now these new buttons unit test the functionality.
+
 ## TODO
 Laser cut a paper or wood sheet model to produce a real object to validate the model is working correctly and all the panels fit together correctly.
 
-I have not tested exporting bulkheads and stringers yet... This work focuses on the exterior panel sheets only for now.
+
 
