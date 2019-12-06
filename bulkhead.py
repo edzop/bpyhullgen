@@ -101,7 +101,7 @@ class bulkhead:
                         self.the_hull_definition.bool_correction_offset[2]))
         
         bpy.ops.transform.resize(value=(self.thickness/2, self.the_hull_definition.hull_width, self.the_hull_definition.hull_height))
-   #     bpy.ops.object.transform_apply(scale=True)
+        bpy.ops.object.transform_apply(scale=True)
         
         self.bulkhead_object=bpy.context.view_layer.objects.active
         self.bulkhead_object.name="Bulkhead.s"+str(self.station)
@@ -137,7 +137,7 @@ class bulkhead:
 
             bpy.ops.transform.resize(value=rescale_factor)
 
-    #        bpy.ops.object.transform_apply(scale=True)
+            bpy.ops.object.transform_apply(scale=True)
 
             curve_helper.select_object(self.bulkhead_object,True)
 
