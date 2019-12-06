@@ -236,6 +236,17 @@ def select_only_going_right(ob):
 	if bpy.context.active_object.mode!=old_mode:
 		bpy.ops.object.mode_set(mode=old_mode)
 
+def select_only_going_up(ob):
+	old_mode=bpy.context.active_object.mode
+	mesh_deselect_all()
+	
+	bpy.ops.object.mode_set(mode='OBJECT')
+	for face in ob.data.polygons:
+		face.select = GoingUp( face.normal)
+
+	if bpy.context.active_object.mode!=old_mode:
+		bpy.ops.object.mode_set(mode=old_mode)
+
 
 def select_only_going_front(ob):
 	old_mode=bpy.context.active_object.mode
@@ -248,6 +259,26 @@ def select_only_going_front(ob):
 	if bpy.context.active_object.mode!=old_mode:
 		bpy.ops.object.mode_set(mode=old_mode)
 
+
+def delete_non_aligned_faces(ob,func):
+	
+	bpy.ops.object.select_all(action='DESELECT')
+	curve_helper.select_object(ob,True)
+
+	old_mode=bpy.context.active_object.mode
+
+	func(ob)
+	#select_only_going_front(ob)
+
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='INVERT')
+
+	bpy.ops.mesh.delete(type='FACE')
+	
+
+	if bpy.context.active_object.mode!=old_mode:
+		bpy.ops.object.mode_set(mode=old_mode)
 
 
 def import_object(path,target_object,location,view_collection=None,rotation=None):
