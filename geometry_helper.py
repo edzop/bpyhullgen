@@ -294,3 +294,4 @@ def import_object(path,target_object,location,view_collection=None,rotation=None
 		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
 
 	return ob
+

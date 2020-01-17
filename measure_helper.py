@@ -99,6 +99,79 @@ def measure_selected_faces_area(obj,SelectAll=False):
 
 	return face_data
 
+# returns empty object representing center of gravity location
+def calculate_cg(influence_objects):
+
+	CG_object_name="CG"
+
+	curve_helper.find_and_remove_object_by_name(CG_object_name)
+
+	bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+	cg_empty = bpy.context.active_object
+	cg_empty.name=CG_object_name
+
+	# Moment = weight * arm
+
+	total_weight=0
+	total_moment=[0,0,0]
+	cg_pos=[0,0,0]
+
+	for obj in influence_objects:
+
+		bpy.ops.object.select_all(action='DESELECT')
+		curve_helper.select_object(obj,True)
+		bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
+
+		object_volume=measure_object_volume(obj)
+
+		face_data=measure_selected_faces_area(obj,True)
+
+		# object surface area in m2
+		object_face_area=face_data[1]
+
+		# hard coded to 5083 aluminum for now
+		# expressed as KG per m3
+		material_weight=2653
+
+		# hard coded 3mm for now
+		material_thickness=0.003
+
+		object_weight=material_thickness*material_weight*object_face_area
+
+		total_weight=total_weight+object_weight
+
+		# Calculate 3D moment tuple for this influence object
+		object_moment=[	object_weight*obj.location.x,
+						object_weight*obj.location.y,
+						object_weight*obj.location.z ]
+
+		total_moment[0]=total_moment[0]+object_moment[0]
+		total_moment[1]=total_moment[1]+object_moment[1]
+		total_moment[2]=total_moment[2]+object_moment[2]
+
+
+
+	if total_weight>0:
+		# offset center of gravity by moment
+		cg_pos[0]=total_moment[0]/total_weight
+		cg_pos[1]=total_moment[1]/total_weight
+		cg_pos[2]=total_moment[2]/total_weight
+
+		print("Total weight: %d KG CG: %f %f %f"%(total_weight,cg_pos[0],cg_pos[1],cg_pos[2]))
+		cg_empty.location[0]=cg_pos[0]
+		cg_empty.location[1]=cg_pos[1]
+		cg_empty.location[2]=cg_pos[2]
+	else:
+		# prevent divide by zero
+		print("Something went wrong... no total weight calculated")
+
+	return cg_empty
+	
+
+
+
+
+
 def import_plates(filename):
 
 	bpy.ops.import_curve.svg(filepath=filename)

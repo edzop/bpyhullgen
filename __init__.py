@@ -53,6 +53,7 @@ else:
 
 classes = (
     ui.MyProperties,
+    ui.CalculateCGOperator,
     ui.OBJECT_PT_my_panel,
     ui.HelloWorldOperator,
     ui.SolidifySelectedObjectsOperator,

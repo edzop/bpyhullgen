@@ -328,6 +328,25 @@ class DeleteNonUpOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class CalculateCGOperator (bpy.types.Operator):
+	"""Calculate CG of selected objects"""
+	bl_idname = "wm.calculate_cg"
+	bl_label = "Calc CG"
+
+	def execute(self, context):
+		#scene = context.scene
+		#mytool = scene.my_tool
+
+		influence_object_list=[]
+
+		for obj in bpy.context.selected_objects:
+			if obj.type=="MESH":
+				influence_object_list.append(obj)
+		
+		measure_helper.calculate_cg(influence_object_list)
+
+
+		return {'FINISHED'}
 
 class ImportPlatesOperator (bpy.types.Operator):
 	"""Import plate geometry from SVG file"""
@@ -409,6 +428,7 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub.operator( "wm.measure_area_all")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_volume")
+		rowsub.operator( "wm.calculate_cg")
 
 		row = layout.row()
 		row.label(text="Output:")
