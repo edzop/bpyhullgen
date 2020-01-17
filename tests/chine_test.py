@@ -27,43 +27,30 @@ hull_maker = imp.load_source('hull_maker','hull_maker.py')
 bulkhead = imp.load_source('bulkhead','bulkhead.py')
 
 
-def delete_all():
-     for obj in bpy.data.objects:
-            if obj.type!="CAMERA":
-                if obj.type!="LIGHT":
-                    if obj.type!="EMPTY":
-                        bpy.data.objects.remove(obj)    
-
-
-delete_all()
-
-the_hull=hull_maker.hull_maker(width=3,length=11,height=4)
+the_hull=hull_maker.hull_maker(width=1,length=1,height=1)
 
 the_hull.make_hull_object()
-
 
 new_chine=hull_maker.chine_helper(the_hull)
 
 new_chine.longitudal_count=1
 new_chine.longitudal_thickness=.4
-new_chine.longitudal_width=-.4
-
 new_chine.curve_width=2
-new_chine.curve_length=the_hull.hull_length*0.5
-new_chine.symmetrical=False
-
 new_chine.rotation=[180,0,0	]
+
+
+new_chine.symmetrical=False
+new_chine.longitudal_width=-.5
 new_chine.offset=[0,1,-0.5]
 new_chine.name="side"
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
 
 
-new_chine.rotation=[180,0,0	]
 new_chine.offset=[0,-1,-0.5]
 new_chine.name="side2"
-new_chine.extrude_multiplier=-3
-new_chine.longitudal_width=.4
+new_chine.extrude_multiplier=-1
+new_chine.longitudal_width=.5
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
 

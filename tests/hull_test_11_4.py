@@ -189,6 +189,8 @@ x_locations=[	-the_hull.hull_length/2+clean_distance,
 
 the_hull.cleanup_longitudal_ends(x_locations)
 
+the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4.2,1,1])
+
 levels=[ -0.9,-0.5 ]
 
 # X station position

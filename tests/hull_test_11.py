@@ -90,9 +90,12 @@ new_chine.offset=[0,0,1.15]
 new_chine.name="roof"
 new_chine.curve_width=1
 new_chine.symmetrical=False
-new_chine.extrude_multiplier=-3
 new_chine.longitudal_count=1
 new_chine.longitudal_z_offset=0
+
+# invert for reverse curve
+new_chine.extrude_multiplier=-1
+new_chine.longitudal_width=-new_chine.longitudal_width
 
 new_chine.make_chine()
 
@@ -227,6 +230,9 @@ x_locations=[	-the_hull.hull_length/2+clean_distance,
 
 the_hull.cleanup_longitudal_ends(x_locations)
 
+the_hull.cleanup_center(clean_location=[0.5,0,0],clean_size=[2.8,1,1])
+
+
 levels=[ -0.9,-0.5 ]
 
 bulkhead_definitions = [ 
@@ -243,7 +249,7 @@ bulkhead_definitions = [
 						(-4,levels[1],True),
 
 						(5,False,False),
-						(-5,False,False)
+					#	(-5,False,False)
 ]
 
 

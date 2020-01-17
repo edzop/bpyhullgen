@@ -54,6 +54,17 @@ class chine_helper:
     longitudal_width=0.5
     longitudal_z_offset=0
 
+
+    # how much wider the slicers will be than the longitudals - value of 1.1 means notches will be 110 percent of longitudal
+    slicer_overcut=1.1
+
+    # ratio of longitudal to slicer means how high the slicers are in relation to longitudals
+    # If it's 0.5 it will be half - it affects the notches height for bulkheads 
+    slicer_longitudal_ratio=0.5
+
+    # amount of distance slicer is poking through skin to ensure clean geometry
+    skin_pokethrough=0.005
+
     # reference to first chine side
     chine_object_1=None
 
@@ -233,11 +244,16 @@ class chine_helper:
             self.the_hull.longitudal_list.append(longitudal_plane)
             self.select_and_extrude_slicer(longitudal_plane,-self.longitudal_width)
             
-            slicer_plane=self.make_slicer_plane(self.curve_object_1,self.curve_object_1.name+".slicer",self.longitudal_height,self.longitudal_thickness*1.5,self.longitudal_z_offset)
+            slicer_plane=self.make_slicer_plane(self.curve_object_1,self.curve_object_1.name+".slicer",self.longitudal_height,self.longitudal_thickness*self.slicer_overcut,self.longitudal_z_offset)
             slicer_plane.parent=self.curve_object_1
             self.the_hull.longitudal_slicer_list.append(slicer_plane)
-            self.select_and_extrude_slicer(slicer_plane,-self.longitudal_width/2)
-            slicer_plane.location.y=-0.005
+            self.select_and_extrude_slicer(slicer_plane,-self.longitudal_width*self.slicer_longitudal_ratio)
+
+            if self.curve_width<0:
+                slicer_plane.location.y=self.skin_pokethrough
+            else:
+                slicer_plane.location.y=-self.skin_pokethrough
+
 
             curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
             curve_helper.hide_object(slicer_plane)
@@ -284,11 +300,17 @@ class chine_helper:
                 #bpy.ops.object.mode_set(mode='OBJECT')
                 #curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
 
-                slicer_plane=self.make_slicer_plane(self.curve_object_2,self.curve_object_2.name+".slicer",self.longitudal_height,self.longitudal_thickness*1.5,-self.longitudal_z_offset)
+                slicer_plane=self.make_slicer_plane(self.curve_object_2,self.curve_object_2.name+".slicer",self.longitudal_height,self.longitudal_thickness*self.slicer_overcut,-self.longitudal_z_offset)
                 slicer_plane.parent=self.curve_object_2
                 self.the_hull.longitudal_slicer_list.append(slicer_plane)
-                self.select_and_extrude_slicer(slicer_plane,-self.longitudal_width/2)
-                slicer_plane.location.y=-0.005
+                self.select_and_extrude_slicer(slicer_plane,-self.longitudal_width*self.slicer_longitudal_ratio)
+
+                if self.curve_width<0:
+                    slicer_plane.location.y=self.skin_pokethrough
+                else:
+                    slicer_plane.location.y=-self.skin_pokethrough
+
+                #slicer_plane.location.y=-0.005
 
                 curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
                 curve_helper.hide_object(slicer_plane)
@@ -416,6 +438,25 @@ class hull_maker:
                 modifier.object=bh.bulkhead_object
                 modifier.operation="DIFFERENCE"
 
+
+
+    def cleanup_center(self,clean_location,clean_size):
+
+        view_collection_cleaner=curve_helper.make_collection("cleaner",bpy.context.scene.collection.children)
+
+        object_end_clean = self.make_bool_cube("mid_clean_%s"%clean_location[0],location=clean_location,size=clean_size)
+
+        curve_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+
+        material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
+
+        for lg in self.longitudal_list:
+
+            modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
+            modifier.object=object_end_clean
+            modifier.operation="DIFFERENCE"
+            modifier.double_threshold=0
+            curve_helper.hide_object(object_end_clean)
 
 
     def cleanup_longitudal_ends(self,x_locations):
