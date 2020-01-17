@@ -40,13 +40,16 @@ new_chine.make_chine()
 
 new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
+new_chine.longitudal_z_offset=-0.33
 new_chine.name="mid"
+
 new_chine.make_chine()
 
 new_chine.longitudal_count=0
 new_chine.rotation=[45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
+new_chine.longitudal_z_offset=0
 new_chine.make_chine()
 
 
