@@ -63,8 +63,6 @@ def make_diffuse_material(name,color):
 	new_material.diffuse_color = color
 	return new_material
 
-
-
 def get_material_support(): 
 	material_name="support"
 
@@ -72,7 +70,6 @@ def get_material_support():
 		return bpy.data.materials[material_name]
 
 	return make_subsurf_material(material_name,[0.8,0.3,0.3,1])
-
 
 def get_material_stringer(): 
 	material_name="cutter"

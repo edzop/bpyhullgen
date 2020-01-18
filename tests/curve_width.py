@@ -28,6 +28,9 @@ theCurveHelper.curve_angle=40
 for width in curve_helper.frange(0.1,1,0.1):
     theCurveHelper.define_curve(10,width)
     theCurveHelper.generate_curve("curve_width_%1.2f"%width)
+    theCurveHelper.curve_object.location.y=-width
+    theCurveHelper.curve_object.location.z=width/3
+    wireframe = theCurveHelper.curve_object.modifiers.new(type="SOLIDIFY", name="solid")
     print("Width: %1.2f"%width)
 
 theCurveHelper.curve_angle=-40
@@ -35,4 +38,7 @@ theCurveHelper.curve_angle=-40
 for length in curve_helper.frange(1,10,1):
     theCurveHelper.define_curve(length,-1)
     theCurveHelper.generate_curve("curve_length_%1.2f"%length)
+    theCurveHelper.curve_object.location.y=length/20
+    theCurveHelper.curve_object.location.z=length/30
+    wireframe = theCurveHelper.curve_object.modifiers.new(type="SOLIDIFY", name="solid")
     print("Length: %1.2f"%length)

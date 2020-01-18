@@ -27,15 +27,8 @@ material_helper = imp.load_source('material_helper','material_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
 bulkhead = imp.load_source('bulkhead','bulkhead.py')
 
-material_red=material_helper.make_diffuse_material("red",(0.7,0.3,0.3,1))
-material_green=material_helper.make_diffuse_material("green",(0.3,0.7,0.3,1))
-#material_blue=material_helper.make_diffuse_material("blue",(0.3,0.3,0.7,1))
-
 the_hull=hull_maker.hull_maker(width=4.7)
 the_hull.make_hull_object()
-
-#hull_material = material_helper.get_material_hull()
-#bulkhead_material = material_helper.get_material_bulkhead()
 
 new_chine=chine_helper.chine_helper(the_hull)
 
@@ -55,8 +48,6 @@ new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0.9,0.3]
 new_chine.name="wall_curve"
 
-#new_chine.symmetrical=False
-
 new_chine.make_chine()
 
 def not_used():
@@ -72,22 +63,13 @@ def not_used():
     new_chine.make_chine()
 
 for lg in the_hull.longitudal_slicer_list:
-    print("LG %s"%lg.name)
-    
     modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')
     modifier.object=lg
     modifier.operation="DIFFERENCE"
-    #material_helper.assign_material(lg,material_red)
     curve_helper.hide_object(lg)
 
 for lg in the_hull.longitudal_list:
-#    material_helper.assign_material(lg,material_green)
     curve_helper.make_rounded(lg,0.2)
-
-
-#wall_curve=new_chine.curve_object_1
-#material_helper.assign_material(wall_curve,material_blue)
-
 
 hull_material = material_helper.get_material_hull()
 material_helper.disable_cutaway(hull_material)

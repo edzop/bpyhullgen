@@ -44,6 +44,8 @@ new_chine.offset=[0,0.5,0]
 new_chine.name="side"
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
+new_chine.curve_object_1.hide_render=False
+wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="wireframe")
 
 new_chine.offset=[0,-0.5,0]
 new_chine.name="side2"
@@ -51,5 +53,7 @@ new_chine.extrude_width=-1
 new_chine.longitudal_width=.4
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
+new_chine.curve_object_1.hide_render=False
+wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="wireframe")
 
 bpy.data.objects.remove(the_hull.hull_object)
