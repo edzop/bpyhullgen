@@ -21,6 +21,7 @@ import imp
 from math import radians, degrees
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
@@ -31,7 +32,7 @@ the_hull.make_hull_object()
 
 curve_helper.select_object(the_hull.hull_object,False)
 
-new_chine=hull_maker.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull)
 
 new_chine.longitudal_thickness=0.05
 new_chine.longitudal_width=-0.15
@@ -41,13 +42,14 @@ new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.27,-0.5]
 new_chine.name="side"
 new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=-0.105
+new_chine.set_longitudal_curve(0.4,10)
+new_chine.longitudal_z_offset=-0.405
 
 #new_chine.curve_twist=[0,25,25]
 new_chine.make_chine(twist=[0,0,0])
 #new_chine.make_chine()
 
-
+new_chine.set_longitudal_curve(0,0)
 new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.curve_width=1.4
 
@@ -79,23 +81,26 @@ new_chine.curve_width=1.6
 new_chine.asymmetry[1]=0
 new_chine.curve_twist=[0,30,-50]
 new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=-0.2
+new_chine.longitudal_bend_radius=0.2
+new_chine.set_longitudal_curve(0.2,10)
+new_chine.longitudal_z_offset=-0.4
 new_chine.make_chine()
 
 new_chine.asymmetry[1]=0
 new_chine.curve_length=the_hull.hull_length*1.25
-new_chine.rotation=[-90,1,0]
-new_chine.offset=[0,0,1.15]
-
+new_chine.rotation=[90,1,0]
+new_chine.offset=[0,0,-0.51]
+new_chine.set_longitudal_curve(0,0)
 new_chine.name="roof"
-new_chine.curve_width=1
+new_chine.curve_width=0.8
+new_chine.curve_angle=0
 new_chine.symmetrical=False
 new_chine.longitudal_count=1
 new_chine.longitudal_z_offset=0
 
 # invert for reverse curve
-new_chine.extrude_multiplier=-1
-new_chine.longitudal_width=-new_chine.longitudal_width
+#new_chine.extrude_multiplier=-1
+#new_chine.longitudal_width=-new_chine.longitudal_width
 
 new_chine.make_chine()
 
@@ -228,7 +233,9 @@ clean_distance=0.5
 x_locations=[	-the_hull.hull_length/2+clean_distance,
 				the_hull.hull_length/2-clean_distance]
 
-the_hull.cleanup_longitudal_ends(x_locations)
+rotations=[-22,0]
+
+the_hull.cleanup_longitudal_ends(x_locations,rotations)
 
 the_hull.cleanup_center(clean_location=[0.5,0,0],clean_size=[2.8,1,1])
 

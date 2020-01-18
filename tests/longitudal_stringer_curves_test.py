@@ -45,40 +45,43 @@ new_chine.longitudal_width=0.5
 new_chine.longitudal_height=0
 new_chine.slicer_longitudal_ratio=1
 
+new_chine.longitudal_bend_radius=-0.8
+new_chine.longitudal_curve_angle=4
 
 new_chine.curve_width=-1
 new_chine.curve_length=the_hull.hull_length+0.1
 
 new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0.9,0.3]
-new_chine.name="mid_curve"
-new_chine.longitudal_z_offset=0.2
+new_chine.name="wall_curve"
 
 #new_chine.symmetrical=False
 
 new_chine.make_chine()
 
-new_chine.longitudal_z_offset=0
-new_chine.rotation=[-45,0,0]
-new_chine.offset=[0,1.5,0.0]
-new_chine.name="low_curve"
-new_chine.make_chine()
+def not_used():
+    new_chine.rotation=[-45,0,0]
+    new_chine.offset=[0,1.5,0.0]
+    new_chine.name="mid_curve"
+    new_chine.make_chine()
 
-new_chine.rotation=[-90,0,0]
-new_chine.offset=[0,0,0.6]
-new_chine.name="top_curve"
-new_chine.symmetrical=False
-new_chine.make_chine()
+    new_chine.rotation=[-90,0,0]
+    new_chine.offset=[0,0,0.6]
+    new_chine.name="top_curve"
+    new_chine.symmetrical=False
+    new_chine.make_chine()
 
 for lg in the_hull.longitudal_slicer_list:
-    modifier=the_hull.hull_object.modifiers.new(name="bool", type='BOOLEAN')
+    print("LG %s"%lg.name)
+    
+    modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')
     modifier.object=lg
     modifier.operation="DIFFERENCE"
-    material_helper.assign_material(lg,material_red)
+    #material_helper.assign_material(lg,material_red)
     curve_helper.hide_object(lg)
 
 for lg in the_hull.longitudal_list:
-    material_helper.assign_material(lg,material_green)
+#    material_helper.assign_material(lg,material_green)
     curve_helper.make_rounded(lg,0.2)
 
 

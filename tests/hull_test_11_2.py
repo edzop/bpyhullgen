@@ -20,6 +20,7 @@ import bpy
 import imp   
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
@@ -28,26 +29,30 @@ the_hull=hull_maker.hull_maker(length=11.2,width=3.9,height=3.6)
 
 the_hull.make_hull_object()
 
-new_chine=hull_maker.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull)
 
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.06,-0.5]
-new_chine.name="top"
-
+new_chine.name="side"
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
+new_chine.longitudal_count=1
+new_chine.longitudal_z_offset=0.1
 new_chine.make_chine()
 
 
 new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.name="mid"
+new_chine.longitudal_count=1
+new_chine.longitudal_z_offset=-0.2
 #new_chine.curve_twist=[0,0,0]
 new_chine.make_chine()
 
 new_chine.rotation=[45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
+new_chine.longitudal_count=0
 new_chine.make_chine()
 
 new_chine.rotation=[-79,-3,0]
@@ -55,6 +60,8 @@ new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
+new_chine.longitudal_count=1
+new_chine.longitudal_z_offset=-0.2
 new_chine.make_chine()
 #new_chine.curve_length=the_hull.hull_length*1.0
 
@@ -65,7 +72,7 @@ new_chine.curve_width=0.8
 new_chine.curve_angle=10
 #new_chine.curve_length=13
 new_chine.symmetrical=False
-
+new_chine.longitudal_count=0
 #new_chine.longitudal_width=0.15
 new_chine.make_chine()
 
@@ -168,3 +175,38 @@ import_library_path="assets/boat_assets.blend/Collection/"
 ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,93,0))
 ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))
 
+
+clean_distance=0.33
+x_locations=[	-the_hull.hull_length/2+clean_distance,
+				the_hull.hull_length/2-clean_distance]
+
+the_hull.cleanup_longitudal_ends(x_locations)
+
+
+
+levels=[ -0.9,-0.5 ]
+
+# X station position
+# Vertical height adjust (or FALSE for no vertical height adjustment)
+# Cutout void in middle (False for watertight bulkhead)
+
+bulkhead_definitions = [ 
+	
+						(0,levels[0],False),
+						(1,levels[0],False),
+						(-1,levels[0],False),
+						(-2,levels[0],False),
+						(2,levels[0],False),
+
+						(3,levels[1],False),
+						(-3,levels[1],False),
+						(4,levels[1],True),
+						(-4,levels[1],True),
+
+						(5,False,False),
+						(-5,False,False)
+]
+
+
+the_hull.make_bulkheads(bulkhead_definitions)
+the_hull.make_longitudal_booleans()

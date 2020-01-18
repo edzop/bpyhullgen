@@ -20,26 +20,34 @@ import bpy
 import imp
 
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
-
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
 bulkhead = imp.load_source('bulkhead','bulkhead.py')
 
-
-the_hull=hull_maker.hull_maker()
-
-the_hull.hull_height=0.4
-the_hull.hull_width=0.4
+the_hull=hull_maker.hull_maker(length=12,width=0.4,height=0.8)
 the_hull.make_hull_object()
 
-new_chine=hull_maker.chine_helper(the_hull)
-
-new_chine.rotation=[180,0,0]
-new_chine.offset=[0,0,0]
+new_chine=chine_helper.chine_helper(the_hull)
+new_chine.extrude_width=1
+new_chine.rotation=[0,0,0]
+new_chine.offset=[0,-0.2,0]
 new_chine.name="top"
 new_chine.longitudal_count=1
-new_chine.longitudal_thickness=0.02
+new_chine.longitudal_thickness=0.8
 new_chine.longitudal_width=-0.15
-new_chine.symmetrical=False
+
+new_chine.symmetrical=True
 new_chine.make_chine()
+
+new_chine.curve_object_1.hide_viewport=False
+new_chine.curve_object_1.hide_render=False
+
+new_chine.curve_object_2.hide_viewport=False
+new_chine.curve_object_2.hide_render=False
+
+wireframe = new_chine.curve_object_2.modifiers.new(type="WIREFRAME", name="w1")
+wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="w2")
+
+bpy.data.objects.remove(the_hull.hull_object)

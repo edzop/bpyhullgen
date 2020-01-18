@@ -25,4 +25,5 @@ theCurveHelper = curve_helper.Curve_Helper()
 theCurveHelper.define_curve(5,0.6)
 
 theCurveHelper.generate_curve("curvetest")
+theCurveHelper.extrude_curve(1)
  

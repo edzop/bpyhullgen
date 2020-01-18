@@ -21,36 +21,34 @@ import imp
 from math import radians, degrees
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
 bulkhead = imp.load_source('bulkhead','bulkhead.py')
 
-
-the_hull=hull_maker.hull_maker(width=1,length=1,height=1)
-
+the_hull=hull_maker.hull_maker(length=12,width=1,height=0.8)
 the_hull.make_hull_object()
 
-new_chine=hull_maker.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull)
+new_chine.extrude_width=1
 
 new_chine.longitudal_count=1
-new_chine.longitudal_thickness=.4
-new_chine.curve_width=2
-new_chine.rotation=[180,0,0	]
-
-
+new_chine.longitudal_thickness=1
+#new_chine.curve_width=1
+new_chine.rotation=[180,0,0]
 new_chine.symmetrical=False
-new_chine.longitudal_width=-.5
-new_chine.offset=[0,1,-0.5]
+
+new_chine.longitudal_width=-.4
+new_chine.offset=[0,0.5,0]
 new_chine.name="side"
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
 
-
-new_chine.offset=[0,-1,-0.5]
+new_chine.offset=[0,-0.5,0]
 new_chine.name="side2"
-new_chine.extrude_multiplier=-1
-new_chine.longitudal_width=.5
+new_chine.extrude_width=-1
+new_chine.longitudal_width=.4
 new_chine.make_chine()
 new_chine.curve_object_1.hide_viewport=False
 

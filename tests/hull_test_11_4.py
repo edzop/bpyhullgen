@@ -20,6 +20,7 @@ import bpy
 import imp   
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
@@ -28,7 +29,7 @@ the_hull=hull_maker.hull_maker(length=11.4,width=3.9,height=3.6)
 
 the_hull.make_hull_object()
 
-new_chine=hull_maker.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull)
 
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.06,-0.5]
@@ -36,13 +37,15 @@ new_chine.name="top"
 new_chine.longitudal_count=1
 new_chine.longitudal_thickness=0.05
 new_chine.longitudal_width=-0.15
+
 new_chine.make_chine()
 
 new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.longitudal_z_offset=-0.33
 new_chine.name="mid"
-
+new_chine.set_longitudal_curve(0.4,10)
+new_chine.longitudal_z_offset=-0.55
 new_chine.make_chine()
 
 new_chine.longitudal_count=0
@@ -50,6 +53,7 @@ new_chine.rotation=[45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
 new_chine.longitudal_z_offset=0
+new_chine.set_longitudal_curve(0,0)
 new_chine.make_chine()
 
 
@@ -59,6 +63,8 @@ new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
+new_chine.set_longitudal_curve(0.6,10)
+new_chine.longitudal_z_offset=-0.5
 new_chine.make_chine()
 
 new_chine.rotation=[90,0,0]
@@ -66,7 +72,9 @@ new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
 new_chine.curve_width=0.8
 #new_chine.curve_angle=55
+new_chine.longitudal_z_offset=0
 new_chine.symmetrical=False
+new_chine.set_longitudal_curve(0,0)
 new_chine.make_chine()
 
 # ================ modify hull

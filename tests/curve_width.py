@@ -23,12 +23,16 @@ curve_helper = imp.load_source('util_lux','curve_helper.py')
 
 theCurveHelper = curve_helper.Curve_Helper()
 
-for width in range(1,10):
-    theCurveHelper.define_curve(5,width)
-    theCurveHelper.generate_curve("curve_width_%d"%width)
-    print(width)
+theCurveHelper.curve_angle=40
 
-for length in range(1,10):
-    theCurveHelper.define_curve(length,-5)
-    theCurveHelper.generate_curve("curve_length_%d"%length)
-    print(width)
+for width in curve_helper.frange(0.1,1,0.1):
+    theCurveHelper.define_curve(10,width)
+    theCurveHelper.generate_curve("curve_width_%1.2f"%width)
+    print("Width: %1.2f"%width)
+
+theCurveHelper.curve_angle=-40
+
+for length in curve_helper.frange(1,10,1):
+    theCurveHelper.define_curve(length,-1)
+    theCurveHelper.generate_curve("curve_length_%1.2f"%length)
+    print("Length: %1.2f"%length)

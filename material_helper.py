@@ -59,7 +59,7 @@ def make_metalic_material(name,color):
 def make_diffuse_material(name,color):
 	delete_material(name)
 	new_material = bpy.data.materials.new(name)
-	print(color)
+	#print(color)
 	new_material.diffuse_color = color
 	return new_material
 
@@ -71,7 +71,7 @@ def get_material_support():
 	if material_name in bpy.data.materials:
 		return bpy.data.materials[material_name]
 
-	return make_subsurf_material(material_name,[0.2,1.0,0.2,1])
+	return make_subsurf_material(material_name,[0.8,0.3,0.3,1])
 
 
 def get_material_stringer(): 
@@ -80,7 +80,7 @@ def get_material_stringer():
 	if material_name in bpy.data.materials:
 		return bpy.data.materials[material_name]
 
-	return make_subsurf_material(material_name,[0.2,0.2,0.8,1])
+	return make_subsurf_material(material_name,[0.2,0.8,0.3,1])
 
 
 def get_material_bulkhead(): 

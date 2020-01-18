@@ -26,4 +26,5 @@ theCurveHelper.asymmetry[1]=1
 theCurveHelper.define_curve(5,0.8)
 
 theCurveHelper.generate_curve("curvetest")
+theCurveHelper.extrude_curve(1)
  

@@ -2,16 +2,13 @@ import bpy
 import imp   
  
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
+chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
 
 def make_chines(the_hull):
 
-	#bpy.ops.transform.translate(value=(0.001, 0.001, 0.01))
-
-	curve_helper.select_object(the_hull.hull_object,False)
-
-	new_chine=hull_maker.chine_helper(the_hull)
+	new_chine=chine_helper.chine_helper(the_hull)
 
 	new_chine.rotation=[0,0,0]
 	new_chine.offset=[0,0,0]
@@ -51,6 +48,8 @@ make_chines(the_hull)
 # =========================================
 # Make bulkheads
 edge_offset=0.18
+
+# can use static station list instead of frange
 #hull_stations=[ -the_hull.hull_length/2+edge_offset, -1.7, -1.5, 0, 1.5, 1.7, the_hull.hull_length/2-edge_offset]
 
 
@@ -63,5 +62,5 @@ the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
 	
 the_hull.hull_object.hide_set(True)
-the_hull.hull_object.hide_render=True
+#the_hull.hull_object.hide_render=True
 

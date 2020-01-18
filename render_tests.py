@@ -45,7 +45,7 @@ def do_render():
     bpy.context.scene.render.resolution_y=1080
 
     # you can adjust samples and percentage to get higher quality render
-    bpy.context.scene.render.resolution_percentage=70
+    bpy.context.scene.render.resolution_percentage=50
     bpy.context.scene.cycles.samples=30
 
     try:

@@ -50,9 +50,11 @@ def make_rounded(ob,width):
 	bpy.ops.mesh.normals_make_consistent(inside=False)
 	bpy.ops.object.editmode_toggle()
 
-	bpy.ops.object.modifier_add(type='BEVEL')
-	bpy.context.object.modifiers["Bevel"].width = width
-	bpy.context.object.modifiers["Bevel"].segments = 2
+	bevel = ob.modifiers.new(type="BEVEL",name="bevel")
+	bevel.width = width
+	bevel.segments = 2
+	bevel.limit_method="ANGLE"
+	
 	bpy.ops.object.modifier_add(type='SUBSURF')
 
 # works on object or collection
@@ -130,12 +132,12 @@ class Curve_Helper:
 	curve_length=5
 	curve_width=1.5
 	curve_resolution=64
-	curve_height=3
+	curve_height=1
 	curvedata=None
 	curve_object=None
 	curve_angle=35
 
-	extrude_multiplier=2.5
+	#extrude_multiplier=1
 
 	asymmetry=[0,0]
 
@@ -230,9 +232,14 @@ class Curve_Helper:
 				point.tilt=math.radians(self.curve_twist[idx])		
 
 		polyline.use_cyclic_u = False
+
+		select_object(self.curve_object,True)
+
 		
-		bpy.context.view_layer.objects.active = self.curve_object
-		self.curve_object.select_set(state=True)     
+
+		bpy.ops.object.convert(target='MESH', keep_original=False)
+		bpy.ops.object.shade_flat()
+		
 
 	def add_boolean(self,hull_object):
 		select_object(hull_object,True)
@@ -245,35 +252,27 @@ class Curve_Helper:
 
 		select_object(hull_object,False)
 
-	def extrude_curve(self,obj):
+	def extrude_curve(self,extrude_width):
 
-		bpy.context.view_layer.objects.active = obj
-		select_object(obj,True)
-		
-		#self.convert_to_mesh()
+		self.curve_object.display_type="WIRE"
 
-		obj.display_type="WIRE"
-		
-		if(bpy.context.active_object.mode=="OBJECT"):
-			bpy.ops.object.editmode_toggle()
+		select_object(self.curve_object,True)
+	
+		bpy.ops.object.mode_set(mode='EDIT')
 			
 		bpy.ops.mesh.select_all(action='SELECT')
+
+#		print("%d %d"%(self.curve_width,extrude_width))
 		
 		bpy.ops.mesh.extrude_region_move( 
-			TRANSFORM_OT_translate={"value":(0,-self.curve_width*self.extrude_multiplier,0)})
+			TRANSFORM_OT_translate={"value":(0,-self.curve_width*extrude_width,0)})
 
 		bpy.ops.transform.resize(value=(1, 0, 1),
 			constraint_axis=(True, False, False))
 
 		bpy.ops.mesh.select_all(action='DESELECT')
 
-		bpy.ops.object.editmode_toggle()
-
-
-	def convert_to_mesh(self):
-		bpy.ops.object.convert(target='MESH', keep_original=False)
-	
-		bpy.ops.object.shade_flat()
+		bpy.ops.object.mode_set(mode='OBJECT')
 
 
 	def move_curve(self,space):
