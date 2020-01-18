@@ -22,7 +22,7 @@ import imp
 curve_helper = imp.load_source('util_lux','curve_helper.py')
 
 theCurveHelper = curve_helper.Curve_Helper()
-theCurveHelper.define_curve(5,0.6)
+theCurveHelper.define_curve(11,1.2)
 
 theCurveHelper.generate_curve("curvetest")
 theCurveHelper.extrude_curve(1)
