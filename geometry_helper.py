@@ -120,6 +120,18 @@ def make_backdrop():
 
 	return ob
 
+def add_info_text(info_text):
+	bpy.ops.object.text_add(enter_editmode=False, location=(0, 0, 0))
+	new_txt=bpy.context.view_layer.objects.active
+	new_txt.data.body=info_text
+	new_txt.data.size=0.7
+	new_txt.data.extrude=0.01
+	new_txt.data.text_boxes[0].width = 11
+	new_txt.location.x=-5.5
+	new_txt.location.y=-3
+	new_txt.location.z=-1
+
+
 
 
 def apply_all_bool_modifiers():

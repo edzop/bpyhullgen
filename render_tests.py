@@ -45,8 +45,8 @@ def do_render():
     bpy.context.scene.render.resolution_y=1080
 
     # you can adjust samples and percentage to get higher quality render
-    bpy.context.scene.render.resolution_percentage=50
-    bpy.context.scene.cycles.samples=30
+    bpy.context.scene.render.resolution_percentage=40
+    bpy.context.scene.cycles.samples=10
 
     try:
         render_result = bpy.ops.render.render(animation=False, write_still=False, layer="", scene="")
@@ -91,9 +91,9 @@ do_render()
 # right side (front view)
 backdrop.rotation_euler.z=math.radians(-94)
 bpy.context.scene.frame_set(3)
-cam.location.y=-0.1
+cam.location.y=-1
 cam.location.z=0
-cam.location.x=-20
+cam.location.x=-12
 
 do_render()
 
@@ -102,5 +102,5 @@ backdrop.rotation_euler.z=math.radians(98)
 bpy.context.scene.frame_set(4)
 cam.location.y=-0.1
 cam.location.z=1
-cam.location.x=20
+cam.location.x=13
 do_render()
