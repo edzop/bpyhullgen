@@ -36,6 +36,42 @@ def make_subsurf_material(name,color):
 	mat.diffuse_color=shader_node.inputs[0].default_value
 	return mat
 
+
+def make_glass_material(name,color):
+ 
+    mat=mat = bpy.data.materials.new(name)
+        
+    mat.use_nodes=True
+    tree=mat.node_tree
+    nodes=tree.nodes
+    
+    delete_all_nodes_except_output_material(nodes)
+    
+    links = mat.node_tree.links
+
+    nodeGlossy = nodes.new(type='ShaderNodeBsdfGlossy')
+    nodeGlossy.location=-200,100
+    nodeGlossy.inputs[1].default_value=0
+    
+    node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
+    node_transparent.location = -200,-100
+    #node_transparent.inputs[2]=1.01
+
+    node_mix = nodes.new(type='ShaderNodeMixShader')
+    node_mix.location=0,0
+    node_mix.inputs[0].default_value=0.776
+    
+    
+    links.new(nodeGlossy.outputs[0], node_mix.inputs[1])
+    links.new(node_transparent.outputs[0], node_mix.inputs[2])
+    
+    node_output=nodes['Material Output']
+    node_output.location=200,0
+
+    links.new(node_mix.outputs[0], node_output.inputs[0])
+
+    return mat
+
 def make_metalic_material(name,color):
 	mat = bpy.data.materials.new(name)
 	mat.use_nodes=True
@@ -78,6 +114,23 @@ def get_material_stringer():
 		return bpy.data.materials[material_name]
 
 	return make_subsurf_material(material_name,[0.2,0.8,0.3,1])
+
+
+def get_material_bolts(): 
+	material_name="bolts"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_metalic_material(material_name,[0.7,0.7,0.7,1])
+
+def get_material_window(): 
+	material_name="window"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_glass_material(material_name,[0.7,0.7,0.7,1])
 
 
 def get_material_bulkhead(): 
@@ -182,3 +235,9 @@ def delete_material(material_name):
 	for m in bpy.data.materials:
 		if m.name==material_name:
 			bpy.data.materials.remove(m)
+
+# delete all nodes except output material
+def delete_all_nodes_except_output_material(nodes):
+	for node in nodes:
+		if node.type != 'OUTPUT_MATERIAL': # skip the material output node as we'll need it later
+			nodes.remove(node)
