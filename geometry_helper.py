@@ -131,8 +131,14 @@ def add_info_text(info_text):
 	new_txt.location.y=-3
 	new_txt.location.z=-1
 
+def set_object_rotation(ob,angle):
+    bpy.ops.object.select_all(action='DESELECT')
+    ob.select_set(state=True)
+    bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
 
-
+def rotate_object_X(ob,angle):
+	bpy.context.view_layer.objects.active=ob
+	bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
 
 def apply_all_bool_modifiers():
 
