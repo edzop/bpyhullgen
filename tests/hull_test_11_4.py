@@ -24,6 +24,7 @@ chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
+window_helper = imp.load_source('window_helper','window_helper.py')
 
 the_hull=hull_maker.hull_maker(length=11.4,width=3.9,height=3.6)
 
@@ -33,12 +34,17 @@ new_chine=chine_helper.chine_helper(the_hull)
 
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.06,-0.5]
-new_chine.name="top"
+new_chine.name="side"
 new_chine.longitudal_count=1
 new_chine.longitudal_thickness=0.05
 new_chine.longitudal_width=-0.15
 
 new_chine.make_chine()
+
+window_helper.make_window_on_chine(new_chine,0.5,-0.3)
+window_helper.make_window_on_chine(new_chine,1.5,-0.3)
+window_helper.make_window_on_chine(new_chine,-1.5,-0.3)
+
 
 new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
@@ -140,7 +146,7 @@ def add_window(the_hull):
 
 	curve_helper.hide_object(ob)
 
-add_window(the_hull)
+#add_window(the_hull)
 
 def add_deck_cockpit(the_hull):
 	# ================ Deck Cockpit
@@ -165,9 +171,9 @@ def add_props():
 	view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
 
 	import_library_path="assets/actors.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"man.stand",(0,0.4,-0.88),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"man.stand",(0,0.4,-1.3),view_collection_props)
 	ob = geometry_helper.import_object(import_library_path,"man.lie_down",(1.05,0,-0.64),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(-0.35,0,-0.4),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(-0.35,0,-0.75),view_collection_props)
 	ob = geometry_helper.import_object(import_library_path,"man.sit_lean",(-2.1,0.13,-0.87),view_collection_props)
 
 
@@ -193,6 +199,8 @@ def add_props():
 
 	ob = geometry_helper.import_object(import_library_path,"battery",(0.6,0.17,-1.15),view_collection_props,rotation=(0,0,0))
 
+
+add_props()
 
 clean_distance=0.33
 x_locations=[	-the_hull.hull_length/2+clean_distance,

@@ -24,6 +24,7 @@ chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
+window_helper = imp.load_source('window_helper','window_helper.py')
 
 the_hull=hull_maker.hull_maker(length=11.2,width=3.9,height=3.6)
 
@@ -39,6 +40,10 @@ new_chine.name="side"
 new_chine.longitudal_count=1
 new_chine.longitudal_z_offset=0.1
 new_chine.make_chine()
+
+window_helper.make_window_on_chine(new_chine,0.5,-0.2)
+window_helper.make_window_on_chine(new_chine,1.5,-0.2)
+window_helper.make_window_on_chine(new_chine,-1.5,-0.2)
 
 
 new_chine.rotation=[-39,0,0]
@@ -147,14 +152,16 @@ bool_new.operation = 'UNION'
 curve_helper.hide_object(ob)
 
 # ================ Add deck cockpit
-bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-2.2, 0, 0) )
+bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0) )
 
 ob = bpy.context.active_object
 
 ob.name="deck_cockpit"
+ob.display_type="WIRE"
 
-bpy.ops.transform.resize(value=(3,1,1))
+bpy.ops.transform.resize(value=(1.8,1,1))
 bpy.ops.object.transform_apply(scale=True,location=False)
+ob.location.x=-3
 
 bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
 bool_new.object = ob

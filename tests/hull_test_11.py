@@ -25,6 +25,7 @@ chine_helper = imp.load_source('chine_helper','chine_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 hull_maker = imp.load_source('hull_maker','hull_maker.py')
+window_helper = imp.load_source('window_helper','window_helper.py')
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
@@ -72,6 +73,10 @@ new_chine.name="upper"
 new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.asymmetry[1]=0
 new_chine.make_chine()
+
+window_helper.make_window_on_chine(new_chine,0.5,0.32)
+window_helper.make_window_on_chine(new_chine,1.5,0.32)
+window_helper.make_window_on_chine(new_chine,-1.5,0.32)
 
 new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0,0.2]
@@ -157,6 +162,8 @@ bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
 bool_new.object = ob
 bool_new.operation = 'UNION'
 
+window_helper.make_window_on_object(ob,(-0.5,0.31,0.35),90-8)
+
 curve_helper.hide_object(ob)
 
 
@@ -216,18 +223,22 @@ def offline():
 
 add_extras()
 
-view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
+def add_props():
 
-import_library_path="assets/actors.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(1.3,0,-0.6),view_collection_props,rotation=(0,0,0))
-ob = geometry_helper.import_object(import_library_path,"man.stand",(0.2,0,-0.95),view_collection_props,rotation=(0,0,0))
+	view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
 
-import_library_path="assets/boat_assets.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0.6,0,-1.3),view_collection_props,rotation=(0,0,0))
-ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(-.6,0,-1.3),view_collection_props,rotation=(0,0,0))
+	import_library_path="assets/actors.blend/Collection/"
+	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(1.3,0,-0.6),view_collection_props,rotation=(0,0,0))
+	ob = geometry_helper.import_object(import_library_path,"man.stand",(0.2,0,-0.95),view_collection_props,rotation=(0,0,0))
 
-ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-0.97),view_collection_props,rotation=(0,93,0))
+	import_library_path="assets/boat_assets.blend/Collection/"
+	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0.6,0,-1.3),view_collection_props,rotation=(0,0,0))
+	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(-.6,0,-1.3),view_collection_props,rotation=(0,0,0))
 
+	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-0.97),view_collection_props,rotation=(0,93,0))
+
+
+add_props()
 
 clean_distance=0.5
 x_locations=[	-the_hull.hull_length/2+clean_distance,
