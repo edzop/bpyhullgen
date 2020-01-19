@@ -39,38 +39,38 @@ def make_subsurf_material(name,color):
 
 def make_glass_material(name,color):
  
-    mat=mat = bpy.data.materials.new(name)
-        
-    mat.use_nodes=True
-    tree=mat.node_tree
-    nodes=tree.nodes
-    
-    delete_all_nodes_except_output_material(nodes)
-    
-    links = mat.node_tree.links
+	mat = bpy.data.materials.new(name)
+		
+	mat.use_nodes=True
+	tree=mat.node_tree
+	nodes=tree.nodes
+	
+	delete_all_nodes_except_output_material(nodes)
+	
+	links = mat.node_tree.links
 
-    nodeGlossy = nodes.new(type='ShaderNodeBsdfGlossy')
-    nodeGlossy.location=-200,100
-    nodeGlossy.inputs[1].default_value=0
-    
-    node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
-    node_transparent.location = -200,-100
-    #node_transparent.inputs[2]=1.01
+	nodeGlossy = nodes.new(type='ShaderNodeBsdfGlossy')
+	nodeGlossy.location=-200,100
+	nodeGlossy.inputs[1].default_value=0
+	
+	node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
+	node_transparent.location = -200,-100
+	#node_transparent.inputs[2]=1.01
 
-    node_mix = nodes.new(type='ShaderNodeMixShader')
-    node_mix.location=0,0
-    node_mix.inputs[0].default_value=0.776
-    
-    
-    links.new(nodeGlossy.outputs[0], node_mix.inputs[1])
-    links.new(node_transparent.outputs[0], node_mix.inputs[2])
-    
-    node_output=nodes['Material Output']
-    node_output.location=200,0
+	node_mix = nodes.new(type='ShaderNodeMixShader')
+	node_mix.location=0,0
+	node_mix.inputs[0].default_value=0.776
+	
+	
+	links.new(nodeGlossy.outputs[0], node_mix.inputs[1])
+	links.new(node_transparent.outputs[0], node_mix.inputs[2])
+	
+	node_output=nodes['Material Output']
+	node_output.location=200,0
 
-    links.new(node_mix.outputs[0], node_output.inputs[0])
+	links.new(node_mix.outputs[0], node_output.inputs[0])
 
-    return mat
+	return mat
 
 def make_metalic_material(name,color):
 	mat = bpy.data.materials.new(name)
@@ -217,6 +217,144 @@ def get_material_hull():
 	node_output.location=800,0
 
 	links.new(node_mix.outputs[0], node_output.inputs[0])
+
+	return mat
+
+def plates_to_aluminum():
+	al_mat = make_aluminum_material()
+
+	list_of_prefix=[ "hull_object_slicer",
+					 "Bulkhead",
+					 "cutterchine"
+					]
+
+	for o in bpy.data.objects:
+		if o.type=="MESH":
+			for pre in list_of_prefix:
+				if o.name.startswith(pre):
+					assign_material(o,al_mat)
+
+def make_aluminum_material():
+	name="aluminum"
+
+	mat = bpy.data.materials.new(name)
+		
+	mat.use_nodes=True
+	tree=mat.node_tree
+	nodes=tree.nodes
+	
+	#delete_all_nodes_except_output_material(nodes)
+	
+	links = mat.node_tree.links
+
+	xpos=-400
+	xinc=200
+
+
+
+	node_tex_coord = nodes.new(type='ShaderNodeTexCoord')
+	node_tex_coord.location=xpos,0
+
+	xpos+=xinc
+	
+	node_tex_noise = nodes.new(type='ShaderNodeTexNoise')
+	node_tex_noise.location=xpos,100
+	node_tex_noise.inputs[2].default_value=40
+	node_tex_noise.inputs[3].default_value=5
+
+	links.new(node_tex_coord.outputs[3], node_tex_noise.inputs[0])
+
+	node_tex_mapping = nodes.new(type='ShaderNodeMapping')
+	node_tex_mapping.location=xpos,-200
+	node_tex_mapping.inputs[3].default_value[2]=500
+
+	links.new(node_tex_coord.outputs[0], node_tex_mapping.inputs[0])
+
+
+	xpos+=xinc
+
+	node_tex_musgrave = nodes.new(type='ShaderNodeTexMusgrave')
+	node_tex_musgrave.location=xpos,-200
+	node_tex_musgrave.inputs[2].default_value=6
+	node_tex_musgrave.inputs[3].default_value=0.3
+	node_tex_musgrave.inputs[4].default_value=0
+	node_tex_musgrave.inputs[5].default_value=1
+
+
+	links.new(node_tex_mapping.outputs[0], node_tex_musgrave.inputs[0])
+
+	xpos+=xinc
+
+	node_tex_rampbump = nodes.new(type='ShaderNodeValToRGB')
+	node_tex_rampbump.location=xpos,-150
+	node_tex_rampbump.name="bump"
+	node_tex_rampbump.color_ramp.elements[0].position=0.1
+	node_tex_rampbump.color_ramp.elements[1].position=0.3
+
+	links.new(node_tex_musgrave.outputs[0], node_tex_rampbump.inputs[0])
+
+	node_tex_ramp2 = nodes.new(type='ShaderNodeValToRGB')
+	node_tex_ramp2.location=xpos,150
+	node_tex_ramp2.name="ramp2"
+	node_tex_ramp2.color_ramp.elements[0].position=0.49
+	node_tex_ramp2.color_ramp.elements[1].position=0.66
+
+	node_tex_ramp2.color_ramp.elements[0].color=[.41,.41,.41,1]
+	node_tex_ramp2.color_ramp.elements[1].color=[.51,.51,.51,1]
+
+	links.new(node_tex_noise.outputs[0], node_tex_ramp2.inputs[0])
+
+	xpos+=xinc*1.5
+
+	node_tex_math1 = nodes.new(type='ShaderNodeMath')
+	node_tex_math1.location=xpos,-100
+	node_tex_math1.name="roughness"
+	node_tex_math1.operation="MULTIPLY"
+	node_tex_math1.use_clamp=True
+	node_tex_math1.inputs[1].default_value=1.2
+	
+
+	node_tex_math2 = nodes.new(type='ShaderNodeMath')
+	node_tex_math2.location=xpos,100
+	node_tex_math2.name="metallic"
+	node_tex_math2.operation="MULTIPLY"
+	node_tex_math2.use_clamp=True
+	node_tex_math2.inputs[1].default_value=2.4
+
+	node_tex_math3 = nodes.new(type='ShaderNodeMath')
+	node_tex_math3.location=xpos,-300
+	node_tex_math3.name="bump"
+	node_tex_math3.operation="MULTIPLY"
+	node_tex_math3.use_clamp=True
+	node_tex_math3.inputs[1].default_value=0.005
+
+
+	xpos+=xinc
+
+	links.new(node_tex_ramp2.outputs[0], node_tex_math2.inputs[0])
+	links.new(node_tex_ramp2.outputs[0], node_tex_math1.inputs[0])
+
+	links.new(node_tex_rampbump.outputs[0], node_tex_math3.inputs[0])
+
+	xpos+=xinc*1.5
+
+	node_principled_bsdf = nodes['Principled BSDF']
+	node_principled_bsdf.location=xpos,200
+
+	links.new(node_tex_math1.outputs[0], node_principled_bsdf.inputs[7])
+	links.new(node_tex_math2.outputs[0], node_principled_bsdf.inputs[4])
+
+	links.new(node_tex_ramp2.outputs[0], node_principled_bsdf.inputs[0])
+
+
+	xpos+=xinc*1.5
+
+	node_output=nodes['Material Output']
+	node_output.location=xpos,0
+
+	links.new(node_tex_math3.outputs[0], node_output.inputs[2])
+
+
 
 	return mat
 

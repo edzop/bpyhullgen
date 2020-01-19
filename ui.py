@@ -23,6 +23,8 @@ import imp
 from . import measure_helper as measure_helper
 from . import boat_curve_2 as boat_curve
 from . import geometry_helper as geometry_helper
+from . import window_helper as window_helper
+from . import material_helper as material_helper
 
 #boat_curve 		= imp.load_source('boat_curve','boat_curve_2.py')
 #measure_helper 	= imp.load_source('measure_helper','measure_helper.py')
@@ -246,8 +248,6 @@ class SeparateMaterialOperator (bpy.types.Operator):
 	bl_label = "Separate by material"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		geometry_helper.separate_active_by_material()
 
@@ -259,12 +259,22 @@ class SolidifySelectedObjectsOperator (bpy.types.Operator):
 	bl_label = "Solidify Selections"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		geometry_helper.solidify_selected_objects()
 
 		return {'FINISHED'}
+
+
+class CutWindowsOperator (bpy.types.Operator):
+	"""Cut window holes for all objects in windows collection"""
+	bl_idname = "wm.cutwindows"
+	bl_label = "Cut Windows"
+
+	def execute(self, context):
+
+		window_helper.cut_windows()
+
+		return {'FINISHED'}		
 
 class ExportPlatesOperator (bpy.types.Operator):
 	"""Export plate geometry to SVG file"""
@@ -272,8 +282,6 @@ class ExportPlatesOperator (bpy.types.Operator):
 	bl_label = "ExportPlates"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		measure_helper.export_plates("plates2.svg")
 
@@ -286,8 +294,6 @@ class ExportHulldxfOperator (bpy.types.Operator):
 	bl_label = "ExportDXF"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		measure_helper.export_dxf("plates2.dxf")
 
@@ -301,8 +307,6 @@ class DeleteNonFrontalOperator (bpy.types.Operator):
 	bl_label = "DeleteNonFront"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		for obj in bpy.context.selected_objects:
 			if obj.type=="MESH":
@@ -317,8 +321,6 @@ class DeleteNonUpOperator (bpy.types.Operator):
 	bl_label = "DeleteNonUp"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		for obj in bpy.context.selected_objects:
 			if obj.type=="MESH":
@@ -334,8 +336,6 @@ class CalculateCGOperator (bpy.types.Operator):
 	bl_label = "Calc CG"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		influence_object_list=[]
 
@@ -354,13 +354,22 @@ class ImportPlatesOperator (bpy.types.Operator):
 	bl_label = "ImportPlates"
 
 	def execute(self, context):
-		#scene = context.scene
-		#mytool = scene.my_tool
 
 		measure_helper.import_plates("plates2.svg")
 
 		return {'FINISHED'}
 
+
+class AluminumPlatesOperator (bpy.types.Operator):
+	"""Import plate geometry from SVG file"""
+	bl_idname = "wm.aluminumplates"
+	bl_label = "AL Plates"
+
+	def execute(self, context):
+
+		material_helper.plates_to_aluminum()
+
+		return {'FINISHED'}
 
 # ------------------------------------------------------------------------
 #    operators
@@ -469,6 +478,9 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.delete_non_frontal")
 		rowsub.operator( "wm.delete_non_up")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.cutwindows")
+		rowsub.operator( "wm.aluminumplates")
 
 		#layout.menu( "OBJECT_MT_select_test", text="Presets", icon="SCENE")
 		

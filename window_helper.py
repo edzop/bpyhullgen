@@ -25,10 +25,7 @@ from math import radians
 
 material_helper = imp.load_source('material_helper','material_helper.py')
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
-
-material_bolts=material_helper.get_material_bolts()
-material_window=material_helper.get_material_window()
-
+geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 
 def calc_arc_point_ellipse(centerpoint,angle,distance):
 	x= (distance[0]/2) * math.sin(math.radians(angle))
@@ -50,6 +47,9 @@ def make_circle(name,centerpoint,diameter,circle_depth):
 
 	
 def make_window(name="window",centerpoint=(0,0,0),diameter=1,depth=0.4):
+
+	material_bolts=material_helper.get_material_bolts()
+	material_window=material_helper.get_material_window()
 
 	view_collection_windows=curve_helper.make_collection("windows",bpy.context.scene.collection.children)
 
@@ -106,8 +106,6 @@ def make_window_on_chine(new_chine,offset_x,offset_z):
 	new_window.location.x=offset_x
 	new_window.rotation_euler[0]=radians(90)
 
-
-
 def make_window_on_object(obj,position,angle):
 	
 	name="%s_L"%obj.name
@@ -129,4 +127,39 @@ def make_window_on_object(obj,position,angle):
 	new_window.location.z=position[2]
 
 	new_window.rotation_euler[0]=radians(angle)
+
+def cut_windows():
+
+	view_collection_windows=curve_helper.make_collection("windows",bpy.context.scene.collection.children)
+
+	hull_walls=[]
+
+	for o in bpy.data.objects:
+		if o.type=="MESH":
+			if o.name.startswith("hull_object_slicer"):
+				hull_walls.append(o)
+				print(o.name)
+
+	for hull_wall in hull_walls:
+		for window_object in view_collection_windows.objects:
+			if geometry_helper.check_intersect(hull_wall,window_object):
+				print("%s intersects %s"%(window_object.name,hull_wall.name))
+
+				bool_new = hull_wall.modifiers.new(type="BOOLEAN", name="hull_cut")
+				bool_new.object = window_object
+				bool_new.operation = 'DIFFERENCE'
+
+				bpy.context.view_layer.objects.active = hull_wall
+				bpy.ops.object.modifier_apply(modifier=bool_new.name)
+
+				bpy.context.view_layer.objects.active = window_object
+				window_object.select_set(True)
+				bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+				window_object.select_set(False)
+				window_object.scale=(0.999,0.999,0.999)
+
+
+
+				#curve_helper.hide_object(window_object)
+
 

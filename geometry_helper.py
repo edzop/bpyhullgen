@@ -23,13 +23,9 @@ import hashlib
 from math import radians, degrees
 from mathutils import Vector
 
-#from . import (
-#		curve_helper,
-#		material_helper
-#		)
+import bmesh
+from mathutils.bvhtree import BVHTree
 
-#from . import curve_helper as curve_helper
-#from . import material_helper as material_helper
 
 curve_helper = imp.load_source('curve_helper','curve_helper.py')
 material_helper = imp.load_source('material_helper','material_helper.py')
@@ -67,7 +63,10 @@ def solidify_selected_objects():
 
 			if has_solidify_modifier==False:
 				modifier=obj.modifiers.new(name="solidify", type='SOLIDIFY')
-				modifier.thickness=-0.1
+				modifier.thickness=-0.03
+
+				bpy.context.view_layer.objects.active = obj
+				bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 
 # Generate unique color RGV values based on input string 
@@ -312,4 +311,32 @@ def import_object(path,target_object,location,view_collection=None,rotation=None
 		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
 
 	return ob
+
+
+
+def check_intersect(the_object,the_other_object):
+
+	BMESH_1 = bmesh.new()
+	BMESH_1.from_mesh(bpy.context.scene.objects[the_object.name].data)
+	BMESH_1.transform(the_object.matrix_world)
+	BVHtree_1 = BVHTree.FromBMesh(BMESH_1)
+
+	BMESH_2 = bmesh.new()
+	BMESH_2.from_mesh(bpy.context.scene.objects[the_other_object.name].data)
+	BMESH_2.transform(the_other_object.matrix_world)
+	BVHtree_2 = BVHTree.FromBMesh(BMESH_2)
+
+	inter = BVHtree_1.overlap(BVHtree_2)
+
+	touching=False
+
+	if inter != []:
+		#print(the_object.name + " and " + the_other_object.name + " are touching!")
+		touching=True
+	#else:
+		#print(the_object.name + " and " + the_other_object.name + " NOT touching!")  
+	
+	return touching
+		
+	#print(inter)
 

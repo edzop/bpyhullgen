@@ -70,7 +70,9 @@ classes = (
     ui.ImportPlatesOperator,
     ui.ExportHulldxfOperator,
     ui.DeleteNonFrontalOperator,
-    ui.DeleteNonUpOperator
+    ui.DeleteNonUpOperator,
+    ui.CutWindowsOperator,
+    ui.AluminumPlatesOperator
 )
 
 def register():
