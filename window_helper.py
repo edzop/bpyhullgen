@@ -18,14 +18,13 @@
 
 import bpy
 
-import imp
-
 import math
 from math import radians
 
-material_helper = imp.load_source('material_helper','material_helper.py')
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
+from . import material_helper as material_helper
+from . import geometry_helper as geometry_helper
+from . import curve_helper as curve_helper
+
 
 def calc_arc_point_ellipse(centerpoint,angle,distance):
 	x= (distance[0]/2) * math.sin(math.radians(angle))

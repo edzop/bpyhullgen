@@ -19,12 +19,9 @@
 import bpy
 import bmesh
 import csv
-import imp
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
-
-
+from . import material_helper as material_helper
+from . import curve_helper as curve_helper
 
 # =======================================================================================
 # This bmesh_copy_from_object function was borrowed from the object_print3d_utils addon.

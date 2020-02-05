@@ -18,22 +18,12 @@
 
 # bpy.ops.script.reload()
 
-import imp
-
-from . import measure_helper as measure_helper
 from . import boat_curve_2 as boat_curve
-from . import geometry_helper as geometry_helper
-from . import window_helper as window_helper
 from . import material_helper as material_helper
 
-#boat_curve 		= imp.load_source('boat_curve','boat_curve_2.py')
-#measure_helper 	= imp.load_source('measure_helper','measure_helper.py')
-#geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
-
-
-#from . import auto_load
-
-#auto_load.init()
+from . import geometry_helper as geometry_helper
+from . import window_helper as window_helper
+from . import measure_helper as measure_helper
 
 
 import bpy

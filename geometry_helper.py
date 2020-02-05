@@ -17,7 +17,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp
+
 import hashlib
 
 from math import radians, degrees
@@ -26,9 +26,8 @@ from mathutils import Vector
 import bmesh
 from mathutils.bvhtree import BVHTree
 
-
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
+from . import curve_helper as curve_helper
+from . import material_helper as material_helper
 
 def separate_active_by_material():
 	selected_object=bpy.context.view_layer.objects.active
