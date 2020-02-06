@@ -20,8 +20,6 @@ import bpy
 from mathutils import Vector 
 import math
 
-import bpy
-
 from math import radians, degrees
 
 
