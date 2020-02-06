@@ -110,7 +110,9 @@ class GenSceneOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		geometry_helper.make_backdrop()
+		backdrop=geometry_helper.make_backdrop()
+		mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
+		material_helper.assign_material(backdrop,mat)
 
 		return {'FINISHED'}
 

@@ -24,6 +24,7 @@ import imp
 import math
 
 geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
+material_helper = imp.load_source('material_helper','material_helper.py')
 
 target_file = os.environ.get("TARGET_FILE")
 
@@ -110,6 +111,8 @@ def do_render():
     print("Render Result %s"%list(render_result))
 
 backdrop=geometry_helper.make_backdrop()
+mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
+material_helper.assign_material(backdrop,mat)
 
 cam=bpy.data.objects["Camera"]
 

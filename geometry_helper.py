@@ -30,7 +30,7 @@ from mathutils.bvhtree import BVHTree
 
 #from . import curve_helper as curve_helper
 #from . import material_helper as material_helper
-material_helper = imp.load_source('material_helper','material_helper.py')
+#material_helper = imp.load_source('material_helper','material_helper.py')
 
 
 def separate_active_by_material():
@@ -116,9 +116,6 @@ def make_backdrop():
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 	bpy.ops.object.shade_smooth()
-
-	mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
-	material_helper.assign_material(ob,mat)
 
 	return ob
 
