@@ -27,15 +27,66 @@ geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
 
 target_file = os.environ.get("TARGET_FILE")
 
-target_file_without_extension=os.path.splitext(target_file)[0]
-
-print("Target file: '%s'"%target_file_without_extension)
-
-#output_path=
-#    if not os.path.exists(d):
-#        os.makedirs(d)
+print("Working file: '%s'"%target_file)
 
 exec(open(target_file).read())
+
+def create_auto_save_nodes(targetfile):
+    scene = bpy.context.scene
+
+    scene.render.use_compositing=True
+
+    #frameIndex=bpy.context.scene.frame_current
+
+    # make sure we have node tree
+    if scene.node_tree==None:
+        scene.use_nodes=True
+
+    if scene.node_tree:
+        nodes = scene.node_tree.nodes
+        auto_save_output_label="auto_save"
+
+        # remove previously auto created denoise nodes to prevent duplicates
+        for node in nodes:
+            if node.label==auto_save_output_label:
+                nodes.remove(node)
+
+        render_layer_node = nodes.new("CompositorNodeRLayers")
+        render_layer_node.location=(0,0)
+        render_layer_node.label=auto_save_output_label
+
+        output_file_node = nodes.new("CompositorNodeOutputFile")
+        output_file_node.location=(600,0)
+        output_file_node.inputs[0].name="filename"
+        current_path=os.path.split(os.path.abspath(target_file))
+        output_file_node.base_path = "%s/output/"%(current_path[0])
+        output_file_node.label=auto_save_output_label
+
+        denoise_node = nodes.new("CompositorNodeDenoise")
+        denoise_node.location=(300,-300)
+
+        bpy.context.scene.render.use_file_extension=True
+
+        blend_file = os.path.basename(targetfile)
+        base_output_file=os.path.splitext(blend_file)[0]
+    
+        output_file_node.file_slots[0].path="%s_"%(base_output_file)
+        output_file_node.file_slots[0].use_node_format=False
+        output_file_node.file_slots[0].format.file_format="PNG"
+        
+        doDenoise=True
+
+        if doDenoise==True:
+            output_file_node.file_slots.new("%s_##"%(base_output_file))
+            output_file_node.file_slots[1].use_node_format=False
+            output_file_node.file_slots[1].format.file_format="PNG"
+            scene.node_tree.links.new(denoise_node.outputs[0],output_file_node.inputs[1])
+        else:
+            scene.node_tree.links.new(render_layer_node.outputs['Image'],output_file_node.inputs[0])
+
+        scene.node_tree.links.new(render_layer_node.outputs['Image'],denoise_node.inputs["Image"])
+
+
 
 def do_render():
 
@@ -46,7 +97,9 @@ def do_render():
 
     # you can adjust samples and percentage to get higher quality render
     bpy.context.scene.render.resolution_percentage=40
-    bpy.context.scene.cycles.samples=10
+
+    bpy.context.scene.render.engine="CYCLES"
+    bpy.context.scene.cycles.samples=50
 
     try:
         render_result = bpy.ops.render.render(animation=False, write_still=False, layer="", scene="")
@@ -54,23 +107,13 @@ def do_render():
             print("Render Failed")
             return False
 
-    print("Render Result")
-    print(list(render_result))
-
-    if 'FINISHED' in render_result:
-        print('Frame ' + str(frameIndex) + ' rendered OK')
-
-        target_path=os.path.split(os.path.abspath(target_file))
-
-        full_output_image_path="%s/output/%s_%d.png"%(target_path[0],target_path[1],frameIndex)
-
-        bpy.data.images['Render Result'].save_render(filepath=full_output_image_path)
-
+    print("Render Result %s"%list(render_result))
 
 backdrop=geometry_helper.make_backdrop()
 
 cam=bpy.data.objects["Camera"]
 
+create_auto_save_nodes(target_file)
 
 # front view
 bpy.context.scene.frame_set(1)
