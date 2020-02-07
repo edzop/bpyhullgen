@@ -223,9 +223,10 @@ def get_material_hull():
 def plates_to_aluminum():
 	al_mat = make_aluminum_material()
 
-	list_of_prefix=[ "hull_object_slicer",
+	list_of_prefix=[ 
 					 "Bulkhead",
-					 "cutterchine"
+					 "cutterchine",
+					 "hull_object"
 					]
 
 	for o in bpy.data.objects:
