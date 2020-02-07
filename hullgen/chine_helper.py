@@ -332,7 +332,7 @@ class chine_helper:
             if self.curve_width<0:
                 slicer_plane.location.y=self.skin_pokethrough
             else:
-                slicer_plane.location.y=self.skin_pokethrough
+                slicer_plane.location.y=-self.skin_pokethrough
 
             # for some reason bool doesn't work if X is 0 on parent object... maybe bug in blender boolean code
             slicer_plane.location.x=0.0001
@@ -413,7 +413,7 @@ class chine_helper:
                 if self.curve_width<0:
                     slicer_plane.location.y=self.skin_pokethrough
                 else:
-                    slicer_plane.location.y=self.skin_pokethrough
+                    slicer_plane.location.y=-self.skin_pokethrough
 
                 # for some reason bool doesn't work if X is 0 on parent object... maybe bug in blender boolean code
                 slicer_plane.location.x=0.0001
