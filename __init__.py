@@ -74,6 +74,7 @@ classes = (
     ui.DeleteNonFrontalOperator,
     ui.DeleteNonUpOperator,
     ui.CutWindowsOperator,
+    ui.InsideShrinkOperator,
     ui.AluminumPlatesOperator
 )
 

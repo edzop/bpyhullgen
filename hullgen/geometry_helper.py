@@ -19,7 +19,7 @@
 import bpy
 import hashlib
 from math import radians, degrees
-from mathutils import Vector
+from mathutils import Vector, Matrix
 import bmesh
 from mathutils.bvhtree import BVHTree
 
@@ -68,21 +68,21 @@ def solidify_selected_objects():
 # Generate unique color RGV values based on input string 
 # Returns list of 3 values between 0 and 1
 def get_color_from_hash_string(input_string,add_alpha_value=True):
-    hash_string=str((hash(input_string) % 10**9))
-    m = hashlib.md5()
-    m.update(input_string.encode())
-    hash_string=m.hexdigest()
+	hash_string=str((hash(input_string) % 10**9))
+	m = hashlib.md5()
+	m.update(input_string.encode())
+	hash_string=m.hexdigest()
 
-    color_value_list=[]
-        
-    color_value_list.append(int(str(int(hash_string, 16))[0:3])/999)
-    color_value_list.append(int(str(int(hash_string, 16))[3:6])/999)
-    color_value_list.append(int(str(int(hash_string, 16))[6:9])/999)
+	color_value_list=[]
+		
+	color_value_list.append(int(str(int(hash_string, 16))[0:3])/999)
+	color_value_list.append(int(str(int(hash_string, 16))[3:6])/999)
+	color_value_list.append(int(str(int(hash_string, 16))[6:9])/999)
 
-    if add_alpha_value==True:
-        color_value_list.append(1)
-        
-    return color_value_list
+	if add_alpha_value==True:
+		color_value_list.append(1)
+		
+	return color_value_list
 
 
 def make_backdrop():
@@ -129,9 +129,9 @@ def add_info_text(info_text):
 	return new_txt
 
 def set_object_rotation(ob,angle):
-    bpy.ops.object.select_all(action='DESELECT')
-    ob.select_set(state=True)
-    bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
+	bpy.ops.object.select_all(action='DESELECT')
+	ob.select_set(state=True)
+	bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
 
 def rotate_object_X(ob,angle):
 	bpy.context.view_layer.objects.active=ob
@@ -228,9 +228,8 @@ def GoingRight( normal, limit = 0.5 ):
 def GoingSide( normal, limit = 0.5 ):
 	return GoingUp( normal, limit ) == False and GoingDown( normal, limit ) == False
 
-def select_only_going_left(ob):
+def select_going_left(ob):
 	old_mode=bpy.context.active_object.mode
-	mesh_deselect_all()
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
@@ -240,9 +239,8 @@ def select_only_going_left(ob):
 		bpy.ops.object.mode_set(mode=old_mode)
 	
 
-def select_only_going_right(ob):
+def select_going_right(ob):
 	old_mode=bpy.context.active_object.mode
-	mesh_deselect_all()
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
@@ -251,10 +249,9 @@ def select_only_going_right(ob):
 	if bpy.context.active_object.mode!=old_mode:
 		bpy.ops.object.mode_set(mode=old_mode)
 
-def select_only_going_up(ob):
+def select_going_up(ob):
 	old_mode=bpy.context.active_object.mode
-	mesh_deselect_all()
-	
+
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
 		face.select = GoingUp( face.normal)
@@ -263,13 +260,22 @@ def select_only_going_up(ob):
 		bpy.ops.object.mode_set(mode=old_mode)
 
 
-def select_only_going_front(ob):
+def select_going_front(ob):
 	old_mode=bpy.context.active_object.mode
-	mesh_deselect_all()
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
 		face.select = GoingFront( face.normal)
+
+	if bpy.context.active_object.mode!=old_mode:
+		bpy.ops.object.mode_set(mode=old_mode)
+
+def select_going_back(ob):
+	old_mode=bpy.context.active_object.mode
+	
+	bpy.ops.object.mode_set(mode='OBJECT')
+	for face in ob.data.polygons:
+		face.select = GoingBack( face.normal)
 
 	if bpy.context.active_object.mode!=old_mode:
 		bpy.ops.object.mode_set(mode=old_mode)
@@ -337,4 +343,62 @@ def check_intersect(the_object,the_other_object):
 	return touching
 		
 	#print(inter)
+
+
+def inside_shrink(amount=0.1):
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_all(action='DESELECT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	ob=bpy.context.view_layer.objects.active
+
+	face_indexes=[]
+
+	polygoncount=len(ob.data.polygons)
+	print("Poly counnt %d"%polygoncount)
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	for i in range(0,polygoncount):
+		face=ob.data.polygons[i]
+		if GoingBack(face.normal) or GoingFront( face.normal):
+			print("not added: %d %s"%(i,str(face.normal)))
+		else:
+			face_indexes.append(i)
+			print("added: %d %s"%(i,str(face.normal)))
+
+	print(face_indexes)
+
+	'''
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_all(action='DESELECT')
+	bpy.ops.object.mode_set(mode='OBJECT')
+	for i in face_indexes:
+		face=ob.data.polygons[i]
+		face.select=True
+
+	bpy.ops.object.mode_set(mode='EDIT')	
+	return
+	'''
+	
+
+
+	for i in face_indexes:
+		face=ob.data.polygons[i]
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.object.mode_set(mode='OBJECT')
+		face=ob.data.polygons[i]
+		face.select=True
+		bpy.ops.object.mode_set(mode='EDIT')
+		face_normal=face.normal
+	
+		matrix=((0, -1, 0), (face_normal[2], 0, -face_normal[0]), (face_normal[0], 0, face_normal[2]))
+
+		print("Identitymatrix: %s"%str(matrix))
+
+		bpy.ops.transform.translate(value=(0, 0, -amount),
+			orient_type='NORMAL', 
+			orient_matrix=matrix, 
+			orient_matrix_type='NORMAL',
+			constraint_axis=(False, False, True))
 

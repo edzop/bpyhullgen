@@ -302,7 +302,8 @@ class DeleteNonFrontalOperator (bpy.types.Operator):
 		for obj in bpy.context.selected_objects:
 			if obj.type=="MESH":
 				#geometry_helper.delete_non_forward_faces(obj)
-				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_only_going_front)
+				geometry_helper.mesh_deselect_all()
+				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
 
 		return {'FINISHED'}
 
@@ -315,8 +316,8 @@ class DeleteNonUpOperator (bpy.types.Operator):
 
 		for obj in bpy.context.selected_objects:
 			if obj.type=="MESH":
-				#geometry_helper.delete_non_forward_faces(obj)
-				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_only_going_up)
+				geometry_helper.mesh_deselect_all()
+				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 
 		return {'FINISHED'}
 
@@ -361,6 +362,18 @@ class AluminumPlatesOperator (bpy.types.Operator):
 		material_helper.plates_to_aluminum()
 
 		return {'FINISHED'}
+
+class InsideShrinkOperator (bpy.types.Operator):
+	"""Shrink faces in orient by normals"""
+	bl_idname = "wm.insideshrink"
+	bl_label = "InShrink"
+
+	def execute(self, context):
+
+		geometry_helper.inside_shrink()
+
+		return {'FINISHED'}
+
 
 # ------------------------------------------------------------------------
 #    operators
@@ -472,6 +485,8 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.insideshrink")
 
 		#layout.menu( "OBJECT_MT_select_test", text="Presets", icon="SCENE")
 		
