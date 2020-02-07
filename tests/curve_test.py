@@ -29,5 +29,5 @@ theCurveHelper.extrude_curve(1)
 
 wireframe = theCurveHelper.curve_object.modifiers.new(type="WIREFRAME", name="wireframe")
  
-info_text="A 2D curve with twist on the second axis"
+info_text="A basic 2D curve"
 geometry_helper.add_info_text(info_text)

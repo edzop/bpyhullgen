@@ -254,7 +254,10 @@ class Curve_Helper:
 
 	def extrude_curve(self,extrude_width):
 
+		bpy.ops.object.select_all(action='DESELECT')
+
 		self.curve_object.display_type="WIRE"
+		
 
 		select_object(self.curve_object,True)
 	

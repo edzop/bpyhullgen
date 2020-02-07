@@ -32,7 +32,7 @@ class chine_helper:
     the_hull=None
     symmetrical=True
 
-    bool_correction_offset=0.02
+    bool_correction_offset=0
 
     curve_length=12
     curve_width=1.2
@@ -336,7 +336,7 @@ class chine_helper:
 
             # for some reason bool doesn't work if X is 0 on parent object... maybe bug in blender boolean code
             slicer_plane.location.x=0.0001
-            slicer_plane.location.z=0
+            slicer_plane.location.z=- ( (self.longitudal_thickness*self.slicer_overcut)-self.longitudal_thickness ) / 2
 
             curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
             curve_helper.hide_object(slicer_plane)
@@ -417,7 +417,7 @@ class chine_helper:
 
                 # for some reason bool doesn't work if X is 0 on parent object... maybe bug in blender boolean code
                 slicer_plane.location.x=0.0001
-                slicer_plane.location.z=0
+                slicer_plane.location.z=- ( (self.longitudal_thickness*self.slicer_overcut)-self.longitudal_thickness ) / 2
 
                 curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
                 curve_helper.hide_object(slicer_plane)

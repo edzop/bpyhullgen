@@ -31,7 +31,7 @@ the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
 the_hull.make_hull_object()
 
-curve_helper.select_object(the_hull.hull_object,False)
+#curve_helper.select_object(the_hull.hull_object,False)
 
 new_chine=chine_helper.chine_helper(the_hull)
 
@@ -74,9 +74,9 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.asymmetry[1]=0
 new_chine.make_chine()
 
-window_helper.make_window_on_chine(new_chine,0.5,0.32)
-window_helper.make_window_on_chine(new_chine,1.5,0.32)
-window_helper.make_window_on_chine(new_chine,-1.5,0.32)
+#window_helper.make_window_on_chine(new_chine,0.5,0.32)
+#window_helper.make_window_on_chine(new_chine,1.5,0.32)
+#window_helper.make_window_on_chine(new_chine,-1.5,0.32)
 
 new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0,0.2]
@@ -129,42 +129,43 @@ bool_new.operation = 'DIFFERENCE'
 curve_helper.hide_object(ob)
 
 
-# ================ Add Pilot House
-bpy.ops.mesh.primitive_cube_add(size=1.0, location=(1, 0, 0.27) )
+def add_pilot_house():
+	# ================ Add Pilot House
+	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(1, 0, 0.27) )
 
-bpy.ops.transform.resize(value=(2,0.9,1.5))
-bpy.ops.object.transform_apply(scale=True,location=False)
+	bpy.ops.transform.resize(value=(2,0.9,1.5))
+	bpy.ops.object.transform_apply(scale=True,location=False)
 
 
-ob = bpy.context.active_object
+	ob = bpy.context.active_object
 
-ob.name="Pilot House"
+	ob.name="Pilot House"
 
-bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.object.mode_set(mode='EDIT')
 
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.mode_set(mode='OBJECT')
+	bpy.ops.mesh.select_all(action='DESELECT')
+	bpy.ops.object.mode_set(mode='OBJECT')
 
-for face in ob.data.polygons:
-	face.select = geometry_helper.GoingUp( face.normal )
+	for face in ob.data.polygons:
+		face.select = geometry_helper.GoingUp( face.normal )
 
-bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.object.mode_set(mode='EDIT')
 
-bpy.ops.transform.resize(value=(1, 0.6, 1))
+	bpy.ops.transform.resize(value=(1, 0.6, 1))
 
-bpy.ops.transform.translate(value=(-0.3, 0, 0))
+	bpy.ops.transform.translate(value=(-0.3, 0, 0))
 
-bpy.ops.mesh.bevel(offset=0.1,segments=4)
+	bpy.ops.mesh.bevel(offset=0.1,segments=4)
 
-bpy.ops.object.mode_set(mode='OBJECT')
+	bpy.ops.object.mode_set(mode='OBJECT')
 
-bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
-bool_new.object = ob
-bool_new.operation = 'UNION'
+	bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
+	bool_new.object = ob
+	bool_new.operation = 'UNION'
 
-window_helper.make_window_on_object(ob,(-0.5,0.31,0.35),90-8)
+	window_helper.make_window_on_object(ob,(-0.5,0.31,0.35),90-8)
 
-curve_helper.hide_object(ob)
+	curve_helper.hide_object(ob)
 
 
 
@@ -221,7 +222,7 @@ def offline():
 
 # =======================================================
 
-add_extras()
+#add_extras()
 
 def add_props():
 
@@ -238,7 +239,7 @@ def add_props():
 	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-0.97),view_collection_props,rotation=(0,93,0))
 
 
-add_props()
+#add_props()
 
 clean_distance=0.5
 x_locations=[	-the_hull.hull_length/2+clean_distance,

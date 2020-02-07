@@ -126,6 +126,7 @@ def add_info_text(info_text):
 	new_txt.location.x=-5.5
 	new_txt.location.y=-3
 	new_txt.location.z=-1
+	return new_txt
 
 def set_object_rotation(ob,angle):
     bpy.ops.object.select_all(action='DESELECT')
