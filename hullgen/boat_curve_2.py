@@ -17,12 +17,9 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp
-import numpy
 import math
 
-from . import curve_helper as curve_helper
-#curve_helper = imp.load_source('curve_helper','curve_helper.py')
+from ..hullgen import curve_helper
 
 def make_rounded(ob):
     bpy.context.view_layer.objects.active=ob

@@ -19,8 +19,10 @@
 import bpy    
 from mathutils import Vector 
 import math
-
 from math import radians, degrees
+
+def curve_helper_hello():
+	print("curve_helper_hello")
 
 
 def cleanup_shape(ob):

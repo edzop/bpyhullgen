@@ -16,15 +16,11 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-
 import bpy
-
 import os
-import imp
 import math
 
-geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
+from bpyhullgen.hullgen import geometry_helper 
 
 target_file = os.environ.get("TARGET_FILE")
 
@@ -36,8 +32,6 @@ def create_auto_save_nodes(targetfile):
     scene = bpy.context.scene
 
     scene.render.use_compositing=True
-
-    #frameIndex=bpy.context.scene.frame_current
 
     # make sure we have node tree
     if scene.node_tree==None:
@@ -87,8 +81,6 @@ def create_auto_save_nodes(targetfile):
 
         scene.node_tree.links.new(render_layer_node.outputs['Image'],denoise_node.inputs["Image"])
 
-
-
 def do_render():
 
     frameIndex=bpy.context.scene.frame_current
@@ -97,10 +89,10 @@ def do_render():
     bpy.context.scene.render.resolution_y=1080
 
     # you can adjust samples and percentage to get higher quality render
-    bpy.context.scene.render.resolution_percentage=40
+    bpy.context.scene.render.resolution_percentage=20
 
     bpy.context.scene.render.engine="CYCLES"
-    bpy.context.scene.cycles.samples=50
+    bpy.context.scene.cycles.samples=10
 
     try:
         render_result = bpy.ops.render.render(animation=False, write_still=False, layer="", scene="")
@@ -111,8 +103,6 @@ def do_render():
     print("Render Result %s"%list(render_result))
 
 backdrop=geometry_helper.make_backdrop()
-mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
-material_helper.assign_material(backdrop,mat)
 
 cam=bpy.data.objects["Camera"]
 

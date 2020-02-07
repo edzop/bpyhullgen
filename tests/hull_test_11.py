@@ -17,15 +17,15 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp   
+  
 from math import radians, degrees
  
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-chine_helper = imp.load_source('chine_helper','chine_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
-geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
-hull_maker = imp.load_source('hull_maker','hull_maker.py')
-window_helper = imp.load_source('window_helper','window_helper.py')
+from bpyhullgen.hullgen import chine_helper
+from bpyhullgen.hullgen import material_helper
+from bpyhullgen.hullgen import curve_helper
+from bpyhullgen.hullgen import hull_maker
+from bpyhullgen.hullgen import geometry_helper
+from bpyhullgen.hullgen import window_helper
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 

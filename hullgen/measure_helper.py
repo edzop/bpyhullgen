@@ -20,8 +20,8 @@ import bpy
 import bmesh
 import csv
 
-from . import material_helper as material_helper
-from . import curve_helper as curve_helper
+from ..hullgen import curve_helper
+from ..hullgen import material_helper
 
 # =======================================================================================
 # This bmesh_copy_from_object function was borrowed from the object_print3d_utils addon.

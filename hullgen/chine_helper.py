@@ -17,13 +17,11 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy 
-import imp
 import math
-
 from math import radians, degrees
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
+from ..hullgen import curve_helper
+from ..hullgen import material_helper
 
 class chine_helper:
     rotation=[0,0,0]

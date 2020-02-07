@@ -35,6 +35,9 @@ bl_info = {
 # register and unregister
 # ------------------------------------------------------------------------
 
+from . import hullgen
+
+
 if "bpy" in locals():
     import importlib
     importlib.reload(ui)
@@ -47,7 +50,6 @@ else:
     from . import (
             ui
             )
-
 
 
 
@@ -74,6 +76,13 @@ classes = (
     ui.CutWindowsOperator,
     ui.AluminumPlatesOperator
 )
+
+from .hullgen import geometry_helper as geometry_helper
+from .hullgen import boat_curve_2 as boat_curve
+from .hullgen import material_helper as material_helper
+from .hullgen import window_helper as window_helper
+from .hullgen import measure_helper as measure_helper
+from .hullgen import curve_helper as curve_helper
 
 def register():
     for cls in classes:

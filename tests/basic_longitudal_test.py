@@ -17,14 +17,11 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-chine_helper = imp.load_source('chine_helper','chine_helper.py')
-material_helper = imp.load_source('material_helper','material_helper.py')
-
-hull_maker = imp.load_source('hull_maker','hull_maker.py')
-bulkhead = imp.load_source('bulkhead','bulkhead.py')
+from bpyhullgen.hullgen import chine_helper
+from bpyhullgen.hullgen import material_helper
+from bpyhullgen.hullgen import curve_helper
+from bpyhullgen.hullgen import hull_maker
 
 the_hull=hull_maker.hull_maker(length=12,width=0.4,height=0.8)
 the_hull.make_hull_object()

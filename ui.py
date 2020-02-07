@@ -18,15 +18,14 @@
 
 # bpy.ops.script.reload()
 
-from . import boat_curve_2 as boat_curve
-from . import material_helper as material_helper
-
-from . import geometry_helper as geometry_helper
-from . import window_helper as window_helper
-from . import measure_helper as measure_helper
-
-
 import bpy
+
+from .hullgen import geometry_helper as geometry_helper
+from .hullgen import boat_curve_2 as boat_curve
+from .hullgen import material_helper as material_helper
+from .hullgen import window_helper as window_helper
+from .hullgen import measure_helper as measure_helper
+from .hullgen import curve_helper as curve_helper
 
 from bpy.props import (StringProperty,
 					BoolProperty,

@@ -17,10 +17,9 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp   
- 
-curve_helper = imp.load_source('util_lux','curve_helper.py')
-geometry_helper = imp.load_source('geometry_helper','geometry_helper.py')
+   
+from bpyhullgen.hullgen import curve_helper
+from bpyhullgen.hullgen import geometry_helper
 
 theCurveHelper = curve_helper.Curve_Helper()
 theCurveHelper.curve_twist[0]=12

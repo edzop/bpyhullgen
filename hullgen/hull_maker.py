@@ -17,18 +17,14 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy 
-import imp
 import math
-
 from math import radians, degrees
 
-#from . import curve_helper as curve_helper
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-chine_helper = imp.load_source('chine_helper','chine_helper.py')
-
-material_helper = imp.load_source('material_helper','material_helper.py')
-bulkhead = imp.load_source('bulkhead','bulkhead.py')
-
+from ..hullgen import curve_helper
+from ..hullgen import material_helper
+from ..hullgen import curve_helper
+from ..hullgen import chine_helper
+from ..hullgen import bulkhead
 
 class hull_maker:
     hull_length=11.4

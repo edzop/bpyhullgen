@@ -17,14 +17,12 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-
 import math
 from math import radians
 
-from . import material_helper as material_helper
-from . import geometry_helper as geometry_helper
-from . import curve_helper as curve_helper
-
+from ..hullgen import geometry_helper
+from ..hullgen import material_helper
+from ..hullgen import curve_helper
 
 def calc_arc_point_ellipse(centerpoint,angle,distance):
 	x= (distance[0]/2) * math.sin(math.radians(angle))
@@ -156,9 +154,3 @@ def cut_windows():
 				bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
 				window_object.select_set(False)
 				window_object.scale=(0.999,0.999,0.999)
-
-
-
-				#curve_helper.hide_object(window_object)
-
-

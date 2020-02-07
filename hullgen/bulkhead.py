@@ -17,11 +17,8 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import imp
 
-curve_helper = imp.load_source('curve_helper','curve_helper.py')
-#from . import curve_helper as curve_helper
-
+from ..hullgen import curve_helper
 
 class bulkhead:
     station=0

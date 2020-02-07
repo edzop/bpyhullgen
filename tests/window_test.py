@@ -1,7 +1,5 @@
 
-import imp
-
-window_helper = imp.load_source('window_helper','window_helper.py')
+from bpyhullgen.hullgen import window_helper
 
 window_helper.make_window(centerpoint=(-5,-3,0),diameter=2)
 window_helper.make_window(centerpoint=(4,-3,0),diameter=1)
