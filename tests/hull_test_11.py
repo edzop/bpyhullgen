@@ -21,7 +21,6 @@ import bpy
 from math import radians, degrees
  
 from bpyhullgen.hullgen import chine_helper
-from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
@@ -30,8 +29,6 @@ from bpyhullgen.hullgen import window_helper
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
 the_hull.make_hull_object()
-
-#curve_helper.select_object(the_hull.hull_object,False)
 
 new_chine=chine_helper.chine_helper(the_hull)
 
@@ -74,9 +71,9 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.asymmetry[1]=0
 new_chine.make_chine()
 
-#window_helper.make_window_on_chine(new_chine,0.5,0.32)
-#window_helper.make_window_on_chine(new_chine,1.5,0.32)
-#window_helper.make_window_on_chine(new_chine,-1.5,0.32)
+window_helper.make_window_on_chine(new_chine,0.5,0.32)
+window_helper.make_window_on_chine(new_chine,1.5,0.32)
+window_helper.make_window_on_chine(new_chine,-1.5,0.32)
 
 new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0,0.2]
@@ -167,7 +164,7 @@ def add_pilot_house():
 
 	curve_helper.hide_object(ob)
 
-
+add_pilot_house()
 
 def add_extras():
 	# ================ Add Rudder
@@ -222,7 +219,7 @@ def offline():
 
 # =======================================================
 
-#add_extras()
+add_extras()
 
 def add_props():
 
@@ -239,7 +236,7 @@ def add_props():
 	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-0.97),view_collection_props,rotation=(0,93,0))
 
 
-#add_props()
+add_props()
 
 clean_distance=0.5
 x_locations=[	-the_hull.hull_length/2+clean_distance,
