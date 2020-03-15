@@ -84,8 +84,12 @@ class keel:
                         self.the_hull_definition.bool_correction_offset[1]+self.lateral_offset, 
                         self.the_hull_definition.bool_correction_offset[2]+self.top_height))
         
+        # shift down a smidge to compensate for boolean coplanar faces bug
+        # maybe this bug will be fixed with blender > 2.83 bool rewrite
+        bool_coplanar_edge_fix=0.01
+
         bpy.ops.transform.resize(value=(self.the_hull_definition.hull_length, 
-                                self.thickness/2, 
+                                self.thickness/2+bool_coplanar_edge_fix, 
                                 self.the_hull_definition.hull_height/2))
 
         bpy.ops.transform.translate(value=(0,0,-self.the_hull_definition.hull_height/2-(self.slicer_cut_height)))
@@ -95,12 +99,11 @@ class keel:
         self.keel_slicer_object=bpy.context.view_layer.objects.active
         self.keel_slicer_object.name="Keel_Slicer.s%0.2f"%(self.lateral_offset)
         self.keel_slicer_object.display_type="WIRE"
+        self.keel_slicer_object.hide_render = True
 
         curve_helper.select_object(self.keel_slicer_object,True)
         curve_helper.move_object_to_collection(self.keel_slicer_collection,self.keel_slicer_object)
 
-
-        
 
         bool_new = self.keel_slicer_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
         bool_new.object = self.the_hull_definition.hull_object
@@ -110,6 +113,9 @@ class keel:
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier="bool.hull_shape")
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+
+        
+        bpy.ops.transform.translate(value=(0,0,-bool_coplanar_edge_fix))
 
 
 
