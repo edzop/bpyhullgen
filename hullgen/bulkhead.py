@@ -101,7 +101,7 @@ class bulkhead:
         bpy.ops.object.transform_apply(scale=True)
         
         self.bulkhead_object=bpy.context.view_layer.objects.active
-        self.bulkhead_object.name="Bulkhead.s"+str(self.station)
+        self.bulkhead_object.name="Bulkhead.s%0.2f"%(self.station)
 
         curve_helper.select_object(self.bulkhead_object,True)
 
@@ -120,7 +120,7 @@ class bulkhead:
                                             TRANSFORM_OT_translate={"value":(0, 0, 0)})
 
             self.bulkhead_void_object=bpy.context.view_layer.objects.active
-            self.bulkhead_void_object.name="Bulkhead.s"+str(self.station)+"_void"
+            self.bulkhead_void_object.name="Bulkhead.s%0.2f_void"%(self.station)
 
             # get truple of current size
             bulkhead_size=self.bulkhead_void_object.dimensions.xyz
