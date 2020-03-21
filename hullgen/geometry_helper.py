@@ -344,8 +344,36 @@ def check_intersect(the_object,the_other_object):
 		
 	#print(inter)
 
-
 def inside_shrink(amount=0.1):
+
+	context = bpy.context
+
+	ob = context.object
+	me = ob.data
+	bm = bmesh.from_edit_mesh(me)
+
+
+	for f in bm.faces:
+		
+		forwardback=GoingBack(f.normal) or GoingFront(f.normal)
+		print("%s %d"%(f.normal,forwardback))
+		if forwardback==False:
+			bmesh.ops.translate(bm,
+					verts=f.verts,
+					vec=-0.025 * f.normal)
+
+
+	#verts = set(v for f in bm.faces if f.select for v in f.verts)
+	#for v in verts:
+#		norms  = [f.normal for f in v.link_faces if f.select]
+		
+#		n = sum(norms, Vector()) / len(norms)
+#		v.co += -0.1 * n
+
+	bmesh.update_edit_mesh(me)
+
+
+def inside_shrink_OLD(amount=0.1):
 	bpy.ops.object.mode_set(mode='EDIT')
 	bpy.ops.mesh.select_all(action='DESELECT')
 	bpy.ops.mesh.select_mode(type="FACE")
