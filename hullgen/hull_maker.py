@@ -25,6 +25,7 @@ from ..hullgen import material_helper
 from ..hullgen import curve_helper
 from ..hullgen import chine_helper
 from ..hullgen import bulkhead
+from ..hullgen import keel
 
 class hull_maker:
     hull_length=11.4
@@ -78,6 +79,10 @@ class hull_maker:
 
         return self.hull_object
 
+    # A list of bulkhead_definitions[ position, height, watertight]
+    # If height == False - do not adjust height 
+    # If height == float - adjust z verts of bulkhead void to constant height (floor)
+
     def make_bulkheads(self,bulkhead_definitions):
         for station_position in bulkhead_definitions:
             bh=bulkhead.bulkhead(self,station_position[0])
@@ -130,6 +135,17 @@ class hull_maker:
                 modifier=lg.modifiers.new(name="bool_bh", type='BOOLEAN')
                 modifier.object=bh.bulkhead_object
                 modifier.operation="DIFFERENCE"
+
+    def integrate_keel(self,keel):
+        for bh in self.bulkheadlist:
+            modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
+            modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+            modifier.object=keel.keel_slicer_object
+            modifier.operation="DIFFERENCE"
+            modifier.double_threshold=0
+
+            curve_helper.select_object(keel.keel_object,True)
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
 
 

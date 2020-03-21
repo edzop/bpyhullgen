@@ -19,7 +19,7 @@
 
 
 bl_info = {
-    "name": "BoatCurve",
+    "name": "bpyhullgen",
     "description": "Parametric BoatCurve",
     "author": "Ed Kraus",
     "version": (0, 0, 3),
