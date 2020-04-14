@@ -162,19 +162,18 @@ class Curve_Helper:
 		half_length=self.curve_length/2
 		angle=radians(self.curve_angle)
 
-		x=handle_width*math.cos(angle)
-		y=handle_width*math.sin(angle)
+
 
 		# Curve handle = point, handle_left of point, handle right of point
 
 		# Left handle
 		asymetric_width=-(self.asymmetry[0]*self.curve_width)
-		print("%f - %f - %f "%(self.asymmetry[0],asymetric_width,self.curve_width))
-
+		x=handle_width*math.cos(radians(self.curve_angle*(1-self.asymmetry[0])))
+		y=handle_width*math.sin(radians(self.curve_angle*(1-self.asymmetry[0])))
 
 		self.coordinates.append([	(-half_length, asymetric_width, 0), 	
-									(-half_length-handle_width, asymetric_width, 0),	
-									(-half_length+handle_width, asymetric_width, 0)
+									(-half_length-x, asymetric_width+y, 0),	
+									(-half_length+x, asymetric_width-y, 0)
 								])
 
 		# Center handle
@@ -186,19 +185,15 @@ class Curve_Helper:
 
 
 		asymetric_width=-(self.asymmetry[1]*self.curve_width)
-		print("%f - %f - %f"%(self.asymmetry[1],asymetric_width,self.curve_width))
+		x=handle_width*math.cos(radians(self.curve_angle*(1-self.asymmetry[1])))
+		y=handle_width*math.sin(radians(self.curve_angle*(1-self.asymmetry[1])))
 
 		# Right handle
 		self.coordinates.append([	
 									(half_length, asymetric_width, 0),  
-									(half_length-handle_width, asymetric_width, 0),
-									(half_length+handle_width, asymetric_width, 0)
+									(half_length-x, asymetric_width-y, 0),
+									(half_length+x, asymetric_width+y, 0)
 								])
-
-		print(" ")
-
-
-		#print(self.coordinates)
 
 	# generates the basic curve
 	def generate_curve(self,curvename):
