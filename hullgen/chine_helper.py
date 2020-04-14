@@ -431,11 +431,8 @@ class chine_helper:
                                 self.rotation[2],
                                 ]
 
-            # TODO - remove this when new versions of bools comes out
-            overlapping_bool_offset_hack=0.0003
-
             theCurveHelper.rotate_curve(rotation_opposite,flip_z=False)
-            bpy.ops.transform.translate(value=(self.offset[0]+overlapping_bool_offset_hack, -self.offset[1], self.offset[2]))
+            bpy.ops.transform.translate(value=(self.offset[0], -self.offset[1], self.offset[2]))
             theCurveHelper.deselect_curve()
             theCurveHelper.add_boolean(self.the_hull.hull_object)
             
