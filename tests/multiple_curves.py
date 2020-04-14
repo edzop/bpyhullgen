@@ -6,7 +6,7 @@ from bpyhullgen.hullgen import geometry_helper
 text_offset=(-5,-2.44,0)
 
 theCurveHelper = curve_helper.Curve_Helper()
-theCurveHelper.define_curve(11,1.2)
+theCurveHelper.define_curve(11,1)
 
 theCurveHelper.generate_curve("bb")
 theCurveHelper.extrude_curve(1)
@@ -22,7 +22,7 @@ theCurveHelper = curve_helper.Curve_Helper()
 theCurveHelper.curve_twist[0]=12
 theCurveHelper.curve_twist[1]=6
 
-theCurveHelper.define_curve(11,1.2)
+theCurveHelper.define_curve(11,1)
 
 theCurveHelper.generate_curve("mm")
 theCurveHelper.extrude_curve(1)
@@ -38,7 +38,7 @@ newtxt.location=text_offset
 # =========================================
 theCurveHelper = curve_helper.Curve_Helper()
 theCurveHelper.asymmetry[1]=1
-theCurveHelper.define_curve(11,1.2)
+theCurveHelper.define_curve(11,1)
 
 theCurveHelper.generate_curve("nn")
 theCurveHelper.extrude_curve(1)

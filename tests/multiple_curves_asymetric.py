@@ -10,13 +10,13 @@ for a in curve_helper.frange(0,1,0.2):
     # =========================================
     theCurveHelper = curve_helper.Curve_Helper()
     theCurveHelper.asymmetry[1]=a
-    theCurveHelper.define_curve(11,1.2)
+    theCurveHelper.define_curve(11,1)
 
     print(a)
 
     theCurveHelper.generate_curve("nn"+str(a))
     theCurveHelper.extrude_curve(1)
-    theCurveHelper.curve_object.location.y=-3+a*9
+    theCurveHelper.curve_object.location.y=-3+a*10
     
     wireframe = theCurveHelper.curve_object.modifiers.new(type="WIREFRAME", name="wireframe")
     
