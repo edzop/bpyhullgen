@@ -138,14 +138,27 @@ class hull_maker:
 
     def integrate_keel(self,keel):
         for bh in self.bulkheadlist:
+
+            # notch the bulkhead with keel_slicer_object
             modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
             modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
             modifier.object=keel.keel_slicer_object
             modifier.operation="DIFFERENCE"
             modifier.double_threshold=0
 
-            curve_helper.select_object(keel.keel_object,True)
+            curve_helper.select_object(bh.bulkhead_object,True)
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
+
+            # notch the keel with modified bulkhead 
+            modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
+            modifier=keel.keel_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+            modifier.object=bh.bulkhead_object
+            modifier.operation="DIFFERENCE"
+            modifier.double_threshold=0
+
+            curve_helper.select_object(keel.keel_object,True)
+            #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
+
 
 
 

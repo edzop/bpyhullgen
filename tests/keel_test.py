@@ -74,5 +74,10 @@ the_keel = keel.keel(the_hull,lateral_offset=-0.3,top_height=floor_height)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
 
+the_keel = keel.keel(the_hull,lateral_offset=0,top_height=floor_height)
+the_keel.make_keel()
+the_hull.integrate_keel(the_keel)
+
+
 
 the_hull.hull_object.hide_set(True)

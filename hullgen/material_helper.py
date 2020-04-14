@@ -226,7 +226,8 @@ def plates_to_aluminum():
 	list_of_prefix=[ 
 					 "Bulkhead",
 					 "cutterchine",
-					 "hull_object"
+					 "hull_object",
+					 "Keel"
 					]
 
 	for o in bpy.data.objects:
