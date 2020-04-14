@@ -168,22 +168,34 @@ class Curve_Helper:
 		# Curve handle = point, handle_left of point, handle right of point
 
 		# Left handle
-		# TODO - variable assymetry ratio
-		if self.asymmetry[0]==0:
-			self.coordinates.append([(-half_length, 0, 0), (-half_length-x, y, 0),(-half_length+x, -y, 0)])
-		else:
-			self.coordinates.append([(-half_length, -self.curve_width, 0), (-half_length-handle_width, -self.curve_width, 0),(-half_length+handle_width, -self.curve_width, 0)])
+		asymetric_width=-(self.asymmetry[0]*self.curve_width)
+		print("%f - %f - %f "%(self.asymmetry[0],asymetric_width,self.curve_width))
+
+
+		self.coordinates.append([	(-half_length, asymetric_width, 0), 	
+									(-half_length-handle_width, asymetric_width, 0),	
+									(-half_length+handle_width, asymetric_width, 0)
+								])
 
 		# Center handle
-		self.coordinates.append([(0,-self.curve_width, 0),(-handle_width, -self.curve_width, 0),  (handle_width,-self.curve_width, 0)]) 
+		self.coordinates.append([	
+										(0,-self.curve_width, 0),
+										(-handle_width, -self.curve_width, 0),  
+										(handle_width,-self.curve_width, 0)
+								]) 
+
+
+		asymetric_width=-(self.asymmetry[1]*self.curve_width)
+		print("%f - %f - %f"%(self.asymmetry[1],asymetric_width,self.curve_width))
 
 		# Right handle
-		# TODO - variable assymetry ratio
-		if self.asymmetry[1]==0:
-			self.coordinates.append([(half_length, 0, 0),  (half_length-x, -y, 0),(half_length+x, y, 0)])
-		else:
-			self.coordinates.append([(half_length, -self.curve_width, 0),  (half_length-handle_width, -self.curve_width, 0),(half_length+handle_width, -self.curve_width, 0)])
+		self.coordinates.append([	
+									(half_length, asymetric_width, 0),  
+									(half_length-handle_width, asymetric_width, 0),
+									(half_length+handle_width, asymetric_width, 0)
+								])
 
+		print(" ")
 
 
 		#print(self.coordinates)
