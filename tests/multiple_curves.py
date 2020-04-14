@@ -46,6 +46,6 @@ theCurveHelper.curve_object.location.y=3
 
 wireframe = theCurveHelper.curve_object.modifiers.new(type="WIREFRAME", name="wireframe")
  
-newtxt=geometry_helper.add_info_text("assymmetry[1]=1")
+newtxt=geometry_helper.add_info_text("asymmetry[1]=1")
 newtxt.parent=theCurveHelper.curve_object
 newtxt.location=text_offset

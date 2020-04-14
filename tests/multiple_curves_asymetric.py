@@ -20,7 +20,7 @@ for a in curve_helper.frange(0,1,0.2):
     
     wireframe = theCurveHelper.curve_object.modifiers.new(type="WIREFRAME", name="wireframe")
     
-    #newtxt=geometry_helper.add_info_text("assymmetry[1]=1")
+    #newtxt=geometry_helper.add_info_text("asymmetry[1]=1")
     #newtxt.parent=theCurveHelper.curve_object
     #text_offset[1]=a*2
     #newtxt.location=text_offset
