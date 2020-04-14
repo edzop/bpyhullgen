@@ -35,6 +35,8 @@ new_chine.curve_width=1
 new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.35,-0.5]
+new_chine.asymmetry[0]=0.8
+
 new_chine.name="side"
 
 #new_chine.curve_twist=[0,-25,-25]
