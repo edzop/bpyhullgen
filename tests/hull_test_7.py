@@ -23,6 +23,7 @@ from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
+from bpyhullgen.hullgen import keel
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
@@ -183,4 +184,65 @@ ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(0,0,-0.6
 
 import_library_path="assets/boat_assets.blend/Collection/"
 ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0,0,-0.96),view_collection_props,rotation=(0,0,0))
+
+
+
+
+
+levels=[ -0.7]
+thickness=0.05
+
+bulkhead_definitions = [
+
+					#	(5	,False		,False	,thickness),
+					#	(4	,levels[1]	,True	,thickness),
+					#	(3	,levels[1]	,False	,thickness),
+						(-3	,levels[0]	,False	,thickness),
+						(-2	,levels[0]	,False	,thickness),	
+						(-1	,levels[0]	,False	,thickness),
+						
+						(0	,levels[0]	,False	,thickness),
+						(1	,levels[0]	,False	,thickness),
+						(2	,levels[0]	,False	,thickness),
+					#	(-3	,levels[1]	,False	,thickness),						
+					#	(-4	,levels[1]	,True	,thickness)
+
+					#	(-5,False,False)
+]
+
+#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
+
+x_locations=[	
+				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+			]
+
+#the_hull.cleanup_longitudal_ends(x_locations)
+
+the_hull.make_bulkheads(bulkhead_definitions)
+#the_hull.make_longitudal_booleans()
+
+station_start=bulkhead_definitions[0][0]+thickness/2
+station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
+
+print("%d %d"%(station_start,station_end))
+
+keel_middle_space=0.3
+the_keel = keel.keel(the_hull,
+		lateral_offset=keel_middle_space/2,
+		top_height=levels[0],
+		station_start=station_start,
+		station_end=station_end)
+
+the_keel.make_keel(0.1)
+the_hull.integrate_keel(the_keel)	
+
+the_keel = keel.keel(the_hull,
+		lateral_offset=-keel_middle_space/2,
+		top_height=levels[0],
+		station_start=station_start,
+		station_end=station_end)
+
+the_keel.make_keel(0.1)
+the_hull.integrate_keel(the_keel)
 

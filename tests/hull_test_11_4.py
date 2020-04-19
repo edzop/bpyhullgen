@@ -209,7 +209,7 @@ x_locations=[	-the_hull.hull_length/2+clean_distance,
 
 the_hull.cleanup_longitudal_ends(x_locations)
 
-the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4.2,1,1])
+
 
 levels=[ -1.1,-0.5 ]
 
@@ -237,21 +237,23 @@ x_locations=[
 				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
 			]
 
-the_hull.cleanup_longitudal_ends(x_locations)
+#the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
+the_hull.cleanup_center(clean_location=[-1.5,0,0],clean_size=[5-thickness+the_hull.bool_coplaner_hack,1,1])			
 
+the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
+		
+station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
+station_end=bulkhead_definitions[0][0]-thickness/2
 
-			
-#the_hull.hull_object.hide_set(True)
-#the_hull.hull_object.hide_render=True
 keel_middle_space=0.3
-the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0])
+the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)	
 
-the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0])
+the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
 

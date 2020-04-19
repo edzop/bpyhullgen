@@ -60,24 +60,30 @@ floor_height=-0.45
 
 bulkhead_definitions=[]
 
-bulkhead_definitions.append([-1,floor_height,False])
-bulkhead_definitions.append([1,floor_height,False])
+thickness=0.05
+
+bulkhead_definitions.append([-1,floor_height,False,thickness])
+bulkhead_definitions.append([1,floor_height,False,thickness])
+bulkhead_definitions.append([-2,floor_height,False,thickness])
+bulkhead_definitions.append([2,floor_height,False,thickness])
+
+
+station_start=-2-thickness/2-0.1
+station_end=3
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
 
-the_keel = keel.keel(the_hull,lateral_offset=0.3,top_height=floor_height)
+the_keel = keel.keel(the_hull,lateral_offset=0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)	
 
-the_keel = keel.keel(the_hull,lateral_offset=-0.3,top_height=floor_height)
+the_keel = keel.keel(the_hull,lateral_offset=-0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
 
-the_keel = keel.keel(the_hull,lateral_offset=0,top_height=floor_height)
+the_keel = keel.keel(the_hull,lateral_offset=0,top_height=floor_height,station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
-
-
 
 the_hull.hull_object.hide_set(True)
