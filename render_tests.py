@@ -85,14 +85,14 @@ def do_render():
 
     frameIndex=bpy.context.scene.frame_current
 
-    bpy.context.scene.render.resolution_x=1920
-    bpy.context.scene.render.resolution_y=1080
+    bpy.context.scene.render.resolution_x=2560
+    bpy.context.scene.render.resolution_y=1440
 
     # you can adjust samples and percentage to get higher quality render
-    bpy.context.scene.render.resolution_percentage=80
+    bpy.context.scene.render.resolution_percentage=50
 
     bpy.context.scene.render.engine="CYCLES"
-    bpy.context.scene.cycles.samples=70
+    bpy.context.scene.cycles.samples=20
 
     try:
         render_result = bpy.ops.render.render(animation=False, write_still=False, layer="", scene="")
@@ -139,4 +139,12 @@ bpy.context.scene.frame_set(4)
 cam.location.y=-0.1
 cam.location.z=1
 cam.location.x=13
+do_render()
+
+# corner side (back view)
+backdrop.rotation_euler.z=math.radians(98)
+bpy.context.scene.frame_set(5)
+cam.location.y=-10
+cam.location.z=10
+cam.location.x=5
 do_render()
