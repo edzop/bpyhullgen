@@ -195,12 +195,13 @@ def get_material_hull():
 	
 	links.new(node_tex_coord.outputs[0], node_separateXYZ.inputs[0])
 
-	node_color_ramp = nodes.new(type='ShaderNodeValToRGB')
-	node_color_ramp.color_ramp.elements[0].position=0.49
-	node_color_ramp.color_ramp.elements[1].position=0.51
-	node_color_ramp.location = -200,300
 	
-	links.new(node_separateXYZ.outputs[1], node_color_ramp.inputs[0])
+	node_color_math = nodes.new(type='ShaderNodeMath')
+	node_color_math.operation = 'GREATER_THAN'
+	node_color_math.inputs[1].default_value = 0.5
+	node_color_math.location = -200,300
+	
+	links.new(node_separateXYZ.outputs[1], node_color_math.inputs[0])
 	
 
 	node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
@@ -208,7 +209,7 @@ def get_material_hull():
 
 	node_mix = nodes.new(type='ShaderNodeMixShader')
 	node_mix.location=450,200
-	links.new(node_color_ramp.outputs[0], node_mix.inputs[0])
+	links.new(node_color_math.outputs[0], node_mix.inputs[0])
 	
 	links.new(node_transparent.outputs[0], node_mix.inputs[1])
 	links.new(node_principled_bsdf.outputs[0], node_mix.inputs[2])
