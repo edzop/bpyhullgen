@@ -2,4 +2,4 @@ tests/output/*.png
 __pycache__
 *.blend1
 *.ogv
-*.LOG
+*.log
