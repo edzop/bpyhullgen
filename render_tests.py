@@ -141,7 +141,7 @@ cam.location.z=1
 cam.location.x=13
 do_render()
 
-# corner side (back view)
+# corner side (front right)
 backdrop.rotation_euler.z=math.radians(98)
 bpy.context.scene.frame_set(5)
 cam.location.y=-10
