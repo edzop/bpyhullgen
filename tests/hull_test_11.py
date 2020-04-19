@@ -26,6 +26,8 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
 
+from bpyhullgen.hullgen import keel
+
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
 the_hull.make_hull_object()
@@ -115,9 +117,11 @@ ob = bpy.context.active_object
 
 ob.name="deck_cockpit"
 
+tail_cut_angle=-22
+
 bpy.ops.transform.resize(value=(1,1,2))
 bpy.ops.object.transform_apply(scale=True,location=False)
-bpy.ops.transform.rotate(value=radians(-22),orient_axis='Y')
+bpy.ops.transform.rotate(value=radians(tail_cut_angle),orient_axis='Y')
 
 bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
 bool_new.object = ob
@@ -238,36 +242,59 @@ def add_props():
 
 add_props()
 
-clean_distance=0.5
-x_locations=[	-the_hull.hull_length/2+clean_distance,
-				the_hull.hull_length/2-clean_distance]
+#clean_distance=0.5
+#x_locations=[	-the_hull.hull_length/2+clean_distance,
+#				the_hull.hull_length/2-clean_distance]
 
-rotations=[-22,0]
 
-the_hull.cleanup_longitudal_ends(x_locations,rotations)
+
+#the_hull.cleanup_longitudal_ends(x_locations,rotations)
 
 the_hull.cleanup_center(clean_location=[0.5,0,0],clean_size=[2.8,1,1])
 
+# Make bulkheads
 
 levels=[ -0.9,-0.5 ]
+thickness=0.05
 
-bulkhead_definitions = [ 
+bulkhead_definitions = [
+
+						(5	,False		,False	,thickness),
+						(4	,levels[1]	,True	,thickness),
+						(3	,levels[1]	,False	,thickness),
+						(2	,levels[0]	,False	,thickness),
+						(1	,levels[0]	,False	,thickness),
 	
-						(0,levels[0],False),
-						(1,levels[0],False),
-						(-1,levels[0],False),
-						(-2,levels[0],False),
-						(2,levels[0],False),
+						(0	,levels[0]	,False	,thickness),
+						
+						(-1	,levels[0]	,False	,thickness),
+						(-2	,levels[0]	,False	,thickness),						
+						(-3	,levels[1]	,False	,thickness),						
+						(-4	,levels[1]	,True	,thickness)
 
-						(3,levels[1],False),
-						(-3,levels[1],False),
-						(4,levels[1],True),
-						(-4,levels[1],True),
-
-						(5,False,False),
 					#	(-5,False,False)
 ]
+
+x_locations=[	
+				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
+				-the_hull.hull_length/2+0.5
+				#bulkhead_definitions[len(bulkhead_definitions)-1][0]
+			]
+
+rotations=[0,tail_cut_angle]
+the_hull.cleanup_longitudal_ends(x_locations,rotations)
+
 
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
+
+keel_middle_space=0.3
+the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0])
+the_keel.make_keel()
+the_hull.integrate_keel(the_keel)	
+
+the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0])
+the_keel.make_keel()
+the_hull.integrate_keel(the_keel)
+

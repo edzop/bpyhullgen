@@ -24,6 +24,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
+from bpyhullgen.hullgen import keel
 
 the_hull=hull_maker.hull_maker(length=11.4,width=3.9,height=3.6)
 
@@ -62,7 +63,7 @@ new_chine.set_longitudal_curve(0,0)
 new_chine.make_chine()
 
 
-new_chine.longitudal_count=1
+new_chine.longitudal_count=0
 new_chine.rotation=[-79,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
@@ -72,6 +73,7 @@ new_chine.set_longitudal_curve(0.6,10)
 new_chine.longitudal_z_offset=-0.5
 new_chine.make_chine()
 
+new_chine.longitudal_count=1
 new_chine.rotation=[90,0,0]
 new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
@@ -209,28 +211,33 @@ the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4.2,1,1])
 
-levels=[ -0.9,-0.5 ]
+levels=[ -1.1,-0.5 ]
 
-# X station position
-# Vertical height adjust (or FALSE for no vertical height adjustment)
-# Cutout void in middle (False for watertight bulkhead)
+thickness=0.05
 
-bulkhead_definitions = [ 
+bulkhead_definitions = [
+
+						(5,False,False,thickness),
+						(4,levels[1],True,thickness),						
+						(3,levels[1],False,thickness),
+						(2,levels[0],False,thickness), 
+						(1,levels[0],False,thickness),
 	
-						(0,levels[0],False),
-						(1,levels[0],False),
-						(-1,levels[0],False),
-						(-2,levels[0],False),
-						(2,levels[0],False),
-
-						(3,levels[1],False),
-						(-3,levels[1],False),
-						(4,levels[1],True),
-						(-4,levels[1],True),
-
-						(5,False,False),
-						(-5,False,False)
+						(0,levels[0],False,thickness),
+						
+						(-1,levels[0],False,thickness),
+						(-2,levels[0],False,thickness),
+						(-3,levels[1],False,thickness),
+						(-4,levels[1],True,thickness),					
+						(-5,False,False,thickness)
 ]
+
+x_locations=[	
+				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+			]
+
+the_hull.cleanup_longitudal_ends(x_locations)
 
 
 the_hull.make_bulkheads(bulkhead_definitions)
@@ -239,5 +246,13 @@ the_hull.make_longitudal_booleans()
 			
 #the_hull.hull_object.hide_set(True)
 #the_hull.hull_object.hide_render=True
+keel_middle_space=0.3
+the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0])
+the_keel.make_keel()
+the_hull.integrate_keel(the_keel)	
+
+the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0])
+the_keel.make_keel()
+the_hull.integrate_keel(the_keel)
 
 

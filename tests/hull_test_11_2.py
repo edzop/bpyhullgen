@@ -24,6 +24,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
+from bpyhullgen.hullgen import keel
 
 the_hull=hull_maker.hull_maker(length=11.2,width=3.9,height=3.6)
 
@@ -182,12 +183,6 @@ ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4)
 ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))
 
 
-clean_distance=0.33
-x_locations=[	-the_hull.hull_length/2+clean_distance,
-				the_hull.hull_length/2-clean_distance]
-
-the_hull.cleanup_longitudal_ends(x_locations)
-
 
 
 levels=[ -0.9,-0.5 ]
@@ -196,23 +191,33 @@ levels=[ -0.9,-0.5 ]
 # Vertical height adjust (or FALSE for no vertical height adjustment)
 # Cutout void in middle (False for watertight bulkhead)
 
-bulkhead_definitions = [ 
+
+thickness=0.05
+
+bulkhead_definitions = [
+
+						(5,False,False,thickness),
+						(4,levels[1],True,thickness),						
+						(3,levels[1],False,thickness),
+						(2,levels[0],False,thickness), 
+						(1,levels[0],False,thickness),
 	
-						(0,levels[0],False),
-						(1,levels[0],False),
-						(-1,levels[0],False),
-						(-2,levels[0],False),
-						(2,levels[0],False),
-
-						(3,levels[1],False),
-						(-3,levels[1],False),
-						(4,levels[1],True),
-						(-4,levels[1],True),
-
-						(5,False,False),
-						(-5,False,False)
+						(0,levels[0],False,thickness),
+						
+						(-1,levels[0],False,thickness),
+						(-2,levels[0],False,thickness),
+						(-3,levels[1],False,thickness),
+						(-4,levels[1],True,thickness),					
+						(-5,False,False,thickness)
 ]
 
+x_locations=[	
+				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+			]
+
+the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
+
