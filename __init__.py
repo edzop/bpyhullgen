@@ -75,7 +75,8 @@ classes = (
     ui.DeleteNonUpOperator,
     ui.CutWindowsOperator,
     ui.InsideShrinkOperator,
-    ui.AluminumPlatesOperator
+    ui.AluminumPlatesOperator,
+    ui.ShrinkOutlinerOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper

@@ -430,3 +430,22 @@ def inside_shrink_OLD(amount=0.1):
 			orient_matrix_type='NORMAL',
 			constraint_axis=(False, False, True))
 
+
+
+# doesn't seem to work if executed from command line
+def collapse_outliner_hiearchy():
+	context = bpy.context
+	screen = context.screen
+	collection = context.collection
+	#collection = bpy.data.collections["scene"]
+	view_layer = context.view_layer
+
+	outliners = [a for a in screen.areas if a.type == 'OUTLINER']
+	c = context.copy()
+
+	c["collection"] = collection
+	for ol in outliners:
+		c["area"] = ol
+
+		bpy.ops.outliner.show_one_level(c, open=False)
+		ol.tag_redraw()

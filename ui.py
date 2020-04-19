@@ -374,6 +374,17 @@ class InsideShrinkOperator (bpy.types.Operator):
 
 		return {'FINISHED'}
 
+class ShrinkOutlinerOperator (bpy.types.Operator):
+	"""Collapse outliner tree hierarchy"""
+	bl_idname = "wm.shrinkoutliner"
+	bl_label = "OLShrink"
+
+	def execute(self, context):
+
+		geometry_helper.collapse_outliner_hiearchy()
+
+		return {'FINISHED'}
+
 
 # ------------------------------------------------------------------------
 #    operators
@@ -487,6 +498,7 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub.operator( "wm.aluminumplates")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.insideshrink")
+		rowsub.operator( "wm.shrinkoutliner")
 
 		#layout.menu( "OBJECT_MT_select_test", text="Presets", icon="SCENE")
 		
