@@ -28,16 +28,18 @@ class bulkhead:
     bulkhead_void_object=None
     bulkhead_collection=None
     bulkhead_void_collection=None
+    watertight=False
 
-    def __init__(self,the_hull_definition,station_location):
-        self.station=station_location
+    def __init__(self,the_hull_definition,station,watertight=False,thickness=0.05):
+        self.station=station
+        self.thickness=thickness
+        self.watertight=watertight
+
         self.the_hull_definition=the_hull_definition
         self.bulkhead_collection=curve_helper.make_collection("bulkheads",bpy.context.scene.collection.children)
         self.bulkhead_void_collection=curve_helper.make_collection("bulkhead_void",bpy.context.scene.collection.children)
 
         #curve_helper.hide_object(self.bulkhead_void_collection)
-
-    import bpy
 
     def move_verts_z(self,ob,new_val):
 
@@ -90,13 +92,13 @@ class bulkhead:
             #print("vert modified: %s"%vert)
         
 
-    def make_bulkhead(self,watertight):
+    def make_bulkhead(self):
         bpy.ops.mesh.primitive_cube_add(size=2.0, 
             enter_editmode=False, 
             location=(  self.the_hull_definition.bool_correction_offset[0]+self.station, 
                         self.the_hull_definition.bool_correction_offset[1], 
                         self.the_hull_definition.bool_correction_offset[2]))
-        
+
         bpy.ops.transform.resize(value=(self.thickness/2, self.the_hull_definition.hull_width, self.the_hull_definition.hull_height))
         bpy.ops.object.transform_apply(scale=True)
         
@@ -114,7 +116,7 @@ class bulkhead:
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
-        if watertight==False:
+        if self.watertight==False:
 
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
                                             TRANSFORM_OT_translate={"value":(0, 0, 0)})

@@ -37,6 +37,8 @@ class hull_maker:
     longitudal_list=None
     longitudal_slicer_list=None
 
+    bool_coplaner_hack=0.001
+
     bulkheadlist=[]
 
     #bool_correction_offset=[ 0.0011, 0.0012, 0.0013 ]
@@ -83,17 +85,25 @@ class hull_maker:
     # If height == False - do not adjust height 
     # If height == float - adjust z verts of bulkhead void to constant height (floor)
 
+
+    # (0	,levels[0]	,False	,thickness),
+
     def make_bulkheads(self,bulkhead_definitions):
-        for station_position in bulkhead_definitions:
-            bh=bulkhead.bulkhead(self,station_position[0])
-            bh.make_bulkhead(station_position[2])
+
+        for bulkhead_definition in bulkhead_definitions:
+
+            bh=bulkhead.bulkhead(self,
+                                station=bulkhead_definition[0],
+                                watertight=bulkhead_definition[2],
+                                thickness=bulkhead_definition[3])
+            bh.make_bulkhead()
 
             # If it's not watertight - there is a void in middle
-            if station_position[2]==False:
+            if bulkhead_definition[2]==False:
                 material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
                 
-                if station_position[1]!=False:
-                    bh.move_verts_z(bh.bulkhead_void_object,station_position[1])
+                if bulkhead_definition[1]!=False:
+                    bh.move_verts_z(bh.bulkhead_void_object,bulkhead_definition[1])
 
             self.bulkheadlist.append(bh)
 
@@ -114,8 +124,6 @@ class hull_maker:
             bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.mesh.normals_make_consistent(inside=False)
             bpy.ops.object.mode_set(mode='OBJECT')
-
-
 
     def make_longitudal_booleans(self):
         for lg in self.longitudal_slicer_list:
@@ -159,9 +167,12 @@ class hull_maker:
             curve_helper.select_object(keel.keel_object,True)
             #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
+            material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
 
 
 
+    # Cleans up longitudal framing in center of hull for access to entrance / pilothouse 
+    # so longitudal frames don't block entrance
     def cleanup_center(self,clean_location,clean_size):
 
         view_collection_cleaner=curve_helper.make_collection("cleaner",bpy.context.scene.collection.children)
@@ -180,7 +191,9 @@ class hull_maker:
             modifier.double_threshold=0
             curve_helper.hide_object(object_end_clean)
 
-
+    # Trims the ends of the longitudal framing where it extends past last bulkhead
+    # x_locations is a list of stations where they will be chopped
+    # rotations is a corresponding list of rotations in the Y axis. Bulkheads are assumed to be not rotated on X an Z axises. 
     def cleanup_longitudal_ends(self,x_locations,rotations=None):
 
         view_collection_cleaner=curve_helper.make_collection("cleaner",bpy.context.scene.collection.children)
