@@ -155,7 +155,7 @@ class hull_maker:
             modifier.double_threshold=0
 
             curve_helper.select_object(bh.bulkhead_object,True)
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
+            #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
             # notch the keel with modified bulkhead 
             modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
