@@ -49,42 +49,14 @@ from bpy.types import (Panel,
 
 class MyProperties (PropertyGroup):
 
-	my_bool : BoolProperty(
-		name="Enable or Disable",
-		description="A bool property",
-		default = False
-		)
-
-	my_int : IntProperty(
-		name = "Int Value",
-		description="A integer property",
-		default = 23,
-		min = 10,
-		max = 100
-		)
-
-	my_float : FloatProperty(
-		name = "Float Value",
-		description = "A float property",
-		default = 23.7,
+	hull_weight : FloatProperty(
+		name = "HullWeight",
+		description = "Gross Weight of Hull (KG)",
+		default = 250,
 		min = 0.01,
-		max = 30.0
+		max = 50000.0
 		)
 
-	my_float_vector : FloatVectorProperty(
-		name = "Float Vector Value",
-		description="Something",
-		default=(0.0, 0.0, 0.0), 
-		min= 0.0, # float
-		max = 0.1
-	) 
-
-	my_string : StringProperty(
-		name="User Input",
-		description=":",
-		default="",
-		maxlen=1024,
-		)
 
 	my_enum : EnumProperty(
 		name="Dropdown:",
@@ -94,8 +66,6 @@ class MyProperties (PropertyGroup):
 				('OP3', "Option 3", ""),
 			   ]
 		)
-
-
 
 
 # ------------------------------------------------------------------------
@@ -340,6 +310,25 @@ class CalculateCGOperator (bpy.types.Operator):
 
 		return {'FINISHED'}
 
+
+
+class SubmergeOperator (bpy.types.Operator):
+	"""Float boat according to CG"""
+	bl_idname = "wm.submerge"
+	bl_label = "Submerge"
+
+	def execute(self, context):
+
+		mytool = context.scene.my_tool
+
+		print("Weight:", mytool.hull_weight)
+
+		hull_object=bpy.context.active_object
+		
+		measure_helper.submerge_boat(hull_object,mytool.hull_weight)
+
+		return {'FINISHED'}
+
 class ImportPlatesOperator (bpy.types.Operator):
 	"""Import plate geometry from SVG file"""
 	bl_idname = "wm.importplates"
@@ -386,27 +375,7 @@ class ShrinkOutlinerOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
-# ------------------------------------------------------------------------
-#    operators
-# ------------------------------------------------------------------------
 
-class HelloWorldOperator (bpy.types.Operator):
-	bl_idname = "wm.hello_world"
-	bl_label = "Print Values Operator"
-
-	def execute(self, context):
-		scene = context.scene
-		mytool = scene.my_tool
-
-		# print the values to the console
-		print("Hello World")
-		print("bool state:", mytool.my_bool)
-		print("int value:", mytool.my_int)
-		print("float value:", mytool.my_float)
-		print("string value:", mytool.my_string)
-		print("enum state:", mytool.my_enum)
-
-		return {'FINISHED'}
 
 # ------------------------------------------------------------------------
 #    menus
@@ -453,6 +422,9 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_volume")
 		rowsub.operator( "wm.calculate_cg")
+		rowsub = layout.row(align=True)
+		layout.prop( mytool, "hull_weight")
+		rowsub.operator( "wm.submerge")
 
 		row = layout.row()
 		row.label(text="Output:")
@@ -466,16 +438,6 @@ class OBJECT_PT_my_panel (Panel):
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.importplates")
-
-		#layout.prop( mytool, "my_bool")
-		#layout.prop( mytool, "my_enum", text="") 
-		#layout.prop( mytool, "my_int")
-		#layout.prop( mytool, "my_float")
-		#layout.prop( mytool, "my_float_vector", text="")
-		#layout.prop( mytool, "my_string")
-
-
-		#layout.operator( "wm.hello_world")
 
 		row = layout.row()
 		row.label(text="Scene:")

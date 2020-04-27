@@ -57,7 +57,6 @@ classes = (
     ui.MyProperties,
     ui.CalculateCGOperator,
     ui.OBJECT_PT_my_panel,
-    ui.HelloWorldOperator,
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
     ui.GenSceneOperator,
@@ -76,7 +75,8 @@ classes = (
     ui.CutWindowsOperator,
     ui.InsideShrinkOperator,
     ui.AluminumPlatesOperator,
-    ui.ShrinkOutlinerOperator
+    ui.ShrinkOutlinerOperator,
+    ui.SubmergeOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper
