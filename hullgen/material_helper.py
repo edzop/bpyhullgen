@@ -52,6 +52,7 @@ def make_glass_material(name,color):
 	nodeGlossy = nodes.new(type='ShaderNodeBsdfGlossy')
 	nodeGlossy.location=-200,100
 	nodeGlossy.inputs[1].default_value=0
+	nodeGlossy.inputs[0].default_value=color
 	
 	node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
 	node_transparent.location = -200,-100
