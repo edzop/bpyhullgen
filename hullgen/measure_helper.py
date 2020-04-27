@@ -19,9 +19,19 @@
 import bpy
 import bmesh
 import csv
+from math import radians, degrees
+from bpy.props import *
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
+
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
+
+
+weight_custom_prop_name="hull_weight"
+bouyancy_text_object=None
+bouyancy_text_object_name="bouyancy_text"
+CG_object_name="CG"
 
 # =======================================================================================
 # This bmesh_copy_from_object function was borrowed from the object_print3d_utils addon.
@@ -96,10 +106,175 @@ def measure_selected_faces_area(obj,SelectAll=False):
 
 	return face_data
 
+
+def make_water_volume():
+
+
+	# Water volume
+	water_object_name="water_volume"
+
+	curve_helper.find_and_remove_object_by_name(water_object_name)
+
+	depth=5
+	width=5
+	length=15
+
+	bpy.ops.mesh.primitive_cube_add(size=1, 
+		enter_editmode=False, 
+		location=(0,0,-depth/2))
+
+	water_volume=bpy.context.view_layer.objects.active
+
+	bpy.ops.transform.resize(value=(length,width,depth))
+
+	bpy.ops.object.transform_apply(scale=True,location=False)
+
+	water_volume.name=water_object_name
+	water_volume.display_type="WIRE"
+
+	water_material=material_helper.make_glass_material("water",(0,0,0.8,0))
+
+	material_helper.assign_material(water_volume,water_material)
+
+	# Displacement area
+	water_displaced_name="water_displaced"
+
+	curve_helper.find_and_remove_object_by_name(water_displaced_name)
+
+	displace_depth=depth-0.5
+	displace_width=width-0.5
+	displace_length=length=length-0.5
+
+	bpy.ops.mesh.primitive_cube_add(size=1, 
+		enter_editmode=False, 
+		location=(0,0,-displace_depth/2))
+
+	water_displaced_volume=bpy.context.view_layer.objects.active
+
+	bpy.ops.transform.resize(value=(displace_length,displace_width,displace_depth))
+
+	bpy.ops.object.transform_apply(scale=True,location=False)
+
+	water_displaced_volume.name=water_displaced_name
+	water_displaced_volume.display_type="WIRE"
+
+	water_displaced_material=material_helper.make_glass_material("water",(1,0,0.8,0))
+
+	material_helper.assign_material(water_displaced_volume,water_displaced_material)
+
+	return (water_volume,water_displaced_volume)
+
+
+def frame_change_handler(scene):
+	current_frame=bpy.context.scene.frame_current
+	
+	weight=0
+
+	if CG_object_name in bpy.data.objects:
+		CG_object=bpy.data.objects[CG_object_name]
+		if "displacement_data" in CG_object:
+			displacement_data=CG_object["displacement_data"]
+
+			if current_frame > 0:
+				if current_frame-1 < len(displacement_data):	
+					weight=displacement_data[current_frame-1]
+				else:
+					# if you scroll past last frame - use last weight (heaviest)
+					weight=displacement_data[len(displacement_data)-1]
+
+	if bouyancy_text_object_name in bpy.data.objects:
+		bouyancy_text_object=bpy.data.objects[bouyancy_text_object_name]
+
+	bouyancy_text_object.data.body="Weight: %0.02fkg"%(weight)
+	
+def register_text_update_callback():
+	if frame_change_handler not in bpy.app.handlers.render_complete:
+		bpy.app.handlers.frame_change_post.append(frame_change_handler)
+
+#def unregister():
+#    bpy.app.handlers.frame_change_post.remove(my_handler)
+
+# Submerge until is a cutoff - solve until this number
+# hull should float before this number but just in case this prevents endless solving
+def submerge_boat(hull_object,weight,submerge_until=-3):
+
+	bpy.context.scene.frame_set(1)
+
+	register_text_update_callback()
+
+	if bouyancy_text_object_name in bpy.data.objects:
+		bouyancy_text_object=bpy.context.scene.objects[bouyancy_text_object_name]
+	else:
+		bpy.ops.object.text_add(enter_editmode=False, location=(0, 0, hull_object.dimensions[2]+1))
+		bouyancy_text_object=bpy.context.view_layer.objects.active
+		bouyancy_text_object.name=bouyancy_text_object_name
+		bpy.ops.transform.rotate(value=radians(-90),orient_axis='X')
+		bouyancy_text_object.data.extrude = 0.05
+
+	cg_empty=calculate_cg([hull_object])
+	displacement_data=[]
+
+	continueSolving=True
+
+	hull_weight=weight
+
+	frames_solved=0
+
+	# start hull off above water
+	hull_object.location.z=hull_object.dimensions[2]
+
+	while continueSolving==True:
+
+		water_volumes=make_water_volume()
+
+		water_displaced_volume=water_volumes[1]
+		water_volume=water_volumes[0]
+
+		displacement_modifier_name="water_displaced"
+		bool_water_displaced = water_displaced_volume.modifiers.new(type="BOOLEAN", name=displacement_modifier_name)
+		bool_water_displaced.object = hull_object
+		bool_water_displaced.operation = 'INTERSECT'
+		curve_helper.select_object(water_displaced_volume,True)
+		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=displacement_modifier_name)
+		bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
+
+		current_frame=bpy.context.scene.frame_current
+		frames_solved+=1
+
+		displaced_volume=measure_object_volume(water_displaced_volume)
+
+		# displaced water 1 cubic meter =1000kg
+		displaced_weight=displaced_volume*1000
+
+		hull_object.keyframe_insert(data_path="location", frame=current_frame) #, index=0)
+		bpy.context.scene.frame_set(current_frame+1)
+
+		# Abort if hull more than 3m under water... something went wrong
+		if hull_object.location.z<submerge_until:
+			continueSolving=False
+
+		print("submerge frame: %d HullZ: %0.03f displaced_weight/hull: %0.3f/%0.3f BouyancyZ: %0.03f"%(
+			frames_solved,
+			hull_object.location.z,
+			displaced_weight,
+			hull_weight,
+			water_displaced_volume.location.z
+			))
+
+		displacement_data.append(displaced_weight)
+
+		if displaced_weight<hull_weight:
+			hull_object.location.z-=0.01
+		else:
+			continueSolving=False
+
+	cg_empty["displacement_data"]=displacement_data
+
+	# mark end of submersion animation
+	bpy.context.scene.frame_end=bpy.context.scene.frame_current
+
 # returns empty object representing center of gravity location
 def calculate_cg(influence_objects):
-
-	CG_object_name="CG"
 
 	curve_helper.find_and_remove_object_by_name(CG_object_name)
 
@@ -130,6 +305,8 @@ def calculate_cg(influence_objects):
 		# expressed as KG per m3
 		material_weight=2653
 
+		# hdpe 970 KG per m3
+
 		# hard coded 3mm for now
 		material_thickness=0.003
 
@@ -155,6 +332,7 @@ def calculate_cg(influence_objects):
 		cg_pos[2]=total_moment[2]/total_weight
 
 		print("Total weight: %d KG CG: %f %f %f"%(total_weight,cg_pos[0],cg_pos[1],cg_pos[2]))
+		
 		cg_empty.location[0]=cg_pos[0]
 		cg_empty.location[1]=cg_pos[1]
 		cg_empty.location[2]=cg_pos[2]
@@ -162,12 +340,11 @@ def calculate_cg(influence_objects):
 		# prevent divide by zero
 		print("Something went wrong... no total weight calculated")
 
+	# TODO - add UI for custom property so weight can be changed
+	cg_empty[weight_custom_prop_name]=total_weight
+	
 	return cg_empty
 	
-
-
-
-
 
 def import_plates(filename):
 
@@ -198,8 +375,6 @@ def import_plates(filename):
 		bpy.ops.mesh.select_all(action='DESELECT')
 		bpy.ops.object.mode_set(mode='OBJECT')
 
-		
-		print("SS:"+obj.name)
 		obj.data.edges[0].select=True
 		bpy.ops.object.mode_set(mode='EDIT')
 		#bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
