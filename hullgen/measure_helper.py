@@ -27,8 +27,6 @@ from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
 
-
-weight_custom_prop_name="hull_weight"
 bouyancy_text_object=None
 bouyancy_text_object_name="bouyancy_text"
 CG_object_name="CG"
@@ -323,6 +321,8 @@ def calculate_cg(influence_objects):
 		total_moment[1]=total_moment[1]+object_moment[1]
 		total_moment[2]=total_moment[2]+object_moment[2]
 
+		assign_weight(obj,object_weight)
+
 
 
 	if total_weight>0:
@@ -332,6 +332,7 @@ def calculate_cg(influence_objects):
 		cg_pos[2]=total_moment[2]/total_weight
 
 		print("Total weight: %d KG CG: %f %f %f"%(total_weight,cg_pos[0],cg_pos[1],cg_pos[2]))
+
 		
 		cg_empty.location[0]=cg_pos[0]
 		cg_empty.location[1]=cg_pos[1]
@@ -340,8 +341,7 @@ def calculate_cg(influence_objects):
 		# prevent divide by zero
 		print("Something went wrong... no total weight calculated")
 
-	# TODO - add UI for custom property so weight can be changed
-	cg_empty[weight_custom_prop_name]=total_weight
+	assign_weight(cg_empty,total_weight)
 	
 	return cg_empty
 	
@@ -502,6 +502,26 @@ def exportCSV():
 		csv_row = ["wood","400","KG per M3"]
 		csvWriter.writerow(csv_row)
 
+
+def assign_weight(obj,weight):
+
+	rna_ui = obj.get('_RNA_UI')
+	if rna_ui is None:
+		rna_ui = obj['_RNA_UI'] = {}
+
+	rna_ui = obj.get('_RNA_UI')
+
+	# property attributes.for UI 
+	rna_ui["weight"] = {"description":"Multiplier for Scale",
+					"default": 1.0,
+					"min":0.0,
+					"max":10.0,
+					"soft_min":0.0,
+					"soft_max":10.0,
+					"is_overridable_library":False
+					}
+
+	obj["weight"]=weight
 
 
 
