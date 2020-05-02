@@ -246,3 +246,47 @@ the_keel = keel.keel(the_hull,
 the_keel.make_keel(0.1)
 the_hull.integrate_keel(the_keel)
 
+
+fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
+				x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
+				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+				name="fuel_1L")
+
+fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
+				x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
+				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+				name="fuel_1R")
+
+
+fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
+				x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
+				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+				name="fuel_2L")
+
+fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
+				x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
+				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+				name="fuel_2R")				
+
+
+fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
+				x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
+				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+				name="fuel_3L")
+
+fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+				top=levels[0],
+				x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
+				x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
+				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+				name="fuel_3R")								
