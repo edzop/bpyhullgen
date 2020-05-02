@@ -29,3 +29,7 @@ delete edges (selected)
 export as DXF
 
 /home/blender/scripts/addons/boat/render_tests.sh
+
+# Method I use to call blender for debugging so I can see code window simultaneously
+
+blender -p 10 200 1900 1200 -P tests/filename
