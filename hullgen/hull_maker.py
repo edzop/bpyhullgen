@@ -120,6 +120,8 @@ class hull_maker:
 
             curve_helper.select_object(bh.bulkhead_object,True)
 
+            bh.bulkhead_object.parent=self.hull_object
+
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.mesh.normals_make_consistent(inside=False)
@@ -167,7 +169,9 @@ class hull_maker:
             curve_helper.select_object(keel.keel_object,True)
             #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
-            material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
+        material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
+
+        keel.keel_object.parent=self.hull_object
 
 
 
