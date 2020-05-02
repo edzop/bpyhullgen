@@ -151,6 +151,14 @@ def get_material_bool():
 
 	return make_subsurf_material(material_name,[1,0.3,0.3,1])
 
+def get_material_fueltank(): 
+	material_name="fueltank"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_subsurf_material(material_name,[0.6,0.6,0,1])	
+
 
 def disable_cutaway(mat):
 	#mat=bpy.data.materials["hull"]
