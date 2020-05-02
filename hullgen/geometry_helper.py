@@ -25,6 +25,7 @@ from mathutils.bvhtree import BVHTree
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
+from ..hullgen import measure_helper
 
 def separate_active_by_material():
 	selected_object=bpy.context.view_layer.objects.active
@@ -449,3 +450,64 @@ def collapse_outliner_hiearchy():
 
 		bpy.ops.outliner.show_one_level(c, open=False)
 		ol.tag_redraw()
+
+
+def create_bilgetank(the_hull,top,x1,x2,y_offset,name):
+
+	length=x2-x1
+	width=the_hull.hull_width/2
+	height=the_hull.hull_height/2
+
+	centerY=0
+
+	if y_offset>0:
+		centerY=y_offset+(width/2)
+	else:
+		centerY=y_offset-(width/2)
+
+	centerX=x1+(length/2)
+	centerZ=top-height/2
+
+	bpy.ops.mesh.primitive_cube_add(size=1, 
+		enter_editmode=False, 
+		location=(centerX, centerY, centerZ) 
+	)
+
+	bilgetank_object=bpy.context.view_layer.objects.active
+	bilgetank_object.name=name
+
+	bpy.ops.transform.resize(value=[length,width,height])
+	bpy.ops.object.transform_apply(scale=True,location=False)
+
+	modifier=bilgetank_object.modifiers.new(name="bilge_hull", type='BOOLEAN')
+	modifier.object=the_hull.hull_object
+	modifier.operation="INTERSECT"
+	modifier.double_threshold=0
+
+	bpy.ops.object.modifier_apply(apply_as='DATA', modifier="bilge_hull")
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_all(action='SELECT')
+	bpy.ops.mesh.normals_make_consistent(inside=False)
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	#volume in m3
+	volume=measure_helper.measure_object_volume(bilgetank_object)
+
+	liters=volume*1000
+
+	# convert liters to gallons
+	gallons=liters*0.264172
+
+	dieselweight=liters*0.832
+
+	# diesel density about 0.832kg/litre
+
+	print("Tank: '%s' Volume: %0.04fm3 Liters: %0.01f Gallons: %0.01f (Diesel %0.01fkg) "%(name,volume,liters,gallons,dieselweight))
+
+	material_helper.assign_material(bilgetank_object,material_helper.get_material_fueltank())
+
+	measure_helper.assign_weight(bilgetank_object,dieselweight)
+
+	bilgetank_object.parent=the_hull.hull_object
+
+	return bilgetank_object
