@@ -5,6 +5,8 @@ from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import bulkhead
+from bpyhullgen.hullgen import render_helper
+
 
 def make_chines(the_hull):
 
@@ -56,7 +58,7 @@ edge_offset=0.18
 bulkhead_definitions=[]
 for station_position in curve_helper.frange(-the_hull.hull_length/2+edge_offset,the_hull.hull_length/2-edge_offset,0.4):
 
-	bulkhead_definitions.append([station_position,-0.9,False])
+	bulkhead_definitions.append([station_position,-0.9,False,0.1])
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
@@ -64,3 +66,12 @@ the_hull.make_longitudal_booleans()
 the_hull.hull_object.hide_set(True)
 #the_hull.hull_object.hide_render=True
 
+framedata=[
+[ 1, [8.927623,-10.659976,-0.208632],[1.458442,-0.166389,-0.166539] ],
+[ 2, [0.460886,-0.961136,14.928463],[0.095418,-0.164318,-0.010775] ],
+[ 3, [10.912931,-1.197941,1.075093],[-0.018434,0.001545,-0.917216] ],
+[ 4, [-9.482988,-7.800827,0.150181],[-1.413847,0.379426,-0.492896] ],
+[ 5, [3.023221,-0.004060,-0.149050],[0.990780,0.029352,-0.437069] ]
+]
+
+render_helper.setup_keyframes(framedata)

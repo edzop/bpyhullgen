@@ -22,6 +22,7 @@ from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
+from bpyhullgen.hullgen import render_helper
 
 the_hull=hull_maker.hull_maker(length=12,width=0.4,height=0.8)
 the_hull.make_hull_object()
@@ -48,3 +49,11 @@ wireframe = new_chine.curve_object_2.modifiers.new(type="WIREFRAME", name="w1")
 wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="w2")
 
 bpy.data.objects.remove(the_hull.hull_object)
+
+framedata=[
+[ 1, [0.000000,-2.867616,18.242138],[0.000000,0.000000,-0.166539] ],
+[ 2, [0.832591,-1.967613,9.744141],[0.000000,0.000000,0.000000] ],
+[ 3, [7.771358,0.000000,2.225859],[-0.018434,0.001545,-0.135337] ]
+]
+
+render_helper.setup_keyframes(framedata)

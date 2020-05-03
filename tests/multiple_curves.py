@@ -2,6 +2,7 @@ import bpy
   
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import geometry_helper
+from bpyhullgen.hullgen import render_helper
 
 text_offset=(-5,-2.44,0)
 
@@ -49,3 +50,10 @@ wireframe = theCurveHelper.curve_object.modifiers.new(type="WIREFRAME", name="wi
 newtxt=geometry_helper.add_info_text("asymmetry[1]=1")
 newtxt.parent=theCurveHelper.curve_object
 newtxt.location=text_offset
+
+framedata=[
+[ 1, [0.000000,-1.362492,23.722034],[0.000000,-1.362492,-0.509545] ],
+[ 2, [19.326504,3.999334,12.807499],[1.342821,-1.737612,0.000000] ]
+]
+
+render_helper.setup_keyframes(framedata)

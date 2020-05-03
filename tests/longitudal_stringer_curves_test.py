@@ -23,6 +23,7 @@ from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
+from bpyhullgen.hullgen import render_helper
 
 the_hull=hull_maker.hull_maker(width=4.7)
 the_hull.make_hull_object()
@@ -70,3 +71,12 @@ for lg in the_hull.longitudal_list:
 
 hull_material = material_helper.get_material_hull()
 material_helper.disable_cutaway(hull_material)
+
+framedata=[
+[ 1, [13.366231,0.000000,2.975308],[1.097236,0.000000,-0.628930] ],
+[ 2, [0.832591,-1.967613,9.744141],[0.000000,0.000000,0.000000] ],
+[ 3, [1.344386,-4.539305,18.487137],[0.095605,-0.101464,-0.945598] ],
+[ 4, [-11.784670,-6.005480,1.519711],[-2.895431,-0.565782,-0.328658] ]
+]
+
+render_helper.setup_keyframes(framedata)

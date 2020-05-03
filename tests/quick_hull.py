@@ -20,6 +20,7 @@ import bpy
 
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
+from bpyhullgen.hullgen import render_helper
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
@@ -54,3 +55,13 @@ def make_chines():
     new_chine.make_chine()
 
 make_chines()
+
+framedata=[
+[ 1, [6.096892,-5.457021,-0.208632],[1.097236,-0.166389,-0.166539] ],
+[ 2, [0.832591,-1.967613,9.744141],[0.000000,0.000000,0.000000] ],
+[ 3, [6.916142,-0.764634,0.672572],[-0.018434,0.001545,-0.917216] ],
+[ 4, [-6.122976,-4.947592,0.150181],[-0.758119,0.379426,-0.492896] ],
+[ 5, [3.023221,-0.004060,-0.149050],[0.990780,0.029352,-0.437069] ]
+]
+
+render_helper.setup_keyframes(framedata)

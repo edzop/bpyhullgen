@@ -19,6 +19,7 @@
 import bpy
    
 from bpyhullgen.hullgen import curve_helper
+from bpyhullgen.hullgen import render_helper
 
 theCurveHelper = curve_helper.Curve_Helper()
 
@@ -41,3 +42,12 @@ for length in curve_helper.frange(1,10,1):
     theCurveHelper.curve_object.location.z=length/30
     wireframe = theCurveHelper.curve_object.modifiers.new(type="SOLIDIFY", name="solid")
     print("Length: %1.2f"%length)
+
+
+framedata=[
+[ 1, [11.138629,1.603968,0.934064],[1.097236,-0.166389,-0.259156] ],
+[ 2, [0.832591,-1.967613,9.744141],[0.000000,0.000000,0.000000] ],
+[ 3, [0.524111,-2.707454,15.600882],[-0.134454,0.020172,0.128049] ]
+]
+
+render_helper.setup_keyframes(framedata)

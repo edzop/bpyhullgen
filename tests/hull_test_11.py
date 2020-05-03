@@ -25,6 +25,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
+from bpyhullgen.hullgen import render_helper
 
 from bpyhullgen.hullgen import keel
 
@@ -301,3 +302,12 @@ the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=lev
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
 
+framedata=[
+[ 1, [3.191784,-14.714936,4.039575],[0.403186,0.026390,-0.141792] ],
+[ 2, [0.578287,-0.787018,14.286550],[0.262983,0.032428,-0.003520] ],
+[ 3, [9.353881,-1.631767,0.840273],[-0.018434,0.001545,-0.668243] ],
+[ 4, [-8.121270,-1.772234,-1.529946],[-2.644429,0.379426,-0.611676] ],
+[ 5, [3.023221,-0.004060,-0.415002],[0.990780,0.029352,-0.437069] ]
+]
+
+render_helper.setup_keyframes(framedata)

@@ -26,6 +26,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import bulkhead
 from bpyhullgen.hullgen import geometry_helper
+from bpyhullgen.hullgen import render_helper
 
 
 the_hull=hull_maker.hull_maker(length=12,width=1,height=0.8)
@@ -62,3 +63,10 @@ bpy.data.objects.remove(the_hull.hull_object)
 
 info_text="Demonstration of two cines with reverse extrude directions"
 geometry_helper.add_info_text(info_text)
+
+framedata=[
+[ 1, [0.000000,-1.362492,27.603287],[0.000000,0.196316,-0.509545] ],
+[ 2, [19.154360,5.335245,12.450815],[1.170676,-0.401701,-0.356683] ]
+]
+
+render_helper.setup_keyframes(framedata)

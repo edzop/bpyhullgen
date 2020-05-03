@@ -24,6 +24,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import keel
+from bpyhullgen.hullgen import render_helper
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
@@ -290,3 +291,14 @@ fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
 				x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
 				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
 				name="fuel_3R")								
+
+
+framedata=[
+[ 1, [2.256688,-9.173357,4.958309],[0.000000,0.000000,0.000000] ],
+[ 2, [0.315304,-0.819446,10.211541],[0.000000,0.000000,0.000000] ],
+[ 3, [7.223459,-0.424494,0.439452],[0.000000,0.000000,-0.409564] ],
+[ 4, [-8.400036,-1.356833,0.990534],[-2.644429,-0.102626,-0.230217] ],
+[ 5, [-3.368380,-0.004060,-0.279753],[0.028123,0.029352,-0.230217] ]
+]
+
+render_helper.setup_keyframes(framedata)
