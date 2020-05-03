@@ -117,6 +117,7 @@ def setup_keyframes(framedata):
                     
     camObject.data.dof.focus_object=camTarget
     camObject.data.dof.use_dof=True
+    camObject.data.dof.aperture_fstop=8.0
             
     highestFrame=1
 
