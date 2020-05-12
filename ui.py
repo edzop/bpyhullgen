@@ -57,15 +57,29 @@ class MyProperties (PropertyGroup):
 		max = 50000.0
 		)
 
+	output_csv : BoolProperty(
+		name="Output CSV",
+		description="Output hydro.csv file containing simulation data",
+		default = True
+    )
 
-	my_enum : EnumProperty(
-		name="Dropdown:",
-		description="Apply Data to attribute.",
-		items=[ ('OP1', "Option 1", ""),
-				('OP2', "Option 2", ""),
-				('OP3', "Option 3", ""),
-			   ]
-		)
+	simulate_depth : BoolProperty(
+		name="Sim Depth",
+		description="Simulate Depth (sinking)",
+		default = True
+    )
+
+	simulate_pitch : BoolProperty(
+		name="Sim Pitch",
+		description="Simulate Pitch (Y Axis)",
+		default = True
+    )
+
+	simulate_roll : BoolProperty(
+		name="Sim Roll",
+		description="Simulate Roll (X Axis)",
+		default = True
+    )
 
 
 # ------------------------------------------------------------------------
@@ -311,6 +325,34 @@ class CalculateCGOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class RollTestOperator (bpy.types.Operator):
+	"""RollTest - Calculate righting moment"""
+	bl_idname = "wm.rolltest"
+	bl_label = "RollTest"
+
+	def execute(self, context):
+
+		mytool = context.scene.my_tool
+
+		hull_object=bpy.context.active_object
+
+		csv_file=None
+
+		if mytool.output_csv==True:
+			csv_file="hydro.csv"
+
+		
+		force_roll_max=80
+			
+		measure_helper.submerge_boat(hull_object,
+			mytool.hull_weight,mytool.simulate_depth,
+			mytool.simulate_pitch,
+			False,
+			force_roll_max,
+			csv_file)
+
+		return {'FINISHED'}
+
 
 class SubmergeOperator (bpy.types.Operator):
 	"""Float boat according to CG"""
@@ -324,8 +366,18 @@ class SubmergeOperator (bpy.types.Operator):
 		print("Weight:", mytool.hull_weight)
 
 		hull_object=bpy.context.active_object
+
+		csv_file=None
+
+		if mytool.output_csv==True:
+			csv_file="hydro.csv"
 		
-		measure_helper.submerge_boat(hull_object,mytool.hull_weight)
+		measure_helper.submerge_boat(hull_object,
+			mytool.hull_weight,mytool.simulate_depth,
+			mytool.simulate_pitch,
+			mytool.simulate_roll,
+			0,
+			csv_file)
 
 		return {'FINISHED'}
 
@@ -376,23 +428,6 @@ class ShrinkOutlinerOperator (bpy.types.Operator):
 
 
 
-
-# ------------------------------------------------------------------------
-#    menus
-# ------------------------------------------------------------------------
-
-class BasicMenu (bpy.types.Menu):
-	bl_idname = "OBJECT_MT_select_test"
-	bl_label = "Select"
-
-	def draw(self, context):
-		layout = self.layout
-
-		# built-in example operators
-		layout.operator("object.select_all", text="Select/Deselect All").action = 'TOGGLE'
-		layout.operator("object.select_all", text="Inverse").action = 'INVERT'
-		layout.operator("object.select_random", text="Random")
-
 # ------------------------------------------------------------------------
 #    my tool in objectmode
 # ------------------------------------------------------------------------
@@ -422,9 +457,19 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_volume")
 		rowsub.operator( "wm.calculate_cg")
+		
+		
+		
+		row = layout.row()
+		row.label(text="Hydrostatics:")
 		rowsub = layout.row(align=True)
 		layout.prop( mytool, "hull_weight")
+		layout.prop( mytool, "output_csv")
+		layout.prop( mytool, "simulate_roll")
+		layout.prop( mytool, "simulate_pitch")
+		layout.prop( mytool, "simulate_depth")
 		rowsub.operator( "wm.submerge")
+		rowsub.operator( "wm.rolltest")
 
 		row = layout.row()
 		row.label(text="Output:")
