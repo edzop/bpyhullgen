@@ -106,6 +106,9 @@ def find_and_remove_object_by_name(objname):
 			bpy.data.objects.remove(obj)
 
 def select_object(theObject,selected):
+
+	bpy.ops.object.select_all(action='DESELECT')
+	
 	if selected==True:
 		bpy.context.view_layer.objects.active = theObject
 		theObject.select_set(state=True)
