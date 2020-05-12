@@ -60,7 +60,6 @@ classes = (
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
     ui.GenSceneOperator,
-    ui.BasicMenu,
     ui.MeasureVolumeOperator,
     ui.MeasureAreaSelectedOperator,
     ui.MeasureAreaAllOperator,
@@ -76,7 +75,8 @@ classes = (
     ui.InsideShrinkOperator,
     ui.AluminumPlatesOperator,
     ui.ShrinkOutlinerOperator,
-    ui.SubmergeOperator
+    ui.SubmergeOperator,
+    ui.RollTestOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper
