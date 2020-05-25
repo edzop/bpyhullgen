@@ -35,7 +35,7 @@ the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
 
-new_chine.longitudal_thickness=0.05
+#new_chine.longitudal_thickness=0.05
 new_chine.longitudal_width=-0.15
 new_chine.curve_width=1.2
 new_chine.curve_length=the_hull.hull_length*1.1
@@ -254,7 +254,8 @@ add_props()
 # Make bulkheads
 
 levels=[ -0.9,-0.5 ]
-thickness=0.05
+#thickness=0.05
+thickness=the_hull.structural_thickness
 
 bulkhead_definitions = [
 
@@ -295,11 +296,11 @@ station_end=bulkhead_definitions[1][0]-thickness/2
 
 keel_middle_space=0.3
 the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel()
+the_keel.make_keel(0.1)
 the_hull.integrate_keel(the_keel)	
 
 the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel()
+the_keel.make_keel(0.1)
 the_hull.integrate_keel(the_keel)
 
 framedata=[
