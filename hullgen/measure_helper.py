@@ -618,17 +618,21 @@ def export_dxf(filename):
 	# For some reason it doens't work if there is no material in slot 0
 	# even when you specify entitycolor from obj.layer 
 
-	default_material=material_helper.make_diffuse_material("export_default",(1,1,1,1))
+	default_material=material_helper.get_material_default()
 
+	# First make 
 	for obj in bpy.data.objects:
 		if obj.type=="MESH":
-			print(obj.name + " slots: %s"%len(obj.material_slots))
+			if len(obj.data.materials)==0:
+				material_helper.assign_material(obj,default_material)
+
 			if obj.data.materials[0]==None:
 				material_helper.assign_material(obj,default_material)
-	
-	bpy.ops.export.dxf(filepath="test.dxf", 
+
+	try:
+		bpy.ops.export.dxf(filepath="bpyhullgen.dxf", 
 		projectionThrough='NO', 
-		onlySelected=False, 
+		onlySelected=True, 
 		apply_modifiers=True, 
 		mesh_as='3DFACEs', 
 		entitylayer_from='obj.data.name', 
@@ -636,6 +640,11 @@ def export_dxf(filename):
 		entityltype_from='CONTINUOUS', 
 		layerName_from='LAYERNAME_DEF', 
 		verbose=True)
+	except Exception as e:
+			print("DXF export failed - check export DXF addon is installed?")
+			return False
+	
+	
 		
 
 
@@ -742,6 +751,67 @@ def assign_weight(obj,weight):
 
 	obj["weight"]=weight
 
+def scale_to_size(scale_to_size):
 
+	distance=get_distance_between_two_selected_points()
+	print("Scale to: %f %f"%(scale_to_size,distance))
+
+	if distance==0:
+		print("Invalid points (Please select 2 points)")
+		return
+
+	scale_factor=1/(distance/scale_to_size)
+
+	print("Distance: %f Scale to: %f Scale factor: %f"%(distance,scale_to_size,scale_factor))
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	for obj in bpy.data.objects:
+
+		if obj.type=="MESH":
+			curve_helper.select_object(obj,True)
+
+			bpy.ops.transform.resize(value=(scale_factor,scale_factor,scale_factor))
+
+
+
+
+# Gets the distance between two selected vertices on selected object
+# Assumes you are in edit mode and have only 2 vertices selected
+def get_distance_between_two_selected_points():
+
+	obj = bpy.context.object
+	
+	selected_vertices=[]
+	
+	if obj==None:
+		print("No Object Selected")
+		return 0
+	
+	# cycle between edit mode and object mode to ensure selections are propogated
+	# from temporary copy
+	bpy.ops.object.mode_set(mode='OBJECT')
+	bpy.ops.object.mode_set(mode='EDIT')
+
+
+	for v in bpy.context.active_object.data.vertices:
+		if v.select:
+			print(str(v.select))
+			co_final =  obj.matrix_world @ v.co
+			print(co_final)
+			selected_vertices.append(co_final)
+			
+	print(len(selected_vertices))
+		
+	if len(selected_vertices)>2:
+		print("Please select only 2 vertices")
+		return 0
+	
+	distance=(selected_vertices[0]-selected_vertices[1]).length
+	
+	print("Distance: %f"%(distance))
+
+	return distance
+		
 
 
