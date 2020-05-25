@@ -46,6 +46,8 @@ class keel:
         self.station_start=station_start
         self.station_end=station_end
 
+        self.thickness=the_hull_definition.structural_thickness
+
         #curve_helper.hide_object(self.bulkhead_void_collection)
 
 

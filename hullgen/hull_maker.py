@@ -39,6 +39,9 @@ class hull_maker:
 
     bool_coplaner_hack=0.001
 
+    # this will be inherited by members
+    structural_thickness=0.06
+
     bulkheadlist=[]
 
     #bool_correction_offset=[ 0.0011, 0.0012, 0.0013 ]
