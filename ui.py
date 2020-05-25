@@ -49,6 +49,22 @@ from bpy.types import (Panel,
 
 class MyProperties (PropertyGroup):
 
+
+	cleanup_options=[ 
+				('auto', 'Auto', ""),
+				('front', 'Front', ""),
+				('left', "Left", ""),
+				('up', "Up", ""),
+				('down', "Down", "")
+			   ]
+
+	cleanup_choice: EnumProperty(
+		items=cleanup_options,
+		description="Cleanup....",
+		name="cleanup",
+		default="auto"
+	)
+
 	hull_weight : FloatProperty(
 		name = "HullWeight",
 		description = "Gross Weight of Hull (KG)",
@@ -283,48 +299,35 @@ class ExportHulldxfOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
-
-class DeleteNonFrontalOperator (bpy.types.Operator):
-	"""Delete non frontal faces"""
-	bl_idname = "wm.delete_non_frontal"
-	bl_label = "DeleteNonFront"
-
-	def execute(self, context):
-
-		for obj in bpy.context.selected_objects:
-			if obj.type=="MESH":
-				#geometry_helper.delete_non_forward_faces(obj)
-				geometry_helper.mesh_deselect_all()
-				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
-
-		return {'FINISHED'}
-
-class DeleteNonUpOperator (bpy.types.Operator):
-	"""Delete non up faces"""
-	bl_idname = "wm.delete_non_up"
-	bl_label = "DeleteNonUp"
+class DeleteFacesOperator (bpy.types.Operator):
+	"""LaserClean-Delete faces not complying with normal direction - basically flattens objects for laser cutting"""
+	bl_idname = "wm.delete_faces_operator"
+	bl_label = "PreLaserClean"
 
 	def execute(self, context):
+
+		mytool = context.scene.my_tool
+
+		cleanup_choice=mytool.cleanup_choice
 
 		for obj in bpy.context.selected_objects:
 			if obj.type=="MESH":
 				geometry_helper.mesh_deselect_all()
-				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 
-		return {'FINISHED'}
+				if cleanup_choice=="left":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
+				elif cleanup_choice=="up":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
+				elif cleanup_choice=="front":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
+				elif cleanup_choice=="auto":
+					if obj.name.startswith("Keel."):
+						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
+					elif obj.name.startswith("Bulkhead."):
+						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
+					elif obj.name.startswith("cutterchine_"):
+						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 
-class DeleteNonLeftOperator (bpy.types.Operator):
-	"""Delete non left faces"""
-	bl_idname = "wm.delete_non_left"
-	bl_label = "DeleteNonLeft"
-
-	def execute(self, context):
-
-		for obj in bpy.context.selected_objects:
-			if obj.type=="MESH":
-				#geometry_helper.delete_non_forward_faces(obj)
-				geometry_helper.mesh_deselect_all()
-				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
 
 		return {'FINISHED'}
 
@@ -393,7 +396,7 @@ class SubmergeOperator (bpy.types.Operator):
 		csv_file=None
 
 		if mytool.output_csv==True:
-			csv_file="hydro.csv"
+			csv_file="bpyhullgen_hydro.csv"
 		
 		measure_helper.submerge_boat(hull_object,
 			mytool.hull_weight,mytool.simulate_depth,
@@ -411,7 +414,7 @@ class ImportPlatesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.import_plates("plates2.svg")
+		measure_helper.import_plates("bpyhullgen.svg")
 
 		return {'FINISHED'}
 
@@ -553,9 +556,10 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
 		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.delete_non_frontal")
-		rowsub.operator( "wm.delete_non_up")
-		rowsub.operator( "wm.delete_non_left")
+
+		rowsub.operator( "wm.delete_faces_operator")
+		layout.prop( mytool, "cleanup_choice", text="Cleanup") 
+		
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")
