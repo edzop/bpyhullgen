@@ -261,7 +261,7 @@ def get_aluminum_material():
 	if material_name in bpy.data.materials:
 		return bpy.data.materials[material_name]
 
-	return make_aluminum_material()
+	return make_aluminum_material(material_name)
 
 def make_aluminum_material(material_name):
 
