@@ -134,6 +134,14 @@ def get_material_window():
 	return make_glass_material(material_name,[0.7,0.7,0.7,1])
 
 
+def get_material_default():
+	material_name="default"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_diffuse_material(material_name,[0.8,0.8,0.8,1])
+
 def get_material_bulkhead(): 
 	material_name="bulkhead"
 
@@ -231,7 +239,7 @@ def get_material_hull():
 	return mat
 
 def plates_to_aluminum():
-	al_mat = make_aluminum_material()
+	al_mat = get_aluminum_material()
 
 	list_of_prefix=[ 
 					 "Bulkhead",
@@ -246,10 +254,18 @@ def plates_to_aluminum():
 				if o.name.startswith(pre):
 					assign_material(o,al_mat)
 
-def make_aluminum_material():
-	name="aluminum"
 
-	mat = bpy.data.materials.new(name)
+def get_aluminum_material(): 
+	material_name="aluminum"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_aluminum_material()
+
+def make_aluminum_material(material_name):
+
+	mat = bpy.data.materials.new(material_name)
 		
 	mat.use_nodes=True
 	tree=mat.node_tree
