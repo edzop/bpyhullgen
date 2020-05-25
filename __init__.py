@@ -71,12 +71,15 @@ classes = (
     ui.ExportHulldxfOperator,
     ui.DeleteNonFrontalOperator,
     ui.DeleteNonUpOperator,
+    ui.DeleteNonLeftOperator,
     ui.CutWindowsOperator,
     ui.InsideShrinkOperator,
     ui.AluminumPlatesOperator,
     ui.ShrinkOutlinerOperator,
     ui.SubmergeOperator,
-    ui.RollTestOperator
+    ui.RollTestOperator,
+    ui.MeasureDistanceBetweenVerticesOperator,
+    ui.ScaleToSizeOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper

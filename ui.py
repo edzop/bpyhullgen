@@ -57,6 +57,14 @@ class MyProperties (PropertyGroup):
 		max = 50000.0
 		)
 
+	scale_to_distance : FloatProperty(
+		name = "ScaleTo",
+		description = "Scale all objects so distance between 2 vertices is exactly this number",
+		default = 1,
+		min = 0.01,
+		max = 50000.0
+		)
+
 	output_csv : BoolProperty(
 		name="Output CSV",
 		description="Output hydro.csv file containing simulation data",
@@ -258,7 +266,7 @@ class ExportPlatesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.export_plates("plates2.svg")
+		measure_helper.export_plates("bpyhullgen.svg")
 
 		return {'FINISHED'}
 
@@ -302,6 +310,21 @@ class DeleteNonUpOperator (bpy.types.Operator):
 			if obj.type=="MESH":
 				geometry_helper.mesh_deselect_all()
 				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
+
+		return {'FINISHED'}
+
+class DeleteNonLeftOperator (bpy.types.Operator):
+	"""Delete non left faces"""
+	bl_idname = "wm.delete_non_left"
+	bl_label = "DeleteNonLeft"
+
+	def execute(self, context):
+
+		for obj in bpy.context.selected_objects:
+			if obj.type=="MESH":
+				#geometry_helper.delete_non_forward_faces(obj)
+				geometry_helper.mesh_deselect_all()
+				geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
 
 		return {'FINISHED'}
 
@@ -394,7 +417,7 @@ class ImportPlatesOperator (bpy.types.Operator):
 
 
 class AluminumPlatesOperator (bpy.types.Operator):
-	"""Import plate geometry from SVG file"""
+	"""Assign aluminum material to plates"""
 	bl_idname = "wm.aluminumplates"
 	bl_label = "AL Plates"
 
@@ -425,6 +448,33 @@ class ShrinkOutlinerOperator (bpy.types.Operator):
 		geometry_helper.collapse_outliner_hiearchy()
 
 		return {'FINISHED'}
+
+class MeasureDistanceBetweenVerticesOperator (bpy.types.Operator):
+	"""Measure distance between 2 selected points"""
+	bl_idname = "wm.measure_two_vertice_distance"
+	bl_label = "MeasurePoints"
+
+	def execute(self, context):
+
+		measure_helper.get_distance_between_two_selected_points()
+
+		return {'FINISHED'}
+
+class ScaleToSizeOperator (bpy.types.Operator):
+	"""Scale all mesh objects so distance between 2 selected points is specific size"""
+	bl_idname = "wm.scale_to_size"
+	bl_label = "ScaleTo"
+
+	def execute(self, context):
+
+		mytool = context.scene.my_tool
+
+#		print("Weight:", mytool.scale_to_distance)
+
+		measure_helper.scale_to_size(mytool.scale_to_distance)
+
+		return {'FINISHED'}
+
 
 
 
@@ -483,6 +533,11 @@ class OBJECT_PT_my_panel (Panel):
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.importplates")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.measure_two_vertice_distance")
+		layout.prop( mytool, "scale_to_distance")
+		rowsub.operator( "wm.scale_to_size")
+		
 
 		row = layout.row()
 		row.label(text="Scene:")
@@ -500,6 +555,7 @@ class OBJECT_PT_my_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.delete_non_frontal")
 		rowsub.operator( "wm.delete_non_up")
+		rowsub.operator( "wm.delete_non_left")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")
