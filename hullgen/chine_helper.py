@@ -80,6 +80,9 @@ class chine_helper:
 
     def __init__(self,the_hull):
         self.the_hull=the_hull
+
+        self.longitudal_thickness=the_hull.structural_thickness
+        
         self.bool_correction_offset=the_hull.bool_correction_offset
 
         self.curve_height=the_hull.hull_height
