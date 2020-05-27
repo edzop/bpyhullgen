@@ -39,6 +39,9 @@ new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.35,-0.5]
 new_chine.asymmetry[0]=1
 
+new_chine.longitudal_count=1
+new_chine.longitudal_width=-0.175
+
 new_chine.name="side"
 
 #new_chine.curve_twist=[0,-25,-25]
@@ -46,7 +49,7 @@ new_chine.name="side"
 new_chine.make_chine()
 
 new_chine.curve_length=the_hull.hull_length*1.1
-
+new_chine.longitudal_count=0
 
 new_chine.rotation=[36,0,0]
 new_chine.offset=[0,0,-0.84]
@@ -214,14 +217,14 @@ bulkhead_definitions = [
 #the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
 
 x_locations=[	
-				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
-				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+				bulkhead_definitions[0][0],
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]
 			]
 
-#the_hull.cleanup_longitudal_ends(x_locations)
+the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
-#the_hull.make_longitudal_booleans()
+the_hull.make_longitudal_booleans()
 
 station_start=bulkhead_definitions[0][0]+thickness/2
 station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
