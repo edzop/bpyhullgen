@@ -889,8 +889,6 @@ def get_distance_between_two_selected_points():
 		return 0
 	
 	distance=(selected_vertices[0]-selected_vertices[1]).length
-	
-	print("Distance: %f"%(distance))
 
 	return distance
 		
