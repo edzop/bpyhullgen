@@ -368,7 +368,7 @@ class RollTestOperator (bpy.types.Operator):
 			csv_file="hydro.csv"
 
 		
-		force_roll_max=80
+		force_roll_max=180
 			
 		measure_helper.submerge_boat(hull_object,
 			mytool.hull_weight,mytool.simulate_depth,
