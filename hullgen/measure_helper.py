@@ -182,7 +182,7 @@ def frame_change_handler(scene):
 	if bouyancy_text_object_name in bpy.data.objects:
 		bouyancy_text_object=bpy.data.objects[bouyancy_text_object_name]
 
-	bouyancy_text_object.data.body="Weight: %0.02fkg"%(weight)
+	bouyancy_text_object.data.body="Displacement: %0.02fkg"%(weight)
 	
 def register_text_update_callback():
 	if frame_change_handler not in bpy.app.handlers.render_complete:
@@ -232,7 +232,9 @@ def submerge_boat(hull_object,weight,
 			force_roll_max,
 			csv_output_file):
 
-	weightQueue = queue.Queue(5)
+
+	weightQueueSize=5
+	weightQueue = queue.Queue(weightQueueSize)
 
 	bpy.context.scene.frame_set(1)
 
@@ -287,21 +289,27 @@ def submerge_boat(hull_object,weight,
 
 	hull_weight=weight
 
-	frames_solved=0
+	simulation_step=0
 
 	force_roll_current=0
 
-	water_volume_phantom=None
+	#water_volume_phantom=None
 
-	# start hull off above water
+	# start hull off above water - start at the height of the hull
 	hull_object.location.z=hull_object.dimensions[2]
 
 	while continueSolving==True:
+
+		# =======================================================
+		# Create water volume and booleans for calculating displacement
+		# =======================================================
 
 		# It's slower to recreate volume each time but we need to APPLY the bool modifier to calculate the center of mass...
 		water_volumes=make_water_volume()
 
 		water_displaced_volume=water_volumes[1]
+		water_displaced_volume.show_axis = True
+
 		water_volume=water_volumes[0]
 
 		displacement_modifier_name="water_displaced"
@@ -319,56 +327,26 @@ def submerge_boat(hull_object,weight,
 		#bpy.ops.object.select_all(action='DESELECT')
 
 		curve_helper.select_object(water_displaced_volume,True)
-		
+
+		# Calculate center of mass for displaced water
+		# I tried to calculate mass without applying boolean modifier and it doesn't used the post bool modifier data so we have to do it the slow way
+		# It's much slower to apply modifier each part of the simulation but I can't find any other way to solve this problem. 
 		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=displacement_modifier_name)
 		bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
 
-		current_frame=bpy.context.scene.frame_current
-		frames_solved+=1
+		simulation_step+=1
+
+
+		# =======================================================
+		# Calculate hydro physics status of current state
+		# =======================================================
 
 		displaced_volume=measure_object_volume(water_displaced_volume)
 
-		water_displaced_volume.show_axis = True
-
-		# displaced water 1 cubic meter =1000kg
+		# displaced water 1 cubic meter =1000kg (Aprox - not factoring for temp or saltwater ect..)
 		displaced_weight=displaced_volume*1000
 
-		hull_object.keyframe_insert(data_path="location", frame=current_frame) #, index=0)
-		hull_object.keyframe_insert(data_path="rotation_euler", frame=current_frame) #, index=0)
-		bpy.context.scene.frame_set(current_frame+1)
-
-		# Abort if hull more than 3m under water... something went wrong
-		if hull_object.location.z>water_volume.dimensions.z:
-			print("Aborting... Hull Z: %f > water height: %f"%(hull_object.location.z,water_volume.dimensions.z))
-			continueSolving=False
-
-		#print("submerge frame: %d HullZ: %0.03f displaced_weight/hull: %0.3f/%0.3f BouyancyZ: %0.03f"%(
-		#	frames_solved,
-		#	hull_object.location.z,
-		#	displaced_weight,
-		#	hull_weight,
-		#	water_displaced_volume.location.z
-		#	))
-
-		displacement_data.append(displaced_weight)
-
-		queueSum=0
-
-		for i in range(0,weightQueue.qsize()):
-			#print("weight: %f average: %f"%(weightQueue.queue[i][0],weightQueue.queue[i][1]))
-			queueSum+=weightQueue.queue[i][0]
-
-		queueAverage=queueSum/5
-
-		if weightQueue.full():
-			weightQueue.get()
-
-		weightQueue.put([displaced_weight,queueAverage])
-
 		displacement_diff=abs(displaced_weight-hull_weight)
-
-		average_threshold=5
-
 		pitch_arm=water_displaced_volume.location.x-hull_object.location.x
 		roll_arm=water_displaced_volume.location.y-hull_object.location.y
 		
@@ -376,29 +354,76 @@ def submerge_boat(hull_object,weight,
 		abs_roll_arm=abs(roll_arm)
 
 		# Arm solve threshold for finish solving (pitch and roll)
-		arm_solve_threshold=0.005
+		arm_solve_threshold=0.005 # Solve rotation within 5mm arm
+		weight_solve_threshold=5 # solve bouyancy displacement within 5kg
 
-		# solve within 5kg
-		weight_solve_threshold=5
+		# =======================================================
+		# Maintain a history (queue) of displacement weights to detect velocity trend... 
+		# =======================================================	
+		queueSum=0
 
-		#bpy.ops.object.select_all(action='DESELECT')
-		curve_helper.select_object(hull_object,True)
+		for i in range(0,weightQueue.qsize()):
+			#print("weight: %f average: %f"%(weightQueue.queue[i][0],weightQueue.queue[i][1]))
+			queueSum+=weightQueue.queue[i][0]
+
+		# calculate average displacement for last simulation steps
+		# If current displacement is same or similar to queue Average - our velocity is stable
+		# If current displacement is less than queue average - we bounced up
+		# If current displacement is more than queue average - we are sinking
+		queueAverage=queueSum/weightQueueSize
+
+		if weightQueue.full():
+			weightQueue.get()
+
+		weightQueue.put([displaced_weight,queueAverage])
+
+		# Cache last roll angle to detect roll movement
+		last_roll_y=degrees(hull_object.rotation_euler.y)
+
+
+		# =======================================================
+		# Detect if we should abort or continue simulation
+		# =======================================================		
+
+
+		# Abort if hull deeper than water volume... something went wrong
+		if hull_object.location.z>water_volume.dimensions.z:
+			print("Aborting... Hull Z: %f > water height: %f"%(hull_object.location.z,water_volume.dimensions.z))
+			continueSolving=False
+
+		# Abort if runaway...
+		if simulation_step>6000:
+			continueSolving=False
+
+		#print("submerge frame: %d HullZ: %0.03f displaced_weight/hull: %0.3f/%0.3f BouyancyZ: %0.03f"%(
+		#	simulation_step,
+		#	hull_object.location.z,
+		#	displaced_weight,
+		#	hull_weight,
+		#	water_displaced_volume.location.z
+		#	))
 
 		if force_roll_max==0:
+
+			# If we aren't doing a forced rollover test - detect if simulation is complete
+
 			if ( (simulate_pitch and abs_pitch_arm<arm_solve_threshold) or simulate_pitch==False) and \
 				( (simulate_roll and abs_roll_arm<arm_solve_threshold) or simulate_roll==False) and \
 				( (simulate_depth and displacement_diff<weight_solve_threshold) or simulate_depth==False):
 				continueSolving=False
 		else:
-			if ( (simulate_depth and displacement_diff<5) or simulate_depth==False):
-				force_roll_current+=1
-				hull_object.rotation_euler.x=radians(force_roll_current)
-				#bpy.ops.transform.rotate(value=radians(force_roll_current),orient_axis='X')
+
+			# Abort forced rollover test when we reach the max rollover angle
 
 			if force_roll_current>=force_roll_max:
 					continueSolving=False
 
-		roll_step=0
+
+		curve_helper.select_object(hull_object,True)
+
+		# =======================================================
+		# Adjust pitch part of simulation
+		# =======================================================
 		pitch_step=0
 
 		if simulate_pitch==True:
@@ -412,7 +437,21 @@ def submerge_boat(hull_object,weight,
 				elif pitch_arm<arm_solve_threshold:
 					bpy.ops.transform.rotate(value=radians(-pitch_step),orient_axis='Y')
 
-		if simulate_roll==True:
+		# =======================================================
+		# Adjust roll part of simulation
+		# =======================================================
+		roll_step=0
+		degrees_rolled=0
+
+		if force_roll_max>0:
+			# If we are doing a forced rollover test - only roll over one degree if bouyancy displacement has reached equilibrium 
+
+			if ( (simulate_depth and displacement_diff<weight_solve_threshold) or simulate_depth==False):
+				degrees_rolled=1
+				force_roll_current+=degrees_rolled
+				hull_object.rotation_euler.x=radians(force_roll_current)
+
+		elif simulate_roll==True:
 			# Only rotate once object hits the water
 			if displaced_weight>0:
 
@@ -423,25 +462,53 @@ def submerge_boat(hull_object,weight,
 				elif pitch_arm<arm_solve_threshold:
 					bpy.ops.transform.rotate(value=radians(roll_step),orient_axis='X')
 
+		# =======================================================
+		# Adjust water submersion depth (Z position) part of simulation
+		# =======================================================
 		z_step=calculate_movement_step(displacement_diff)
+
+		average_threshold=5
 
 		if (queueAverage+average_threshold)<hull_weight:
 			hull_object.location.z-=z_step
 		elif (queueAverage-average_threshold)>hull_weight:
 			hull_object.location.z+=z_step
 
-		# Abort if runaway...
-		if frames_solved>3000:
-			continueSolving=False
 
-		if csvWriter!=None:
+		# =======================================================
+		# Bake simulation steps into keyframes
+		# =======================================================
 
-			# only log once it's reached equilibrium if doing roll test
-			if force_roll_max==0 or (simulate_depth and displacement_diff<weight_solve_threshold):
+		# To make the resulting output animation smoother we should skip some keyframes frames that are considered subframes in the simulation.
+		# Subframes are not rendered but used for the calculation...
+
+		if force_roll_max==0 or (force_roll_max>0 and degrees_rolled>0):
+
+			# If a forced roll test - only log steps when roll degrees change
+			# If not force roll test - log all frames of simulation
+
+			current_frame=bpy.context.scene.frame_current
+			hull_object.keyframe_insert(data_path="location", frame=current_frame) #, index=0)
+			hull_object.keyframe_insert(data_path="rotation_euler", frame=current_frame) #, index=0)
+			bpy.context.scene.frame_set(current_frame+1)
+
+			# =======================================================
+			# Log results and reporting part of simulation
+			# =======================================================
+
+			# Cache weight for frame (used in frame_change_handler function)
+			displacement_data.append(displaced_weight)
+
+			if csvWriter!=None:
+
+				# only log once it's reached equilibrium if doing roll test
+				#if force_roll_max==0 or (simulate_depth and displacement_diff<weight_solve_threshold):
+
+				print("Log CSV")
 
 				csv_row = []
 
-				csv_row.append(frames_solved) #1
+				csv_row.append(simulation_step) #1
 
 				csv_row.append("%f"%displacement_diff) #2
 				csv_row.append("%f"%displaced_weight) #3
@@ -449,18 +516,18 @@ def submerge_boat(hull_object,weight,
 
 				csv_row.append("%f"%hull_object.location.z) #5
 
-				csv_row.append("%f"%degrees(hull_object.rotation_euler.y))  #6
+				csv_row.append("%f"%degrees(hull_object.rotation_euler.y))  #6 pitch
 				csv_row.append("%f"%pitch_arm) #7
 				csv_row.append("%f"%pitch_step) #8
 
-				csv_row.append("%f"%degrees(hull_object.rotation_euler.x)) #9
+				csv_row.append("%f"%degrees(hull_object.rotation_euler.x)) #9 roll
 				csv_row.append("%f"%roll_arm) #10
 				csv_row.append("%f"%roll_step) #11
 
 				csvWriter.writerow(csv_row)
 
-		print("frame:%d queue(sum:%f average:%f) dispdiff:%f zstep:%f yRot:%f Yarm:%f xRot:%f Xarm:%f forceroll(%f/%f)"%(
-						frames_solved,
+		statusText=("step:%d queue(sum:%f average:%f) dispdiff:%f zstep:%f yRot:%f Yarm:%f xRot:%f Xarm:%f forceroll(%f/%f)"%(
+						simulation_step,
 						queueSum,
 						queueAverage,
 						displacement_diff,
@@ -471,8 +538,15 @@ def submerge_boat(hull_object,weight,
 						roll_arm,
 						force_roll_current,
 						force_roll_max
-						))		
+						))
 
+		print(statusText)
+		
+		bpy.context.workspace.status_text_set(statusText)	
+
+		# Update viewport
+		bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+		#bpy.context.view_layer.update()
 	
 
 	if csvfile!=None:
