@@ -85,6 +85,11 @@ def measure_object_volume(obj):
 
 def measure_selected_faces_area(obj,SelectAll=False):
 
+	previous_mode=obj.mode
+
+	# Selection not accurate if not in object mode... 
+	bpy.ops.object.mode_set(mode='OBJECT')
+
 	selected_face_count=0
 	total_area=0
 
@@ -100,6 +105,8 @@ def measure_selected_faces_area(obj,SelectAll=False):
 			total_area+=f.area
 
 	face_data=[selected_face_count,total_area]
+
+	bpy.ops.object.mode_set(mode=previous_mode)
 
 	return face_data
 
