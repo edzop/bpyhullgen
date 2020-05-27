@@ -111,7 +111,7 @@ class MyProperties (PropertyGroup):
 # ------------------------------------------------------------------------
 
 class GenSceneOperator (bpy.types.Operator):
-	"""Quick generate background scene for rendering"""
+	"""Quick generate background backdrop for rendering"""
 	bl_idname = "wm.genscene"
 	bl_label = "GenScene"
 
@@ -244,7 +244,7 @@ class MeasureVolumeOperator (bpy.types.Operator):
 class SeparateMaterialOperator (bpy.types.Operator):
 	"""Separate active object into new objects based on material"""
 	bl_idname = "wm.separatematerial"
-	bl_label = "Separate by material"
+	bl_label = "SeparateMat"
 
 	def execute(self, context):
 
@@ -459,7 +459,9 @@ class MeasureDistanceBetweenVerticesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.get_distance_between_two_selected_points()
+		distance = measure_helper.get_distance_between_two_selected_points()
+
+		self.report({'INFO'}, "Distance %f: "%(distance))
 
 		return {'FINISHED'}
 
