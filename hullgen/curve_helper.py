@@ -293,10 +293,21 @@ class Curve_Helper:
 		bpy.ops.transform.translate(value=space)
 
 	def rotate_curve(self,rotation,flip_z=False):
-		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
-		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
+
+		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X',orient_type='GLOBAL',
+			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
+		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y',orient_type='GLOBAL',
+			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
 
 		if flip_z==True:
-			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z')
+			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z',orient_type='GLOBAL',
+				orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
 		else:
-			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
+			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z',orient_type='GLOBAL',
+				orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
+
+
+
+#bpy.ops.transform.rotate(value=0.785398, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+#bpy.ops.transform.rotate(value=0.785398, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)

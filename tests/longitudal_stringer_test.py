@@ -41,7 +41,7 @@ new_chine.curve_length=the_hull.hull_length+0.1
 
 
 # MID Chine ==========================
-new_chine.rotation=[-75,0,0]
+new_chine.rotation=[75,0,0]
 new_chine.offset=[0,0.9,0.3]
 new_chine.name="mid_curve"
 new_chine.longitudal_thickness=0.4
@@ -50,14 +50,14 @@ new_chine.make_chine()
 
 # LOW Chine ==========================
 new_chine.longitudal_z_offset=0
-new_chine.rotation=[-45,0,0]
+new_chine.rotation=[45,0,0]
 new_chine.offset=[0,1.5,0.0]
 new_chine.name="low_curve"
 new_chine.longitudal_thickness=0.1
 new_chine.make_chine()
 
 # TOP Chine ==========================
-new_chine.rotation=[-90,0,0]
+new_chine.rotation=[90,0,0]
 new_chine.offset=[0,0,0.6]
 new_chine.name="top_curve"
 new_chine.symmetrical=False

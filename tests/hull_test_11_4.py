@@ -47,16 +47,16 @@ window_helper.make_window_on_chine(new_chine,1.5,-0.3)
 window_helper.make_window_on_chine(new_chine,-1.5,-0.3)
 
 
-new_chine.rotation=[-39,0,0]
+new_chine.rotation=[39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.longitudal_z_offset=-0.33
 new_chine.name="mid"
-new_chine.set_longitudal_curve(0.4,10)
+new_chine.set_longitudal_curve(-0.4,-5)
 new_chine.longitudal_z_offset=-0.55
 new_chine.make_chine()
 
 new_chine.longitudal_count=0
-new_chine.rotation=[45,0,0]
+new_chine.rotation=[-45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
 new_chine.longitudal_z_offset=0
@@ -65,17 +65,17 @@ new_chine.make_chine()
 
 
 new_chine.longitudal_count=0
-new_chine.rotation=[-79,0,0]
+new_chine.rotation=[79,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
-new_chine.set_longitudal_curve(0.6,10)
-new_chine.longitudal_z_offset=-0.5
+new_chine.set_longitudal_curve(0.6,-10)
+new_chine.longitudal_z_offset=0.5
 new_chine.make_chine()
 
 new_chine.longitudal_count=1
-new_chine.rotation=[90,0,0]
+new_chine.rotation=[-90,0,0]
 new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
 new_chine.curve_width=0.8

@@ -82,6 +82,9 @@ class hull_maker:
 
         material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
 
+        view_collection_hull=curve_helper.make_collection("hull",bpy.context.scene.collection.children)
+        curve_helper.move_object_to_collection(view_collection_hull,self.hull_object)
+
         return self.hull_object
 
     # A list of bulkhead_definitions[ position, height, watertight]
@@ -119,6 +122,8 @@ class hull_maker:
                 bpy.ops.mesh.normals_make_consistent(inside=False)
                 bpy.ops.object.mode_set(mode='OBJECT')
                 curve_helper.hide_object(bh.bulkhead_void_object)
+
+                bh.bulkhead_void_object.parent=self.hull_object
             
 
             curve_helper.select_object(bh.bulkhead_object,True)

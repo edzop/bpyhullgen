@@ -17,22 +17,22 @@ def make_chines(the_hull):
 	new_chine.name="top"
 	new_chine.make_chine()
 
-	new_chine.rotation=[-25,0,0]
+	new_chine.rotation=[25,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="mid"
 	new_chine.make_chine()
 
-	new_chine.rotation=[45,0,0]
+	new_chine.rotation=[-45,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="upper"
 	new_chine.make_chine()
 
-	new_chine.rotation=[-72,0,0]
+	new_chine.rotation=[72,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="low"
 	new_chine.make_chine()
 
-	new_chine.rotation=[-90,0,0]
+	new_chine.rotation=[90,0,0]
 	new_chine.offset=[0,0,0.3]
 	new_chine.name="roof"
 	new_chine.curve_width=-0.4

@@ -75,7 +75,7 @@ class keel:
         #    location=(  self.the_hull_definition.bool_correction_offset[0], 
         #                self.the_hull_definition.bool_correction_offset[1]+self.lateral_offset, 
         #                self.the_hull_definition.bool_correction_offset[2]+self.top_height))
-        bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
+        bpy.ops.transform.rotate(value=radians(-90),orient_axis='X')
 
         bpy.ops.transform.resize(value=(keel_length, 
                                 0, 

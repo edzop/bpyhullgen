@@ -281,7 +281,8 @@ class chine_helper:
 
         theCurveHelper.asymmetry=self.asymmetry
 
-        theCurveHelper.define_curve(self.curve_length,self.curve_width)
+        #theCurveHelper.define_curve(self.curve_length,self.curve_width)
+
         # ================================================================================================ 
         # First curve is Left Side or non-symmetrical "single side"
         # ================================================================================================
@@ -298,7 +299,7 @@ class chine_helper:
         theCurveHelper.define_curve(length=self.curve_length,width=self.curve_width)
         theCurveHelper.curve_height=self.curve_height
         theCurveHelper.generate_curve(first_curve_name)
-        
+
         self.curve_object_1=theCurveHelper.curve_object
 
         material_helper.assign_material(self.curve_object_1,material_helper.get_material_bool())
@@ -344,13 +345,14 @@ class chine_helper:
             curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
             curve_helper.hide_object(slicer_plane)
             curve_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
-            
+        
         curve_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
         theCurveHelper.extrude_curve(self.extrude_width)
-    
+        
         theCurveHelper.rotate_curve(self.rotation)
         bpy.ops.transform.translate(value=(self.offset[0], self.offset[1], self.offset[2]))
         theCurveHelper.deselect_curve()
+        
         theCurveHelper.add_boolean(self.the_hull.hull_object)
 
         curve_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)

@@ -51,14 +51,14 @@ new_chine.make_chine()
 new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.longitudal_count=0
 
-new_chine.rotation=[36,0,0]
+new_chine.rotation=[-36,0,0]
 new_chine.offset=[0,0,-0.84]
 new_chine.name="upper"
 new_chine.curve_length=the_hull.hull_length*1.3
 new_chine.make_chine()
 
 new_chine.curve_length=the_hull.hull_length*1.3
-new_chine.rotation=[-39,0,0]
+new_chine.rotation=[39,0,0]
 new_chine.offset=[0,-0.2,0.331]
 new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
@@ -66,7 +66,7 @@ new_chine.make_chine()
 
 
 
-new_chine.rotation=[-82,0,0]
+new_chine.rotation=[82,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.4
@@ -77,7 +77,7 @@ new_chine.asymmetry[1]=0
 #new_chine.curve_length=the_hull.hull_length*1.0
 
 
-new_chine.rotation=[90,0,0]
+new_chine.rotation=[-90,0,0]
 new_chine.offset=[0,0,-0.5]
 new_chine.name="roof"
 new_chine.curve_width=0.8

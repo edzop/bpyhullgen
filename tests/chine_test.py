@@ -61,7 +61,7 @@ wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="wiref
 bpy.data.objects.remove(the_hull.hull_object)
 
 
-info_text="Demonstration of two cines with reverse extrude directions"
+info_text="Demonstration of two chines with reverse extrude directions"
 geometry_helper.add_info_text(info_text)
 
 framedata=[

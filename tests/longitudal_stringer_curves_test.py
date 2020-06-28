@@ -36,13 +36,13 @@ new_chine.longitudal_width=0.5
 new_chine.longitudal_height=0
 new_chine.slicer_longitudal_ratio=1
 
-new_chine.longitudal_bend_radius=-0.8
+new_chine.longitudal_bend_radius=0.8
 new_chine.longitudal_curve_angle=4
 
 new_chine.curve_width=-1
 new_chine.curve_length=the_hull.hull_length+0.1
 
-new_chine.rotation=[-75,0,0]
+new_chine.rotation=[75,0,0]
 new_chine.offset=[0,0.9,0.3]
 new_chine.name="wall_curve"
 

@@ -103,7 +103,7 @@ class bulkhead:
         bpy.ops.object.transform_apply(scale=True)
         
         self.bulkhead_object=bpy.context.view_layer.objects.active
-        self.bulkhead_object.name="Bulkhead.s%0.2f"%(self.station)
+        self.bulkhead_object.name="Bulkhead.s%06.2f"%(self.station)
 
         curve_helper.select_object(self.bulkhead_object,True)
 
@@ -116,27 +116,51 @@ class bulkhead:
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+
         if self.watertight==False:
 
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
                                             TRANSFORM_OT_translate={"value":(0, 0, 0)})
 
             self.bulkhead_void_object=bpy.context.view_layer.objects.active
-            self.bulkhead_void_object.name="Bulkhead.s%0.2f_void"%(self.station)
+
+            curve_helper.select_object(self.bulkhead_void_object,True)
+
+            
+
+            self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.station)
+
+            mod_remesh = self.bulkhead_void_object.modifiers.new(type="REMESH", name="remesh")
+            mod_remesh.mode = 'SHARP'
+            mod_remesh.octree_depth = 4
+            mod_remesh.scale = 0.99
+            bpy.ops.object.modifier_apply(modifier="remesh")
+
 
             # get truple of current size
             bulkhead_size=self.bulkhead_void_object.dimensions.xyz
 
+            if bulkhead_size[0]==0 or bulkhead_size[1]==0 or bulkhead_size[2]==0:
+                print("Something went wrong... bulkhead size==0")
+                return None
+
             minimum_support_size=0.2
             rescale_factor=[1,1,1]
 
-            rescale_factor[0]=1.1
+            rescale_factor[0]=1.3
             rescale_factor[1]=(bulkhead_size[1]-(minimum_support_size*2))*1/bulkhead_size[1]
             rescale_factor[2]=(bulkhead_size[2]-(minimum_support_size*2))*1/bulkhead_size[2]
 
             bpy.ops.transform.resize(value=rescale_factor)
 
             bpy.ops.object.transform_apply(scale=True)
+
+            bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
             curve_helper.select_object(self.bulkhead_object,True)
 
