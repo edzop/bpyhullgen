@@ -278,17 +278,13 @@ class Curve_Helper:
 
 	def rotate_curve(self,rotation,flip_z=False):
 
-		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X',orient_type='GLOBAL',
-			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
-		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y',orient_type='GLOBAL',
-			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
+		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
+		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
 
 		if flip_z==True:
-			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z',orient_type='GLOBAL',
-				orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
+			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z')
 		else:
-			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z',orient_type='GLOBAL',
-				orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL')
+			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
 
 
 
