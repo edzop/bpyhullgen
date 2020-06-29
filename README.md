@@ -11,3 +11,5 @@ For further information please refer to [bpyhullgen Github Wiki](https://github.
 ![](images/2019_10_15_v05.png)
 Example showing bulkheads and stringers and one stringer removed to show notching in both bulkhead and stringer.
 
+
+See related project: [bpyhullsim](https://github.com/edzop/bpyhullsim)
