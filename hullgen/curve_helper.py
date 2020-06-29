@@ -21,6 +21,8 @@ from mathutils import Vector
 import math
 from math import radians, degrees
 
+from ..hullgen import bpy_helper
+
 def curve_helper_hello():
 	print("curve_helper_hello")
 
@@ -97,24 +99,6 @@ def move_object_to_collection(new_collection,the_object):
 	new_collection.objects.link(the_object)
 
 
-def find_and_remove_object_by_name(objname):
-	for obj in bpy.data.objects:
-	#	print(obj.name)
-		if(obj.name==objname):
-	#		print("found")
-	#        bpy.context.scene.collection.objects.unlink(obj)
-			bpy.data.objects.remove(obj)
-
-def select_object(theObject,selected):
-
-	bpy.ops.object.select_all(action='DESELECT')
-	
-	if selected==True:
-		bpy.context.view_layer.objects.active = theObject
-		theObject.select_set(state=True)
-	else:
-		bpy.context.view_layer.objects.active = None
-		theObject.select_set(state=False)
 
 def frange(start, stop, step):
 	i = start
@@ -202,7 +186,7 @@ class Curve_Helper:
 	def generate_curve(self,curvename):
 
 		# delete it if it already exists
-		find_and_remove_object_by_name(curvename)
+		bpy_helper.find_and_remove_object_by_name(curvename)
 		origin=(0,0,0)
   
 		self.curvedata = bpy.data.curves.new(name=curvename, type='CURVE')
@@ -243,7 +227,7 @@ class Curve_Helper:
 
 		polyline.use_cyclic_u = False
 
-		select_object(self.curve_object,True)
+		bpy_helper.select_object(self.curve_object,True)
 
 		
 
@@ -252,7 +236,7 @@ class Curve_Helper:
 		
 
 	def add_boolean(self,hull_object):
-		select_object(hull_object,True)
+		bpy_helper.select_object(hull_object,True)
 
 		slicename="slice.%s"%self.curve_object.name
 
@@ -260,7 +244,7 @@ class Curve_Helper:
 		bool_new.object = self.curve_object
 		bool_new.operation = 'DIFFERENCE'
 
-		select_object(hull_object,False)
+		bpy_helper.select_object(hull_object,False)
 
 	def extrude_curve(self,extrude_width):
 
@@ -269,7 +253,7 @@ class Curve_Helper:
 		self.curve_object.display_type="WIRE"
 		
 
-		select_object(self.curve_object,True)
+		bpy_helper.select_object(self.curve_object,True)
 	
 		bpy.ops.object.mode_set(mode='EDIT')
 			

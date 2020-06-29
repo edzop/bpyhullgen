@@ -26,6 +26,7 @@ from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
 from bpyhullgen.hullgen import keel
 from bpyhullgen.hullgen import render_helper
+from bpyhullgen.hullgen import bpy_helper
 
 the_hull=hull_maker.hull_maker(length=11.2,width=3.9,height=3.6)
 
@@ -176,7 +177,7 @@ curve_helper.hide_object(ob)
 
 
 #geometry_helper.apply_all_bool_modifiers()
-#curve_helper.select_object(the_hull.hull_object,True)
+#bpy_helper.select_object(the_hull.hull_object,True)
 
 view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
 import_library_path="assets/boat_assets.blend/Collection/"

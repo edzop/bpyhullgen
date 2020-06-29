@@ -26,6 +26,7 @@ from mathutils.bvhtree import BVHTree
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
 from ..hullgen import measure_helper
+from ..hullgen import bpy_helper
 
 def separate_active_by_material():
 	selected_object=bpy.context.view_layer.objects.active
@@ -286,7 +287,7 @@ def select_going_back(ob):
 def delete_non_aligned_faces(ob,func):
 	
 	bpy.ops.object.select_all(action='DESELECT')
-	curve_helper.select_object(ob,True)
+	bpy_helper.select_object(ob,True)
 
 	old_mode=bpy.context.active_object.mode
 

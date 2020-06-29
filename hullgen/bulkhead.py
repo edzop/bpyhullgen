@@ -19,6 +19,7 @@
 import bpy
 
 from ..hullgen import curve_helper
+from ..hullgen import bpy_helper
 
 class bulkhead:
     station=0
@@ -105,7 +106,7 @@ class bulkhead:
         self.bulkhead_object=bpy.context.view_layer.objects.active
         self.bulkhead_object.name="Bulkhead.s%06.2f"%(self.station)
 
-        curve_helper.select_object(self.bulkhead_object,True)
+        bpy_helper.select_object(self.bulkhead_object,True)
 
         bool_new = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="slice")
         bool_new.object = self.the_hull_definition.hull_object
@@ -129,7 +130,7 @@ class bulkhead:
 
             self.bulkhead_void_object=bpy.context.view_layer.objects.active
 
-            curve_helper.select_object(self.bulkhead_void_object,True)
+            bpy_helper.select_object(self.bulkhead_void_object,True)
 
             
 
@@ -162,7 +163,7 @@ class bulkhead:
 
             bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
-            curve_helper.select_object(self.bulkhead_object,True)
+            bpy_helper.select_object(self.bulkhead_object,True)
 
             bool_void = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center")
             bool_void.object = self.bulkhead_void_object

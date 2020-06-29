@@ -26,6 +26,7 @@ from ..hullgen import curve_helper
 from ..hullgen import chine_helper
 from ..hullgen import bulkhead
 from ..hullgen import keel
+from ..hullgen import bpy_helper
 
 class hull_maker:
     hull_length=11.4
@@ -62,7 +63,7 @@ class hull_maker:
 
     def make_bool_cube(self,name,location=(0,0,0),size=(1,1,1)):
 
-        curve_helper.find_and_remove_object_by_name(name)
+        bpy_helper.find_and_remove_object_by_name(name)
 
         # Booleans behave really strange if origin is 0,0,0 - this works
         #bpy.ops.mesh.primitive_cube_add(size=1.0,enter_editmode=False, location=(0.02, 0.02, 0.02))
@@ -116,7 +117,7 @@ class hull_maker:
             material_helper.assign_material(bh.bulkhead_object,material_helper.get_material_bulkhead())
 
             if bh.bulkhead_void_object!=None:
-                curve_helper.select_object(bh.bulkhead_void_object,True)
+                bpy_helper.select_object(bh.bulkhead_void_object,True)
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.normals_make_consistent(inside=False)
@@ -126,7 +127,7 @@ class hull_maker:
                 bh.bulkhead_void_object.parent=self.hull_object
             
 
-            curve_helper.select_object(bh.bulkhead_object,True)
+            bpy_helper.select_object(bh.bulkhead_object,True)
 
             bh.bulkhead_object.parent=self.hull_object
 
@@ -164,7 +165,7 @@ class hull_maker:
             modifier.operation="DIFFERENCE"
             modifier.double_threshold=0
 
-            curve_helper.select_object(bh.bulkhead_object,True)
+            bpy_helper.select_object(bh.bulkhead_object,True)
             #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
             # notch the keel with modified bulkhead 
@@ -174,7 +175,7 @@ class hull_maker:
             modifier.operation="DIFFERENCE"
             modifier.double_threshold=0
 
-            curve_helper.select_object(keel.keel_object,True)
+            bpy_helper.select_object(keel.keel_object,True)
             #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
 
         material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
@@ -228,7 +229,7 @@ class hull_maker:
             object_end_clean = self.make_bool_cube("end_clean_%s"%index,location=[adjusted_location,0,0],size=(block_width,block_width,self.hull_height))
 
             if rotations!=None:
-                curve_helper.select_object(object_end_clean,True)
+                bpy_helper.select_object(object_end_clean,True)
                 bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
 
             curve_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)

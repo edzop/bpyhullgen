@@ -21,6 +21,7 @@ import bpy
 from math import radians
 
 from ..hullgen import curve_helper
+from ..hullgen import bpy_helper
 
 class keel:
     lateral_offset=0
@@ -89,14 +90,14 @@ class keel:
         self.keel_object.name="Keel.s%0.2f"%(self.lateral_offset)
 
 
-        curve_helper.select_object(self.keel_object,True)
+        bpy_helper.select_object(self.keel_object,True)
         curve_helper.move_object_to_collection(self.keel_collection,self.keel_object)
 
         bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
         bool_new.object = self.the_hull_definition.hull_object
         bool_new.operation = 'INTERSECT'
 
-        curve_helper.select_object(self.keel_object,True)
+        bpy_helper.select_object(self.keel_object,True)
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier=bool_new.name)
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
@@ -131,7 +132,7 @@ class keel:
         self.keel_slicer_object.hide_render = True
         self.keel_slicer_object.hide_viewport = True
 
-        curve_helper.select_object(self.keel_slicer_object,True)
+        bpy_helper.select_object(self.keel_slicer_object,True)
         curve_helper.move_object_to_collection(self.keel_collection,self.keel_slicer_object)
 
 
@@ -139,7 +140,7 @@ class keel:
         bool_new.object = self.the_hull_definition.hull_object
         bool_new.operation = 'INTERSECT'
 
-        curve_helper.select_object(self.keel_slicer_object,True)
+        bpy_helper.select_object(self.keel_slicer_object,True)
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier=bool_new.name)
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')

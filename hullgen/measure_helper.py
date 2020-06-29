@@ -27,6 +27,7 @@ import queue
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
+from ..hullgen import bpy_helper
 
 bouyancy_text_object=None
 bouyancy_text_object_name="bouyancy_text"
@@ -94,7 +95,7 @@ def measure_selected_faces_area(obj,SelectAll=False):
 	total_area=0
 
 	if SelectAll==True:
-		curve_helper.select_object(obj,True)
+		bpy_helper.select_object(obj,True)
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='SELECT')
 		bpy.ops.object.mode_set(mode='OBJECT')
@@ -117,7 +118,7 @@ def make_water_volume():
 	# Water volume
 	water_object_name="water_volume"
 
-	curve_helper.find_and_remove_object_by_name(water_object_name)
+	bpy_helper.find_and_remove_object_by_name(water_object_name)
 
 	depth=5
 	width=5
@@ -143,7 +144,7 @@ def make_water_volume():
 	# Displacement area
 	water_displaced_name="water_displaced"
 
-	curve_helper.find_and_remove_object_by_name(water_displaced_name)
+	bpy_helper.find_and_remove_object_by_name(water_displaced_name)
 
 	displace_depth=depth-0.5
 	displace_width=width-0.5
@@ -327,13 +328,13 @@ def submerge_boat(hull_object,weight,
 		#if water_volume_phantom==None:
 			# Create a copy "the phantom object" of the water displaced volume because we need to apply bool modifier each time...
 			# Keep a copy that will be used during rendering
-		#	curve_helper.select_object(water_displaced_volume,True)
+		#	bpy_helper.select_object(water_displaced_volume,True)
 		#	bpy.ops.object.duplicate_move()
 		#	water_displaced_volume_phantom=bpy.context.view_layer.objects.active
 
 		#bpy.ops.object.select_all(action='DESELECT')
 
-		curve_helper.select_object(water_displaced_volume,True)
+		bpy_helper.select_object(water_displaced_volume,True)
 
 		# Calculate center of mass for displaced water
 		# I tried to calculate mass without applying boolean modifier and it doesn't used the post bool modifier data so we have to do it the slow way
@@ -426,7 +427,7 @@ def submerge_boat(hull_object,weight,
 					continueSolving=False
 
 
-		curve_helper.select_object(hull_object,True)
+		bpy_helper.select_object(hull_object,True)
 
 		# =======================================================
 		# Adjust pitch part of simulation
@@ -570,7 +571,7 @@ def calculate_cg(influence_objects):
 	title_object=influence_objects[0]
 	CG_object_name
 
-	curve_helper.find_and_remove_object_by_name(CG_object_name)
+	bpy_helper.find_and_remove_object_by_name(CG_object_name)
 
 	bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
 	cg_empty = bpy.context.active_object
@@ -587,7 +588,7 @@ def calculate_cg(influence_objects):
 	for obj in influence_objects:
 
 		bpy.ops.object.select_all(action='DESELECT')
-		curve_helper.select_object(obj,True)
+		bpy_helper.select_object(obj,True)
 		bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
 
 		object_volume=measure_object_volume(obj)
@@ -850,7 +851,7 @@ def scale_to_size(scale_to_size):
 	for obj in bpy.data.objects:
 
 		if obj.type=="MESH":
-			curve_helper.select_object(obj,True)
+			bpy_helper.select_object(obj,True)
 
 			bpy.ops.transform.resize(value=(scale_factor,scale_factor,scale_factor))
 

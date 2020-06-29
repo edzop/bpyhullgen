@@ -22,6 +22,7 @@ from math import radians, degrees
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
+from ..hullgen import bpy_helper
 
 class chine_helper:
     rotation=[0,0,0]
@@ -140,7 +141,7 @@ class chine_helper:
 
         newCurve=theCurveHelper.curve_object
 
-        curve_helper.select_object(newCurve,True)
+        bpy_helper.select_object(newCurve,True)
 
         bpy.ops.object.mode_set(mode='EDIT')
 
@@ -395,7 +396,7 @@ class chine_helper:
                
                 self.select_and_extrude_slicer(longitudal_plane,-self.longitudal_width)
                 #longitudal_plane.rotation.y=180
-                #curve_helper.select_object(longitudal_plane,True)
+                #bpy_helper.select_object(longitudal_plane,True)
                 #bpy.ops.transform.rotate(value=radians(180),orient_axis='Y')
                 #bpy.ops.object.mode_set(mode='OBJECT')
                 #curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
@@ -412,7 +413,7 @@ class chine_helper:
                 material_helper.assign_material(slicer_plane,material_helper.get_material_support())
                 self.the_hull.longitudal_slicer_list.append(slicer_plane)
                 self.select_and_extrude_slicer(slicer_plane,-self.longitudal_width*self.slicer_longitudal_ratio)
-                #curve_helper.select_object(slicer_plane,True)
+                #bpy_helper.select_object(slicer_plane,True)
                 #bpy.ops.transform.rotate(value=radians(180),orient_axis='Y')
 
                 if self.curve_width<0:

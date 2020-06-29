@@ -54,15 +54,11 @@ else:
 
 
 classes = (
-    ui.MyProperties,
-    ui.CalculateCGOperator,
-    ui.OBJECT_PT_my_panel,
+    ui.hullgen_Properties,
+    ui.OBJECT_PT_bpyhullgen_panel,
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
     ui.GenSceneOperator,
-    ui.MeasureVolumeOperator,
-    ui.MeasureAreaSelectedOperator,
-    ui.MeasureAreaAllOperator,
     ui.ApplyAllBoolOperator,
     ui.DeleteAllOperator,
     ui.Export_CSV_Operator,
@@ -74,8 +70,6 @@ classes = (
     ui.InsideShrinkOperator,
     ui.AluminumPlatesOperator,
     ui.ShrinkOutlinerOperator,
-    ui.SubmergeOperator,
-    ui.RollTestOperator,
     ui.MeasureDistanceBetweenVerticesOperator,
     ui.ScaleToSizeOperator
 )
@@ -91,11 +85,11 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.my_tool = PointerProperty( type = ui.MyProperties )
+    bpy.types.Scene.hullgen_Props = PointerProperty( type = ui.hullgen_Properties )
 
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Scene.my_tool
+    del bpy.types.Scene.hullgen_Props
