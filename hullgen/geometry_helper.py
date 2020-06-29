@@ -141,6 +141,9 @@ def rotate_object_X(ob,angle):
 
 def apply_all_bool_modifiers():
 
+	# faster implementation maybe in future instead of bpy.ops operations?
+	#mesh = your_object.to_mesh(scene = bpy.context.scene, apply_modifiers = True, settings = 'PREVIEW')
+
 	if(bpy.context.active_object.mode!="OBJECT"):
 		bpy.ops.object.editmode_toggle()
 	
@@ -305,7 +308,7 @@ def delete_non_aligned_faces(ob,func):
 		bpy.ops.object.mode_set(mode=old_mode)
 
 
-def import_object(path,target_object,location,view_collection=None,rotation=None):
+def import_object(path,target_object,location,view_collection=None,rotation=None,parent=None):
 	nob = bpy.ops.wm.link(directory=path,link=True,files=[{'name': target_object}], relative_path=False)
 	ob = bpy.context.active_object
 	ob.location=location
@@ -314,8 +317,13 @@ def import_object(path,target_object,location,view_collection=None,rotation=None
 
 	if rotation!=None:
 		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
+
 		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
+
 		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
+
+	if parent!=None:
+		ob.parent=parent
 
 	return ob
 
