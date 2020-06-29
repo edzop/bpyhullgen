@@ -118,7 +118,7 @@ ob = bpy.context.active_object
 
 ob.name="deck_cockpit"
 
-tail_cut_angle=-22
+tail_cut_angle=22
 
 bpy.ops.transform.resize(value=(1,1,2))
 bpy.ops.object.transform_apply(scale=True,location=False)
@@ -173,13 +173,13 @@ add_pilot_house()
 
 def add_extras():
 	# ================ Add Rudder
-	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-4.6, 0, -0.75) )
+	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-4.6, 0, -1.05) )
 
 	rudder_object = bpy.context.active_object
 
 	rudder_object.name="Rudder"
 
-	bpy.ops.transform.resize(value=(0.7,0.05,0.8))
+	bpy.ops.transform.resize(value=(0.7,0.10,0.8))
 	bpy.ops.object.transform_apply(scale=True,location=False)
 
 	bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
@@ -189,13 +189,13 @@ def add_extras():
 	curve_helper.hide_object(rudder_object)
 
 	# ================ Add Keel
-	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-1, 0, -0.75) )
+	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-1.9, 0, -1.05) )
 
 	ob = bpy.context.active_object
 
 	ob.name="Keel"
 
-	bpy.ops.transform.resize(value=(5.6,0.05,0.8))
+	bpy.ops.transform.resize(value=(3.8,0.10,0.8))
 	bpy.ops.object.transform_apply(scale=True,location=False)
 
 	bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
@@ -231,14 +231,14 @@ def add_props():
 	view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
 
 	import_library_path="assets/actors.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(1.3,0,-0.6),view_collection_props,rotation=(0,0,0))
-	ob = geometry_helper.import_object(import_library_path,"man.stand",(0.2,0,-0.95),view_collection_props,rotation=(0,0,0))
+	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(1.3,0,-0.6),view_collection_props,rotation=(0,0,0),parent=the_hull.hull_object)
+	ob = geometry_helper.import_object(import_library_path,"man.stand",(0.2,0,-0.95),view_collection_props,rotation=(0,0,0),parent=the_hull.hull_object)
 
 	import_library_path="assets/boat_assets.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0.6,0,-1.3),view_collection_props,rotation=(0,0,0))
-	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(-.6,0,-1.3),view_collection_props,rotation=(0,0,0))
+	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0.6,0,-1.3),view_collection_props,rotation=(0,0,0),parent=the_hull.hull_object)
+	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(-.6,0,-1.3),view_collection_props,rotation=(0,0,0),parent=the_hull.hull_object)
 
-	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-0.97),view_collection_props,rotation=(0,93,0))
+	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-1.2),view_collection_props,rotation=(0,-93,0),parent=the_hull.hull_object)
 
 
 add_props()
