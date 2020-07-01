@@ -54,7 +54,7 @@ class hull_maker:
         self.hull_height=height
         self.hull_length=length
         self.hull_width=width
-        chine_list=list()
+        self.chine_list=[]
 
         self.longitudal_list=list()
         self.longitudal_slicer_list=list()

@@ -276,15 +276,10 @@ class Curve_Helper:
 		#bpy.ops.transform.translate(value=(0, 0, 0.5))
 		bpy.ops.transform.translate(value=space)
 
-	def rotate_curve(self,rotation,flip_z=False):
-
+	def rotate_curve(self,rotation):
 		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
 		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
-
-		if flip_z==True:
-			bpy.ops.transform.rotate(value=radians(-rotation[2]),orient_axis='Z')
-		else:
-			bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
+		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
 
 
 
