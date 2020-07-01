@@ -48,7 +48,7 @@ def make_window(name="window",centerpoint=(0,0,0),diameter=1,depth=0.4):
 	material_bolts=material_helper.get_material_bolts()
 	material_window=material_helper.get_material_window()
 
-	view_collection_windows=curve_helper.make_collection("windows",bpy.context.scene.collection.children)
+	view_collection_windows=bpy_helper.make_collection("windows",bpy.context.scene.collection.children)
 
 	ellipse_ratio=2
 
@@ -56,7 +56,7 @@ def make_window(name="window",centerpoint=(0,0,0),diameter=1,depth=0.4):
 
 	main_circle=make_circle(window_name,centerpoint,diameter,depth)
 
-	curve_helper.move_object_to_collection(view_collection_windows,main_circle)
+	bpy_helper.move_object_to_collection(view_collection_windows,main_circle)
 
 	material_helper.assign_material(main_circle,material_window)
 
@@ -79,7 +79,7 @@ def make_window(name="window",centerpoint=(0,0,0),diameter=1,depth=0.4):
 
 		material_helper.assign_material(bolt_hole,material_bolts)
 
-		curve_helper.move_object_to_collection(view_collection_windows,bolt_hole)
+		bpy_helper.move_object_to_collection(view_collection_windows,bolt_hole)
 
 
 	return main_circle
@@ -148,7 +148,7 @@ def make_window_on_object(obj,position,angle):
 
 def cut_windows():
 
-	view_collection_windows=curve_helper.make_collection("windows",bpy.context.scene.collection.children)
+	view_collection_windows=bpy_helper.make_collection("windows",bpy.context.scene.collection.children)
 
 	hull_walls=[]
 

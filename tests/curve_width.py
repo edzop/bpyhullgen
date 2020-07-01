@@ -25,7 +25,7 @@ theCurveHelper = curve_helper.Curve_Helper()
 
 theCurveHelper.curve_angle=40
 
-for width in curve_helper.frange(0.1,1,0.1):
+for width in bpy_helper.frange(0.1,1,0.1):
     theCurveHelper.define_curve(10,width)
     theCurveHelper.generate_curve("curve_width_%1.2f"%width)
     theCurveHelper.curve_object.location.y=-width
@@ -35,7 +35,7 @@ for width in curve_helper.frange(0.1,1,0.1):
 
 theCurveHelper.curve_angle=-40
 
-for length in curve_helper.frange(1,10,1):
+for length in bpy_helper.frange(1,10,1):
     theCurveHelper.define_curve(length,-1)
     theCurveHelper.generate_curve("curve_length_%1.2f"%length)
     theCurveHelper.curve_object.location.y=length/20

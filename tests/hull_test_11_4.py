@@ -131,7 +131,7 @@ def add_pilot_house(the_hull):
 	bool_new.object = ob
 	bool_new.operation = 'UNION'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 add_pilot_house(the_hull)
 
@@ -149,7 +149,7 @@ def add_window(the_hull):
 	bool_new.object = ob
 	bool_new.operation = 'DIFFERENCE'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 #add_window(the_hull)
 
@@ -167,13 +167,13 @@ def add_deck_cockpit(the_hull):
 	bool_new.object = ob
 	bool_new.operation = 'DIFFERENCE'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 add_deck_cockpit(the_hull)
 
 # ============================================================================================
 def add_props():
-	view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
+	view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
 
 	import_library_path="assets/actors.blend/Collection/"
 	ob = geometry_helper.import_object(import_library_path,"man.stand",(0,0.4,-1.3),view_collection_props)

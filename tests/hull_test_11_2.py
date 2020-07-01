@@ -101,7 +101,7 @@ bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
 bool_new.object = rudder_object
 bool_new.operation = 'UNION'
 
-curve_helper.hide_object(rudder_object)
+bpy_helper.hide_object(rudder_object)
 
 # ================ Add Keel
 bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-1.2, 0, -1.25) )
@@ -117,7 +117,7 @@ bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
 bool_new.object = ob
 bool_new.operation = 'UNION'
 
-curve_helper.hide_object(ob)
+bpy_helper.hide_object(ob)
 
 # ================ Add Pilot House
 bpy.ops.mesh.primitive_cube_add(size=2.0, location=(-0.4, 0, -0.3) )
@@ -152,7 +152,7 @@ bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_join")
 bool_new.object = ob
 bool_new.operation = 'UNION'
 
-curve_helper.hide_object(ob)
+bpy_helper.hide_object(ob)
 
 # ================ Add deck cockpit
 bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0) )
@@ -170,7 +170,7 @@ bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
 bool_new.object = ob
 bool_new.operation = 'DIFFERENCE'
 
-curve_helper.hide_object(ob)
+bpy_helper.hide_object(ob)
 
 # =======================================================
 
@@ -180,7 +180,7 @@ curve_helper.hide_object(ob)
 #geometry_helper.apply_all_bool_modifiers()
 #bpy_helper.select_object(the_hull.hull_object,True)
 
-view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
+view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
 import_library_path="assets/boat_assets.blend/Collection/"
 ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,-93,0))
 ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))

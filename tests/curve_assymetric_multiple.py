@@ -7,7 +7,7 @@ from bpyhullgen.hullgen import render_helper
 text_offset=(-5,-2.44,0)
 
 
-for a in curve_helper.frange(0,1,0.2):
+for a in bpy_helper.frange(0,1,0.2):
     # =========================================
     theCurveHelper = curve_helper.Curve_Helper()
     theCurveHelper.asymmetry[1]=a

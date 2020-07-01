@@ -126,7 +126,7 @@ def add_pilot_house():
 	bool_new.object = ob
 	bool_new.operation = 'UNION'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 add_pilot_house()
 
@@ -145,7 +145,7 @@ def add_extras():
 	bool_new.object = rudder_object
 	bool_new.operation = 'UNION'
 
-	curve_helper.hide_object(rudder_object)
+	bpy_helper.hide_object(rudder_object)
 
 	# ================ Add Keel
 	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-1.2, 0, -1.25) )
@@ -161,7 +161,7 @@ def add_extras():
 	bool_new.object = ob
 	bool_new.operation = 'UNION'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 	# ================ Add deck cockpit
 	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-2.2, 0, 0) )
@@ -177,11 +177,11 @@ def add_extras():
 	bool_new.object = ob
 	bool_new.operation = 'DIFFERENCE'
 
-	curve_helper.hide_object(ob)
+	bpy_helper.hide_object(ob)
 
 
 
-view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
+view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
 
 import_library_path="assets/actors.blend/Collection/"
 ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(0,0,-0.6),view_collection_props,rotation=(0,0,0))

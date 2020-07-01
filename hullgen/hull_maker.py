@@ -83,8 +83,8 @@ class hull_maker:
 
         material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
 
-        view_collection_hull=curve_helper.make_collection("hull",bpy.context.scene.collection.children)
-        curve_helper.move_object_to_collection(view_collection_hull,self.hull_object)
+        view_collection_hull=bpy_helper.make_collection("hull",bpy.context.scene.collection.children)
+        bpy_helper.move_object_to_collection(view_collection_hull,self.hull_object)
 
         return self.hull_object
 
@@ -122,7 +122,7 @@ class hull_maker:
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.mesh.normals_make_consistent(inside=False)
                 bpy.ops.object.mode_set(mode='OBJECT')
-                curve_helper.hide_object(bh.bulkhead_void_object)
+                bpy_helper.hide_object(bh.bulkhead_void_object)
 
                 bh.bulkhead_void_object.parent=self.hull_object
             
@@ -188,11 +188,11 @@ class hull_maker:
     # so longitudal frames don't block entrance
     def cleanup_center(self,clean_location,clean_size):
 
-        view_collection_cleaner=curve_helper.make_collection("cleaner",bpy.context.scene.collection.children)
+        view_collection_cleaner=bpy_helper.make_collection("cleaner",bpy.context.scene.collection.children)
 
         object_end_clean = self.make_bool_cube("mid_clean_%s"%clean_location[0],location=clean_location,size=clean_size)
 
-        curve_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+        bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
 
         material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
 
@@ -202,14 +202,14 @@ class hull_maker:
             modifier.object=object_end_clean
             modifier.operation="DIFFERENCE"
             modifier.double_threshold=0
-            curve_helper.hide_object(object_end_clean)
+            bpy_helper.hide_object(object_end_clean)
 
     # Trims the ends of the longitudal framing where it extends past last bulkhead
     # x_locations is a list of stations where they will be chopped
     # rotations is a corresponding list of rotations in the Y axis. Bulkheads are assumed to be not rotated on X an Z axises. 
     def cleanup_longitudal_ends(self,x_locations,rotations=None):
 
-        view_collection_cleaner=curve_helper.make_collection("cleaner",bpy.context.scene.collection.children)
+        view_collection_cleaner=bpy_helper.make_collection("cleaner",bpy.context.scene.collection.children)
 
         end_clean_list=[]
 
@@ -232,7 +232,7 @@ class hull_maker:
                 bpy_helper.select_object(object_end_clean,True)
                 bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
 
-            curve_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+            bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
 
             material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
             end_clean_list.append(object_end_clean)
@@ -246,6 +246,6 @@ class hull_maker:
                 modifier.object=object_end_clean
                 modifier.operation="DIFFERENCE"
                 modifier.double_threshold=0
-                curve_helper.hide_object(object_end_clean)
+                bpy_helper.hide_object(object_end_clean)
 
-        #curve_helper.hide_object(view_collection_cleaner)
+        #bpy_helper.hide_object(view_collection_cleaner)

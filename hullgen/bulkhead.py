@@ -37,10 +37,10 @@ class bulkhead:
         self.watertight=watertight
 
         self.the_hull_definition=the_hull_definition
-        self.bulkhead_collection=curve_helper.make_collection("bulkheads",bpy.context.scene.collection.children)
-        self.bulkhead_void_collection=curve_helper.make_collection("bulkhead_void",bpy.context.scene.collection.children)
+        self.bulkhead_collection=bpy_helper.make_collection("bulkheads",bpy.context.scene.collection.children)
+        self.bulkhead_void_collection=bpy_helper.make_collection("bulkhead_void",bpy.context.scene.collection.children)
 
-        #curve_helper.hide_object(self.bulkhead_void_collection)
+        #bpy_helper.hide_object(self.bulkhead_void_collection)
 
     def move_verts_z(self,ob,new_val):
 
@@ -170,9 +170,9 @@ class bulkhead:
             bool_void.operation = 'DIFFERENCE'
             bool_void.double_threshold=0
 
-            curve_helper.move_object_to_collection(self.bulkhead_void_collection,self.bulkhead_void_object)
+            bpy_helper.move_object_to_collection(self.bulkhead_void_collection,self.bulkhead_void_object)
 
 
-        curve_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_object)
+        bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_object)
 
         return self.bulkhead_object

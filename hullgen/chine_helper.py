@@ -104,9 +104,9 @@ class chine_helper:
 		self.curve_height=the_hull.hull_height
 		self.extrude_width=the_hull.hull_height*3
 
-		self.view_collection_chines=curve_helper.make_collection("chines",bpy.context.scene.collection.children)
-		self.view_collection_longitudals=curve_helper.make_collection("longitudals",bpy.context.scene.collection.children)
-		self.view_collection_longitudal_slicers=curve_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
+		self.view_collection_chines=bpy_helper.make_collection("chines",bpy.context.scene.collection.children)
+		self.view_collection_longitudals=bpy_helper.make_collection("longitudals",bpy.context.scene.collection.children)
+		self.view_collection_longitudal_slicers=bpy_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
  
 	# After the boolean operation is complete the vertices can be removed that are on the other side
 	# of the plane used for the boolean operation. 
@@ -387,9 +387,9 @@ class chine_helper:
 		
 		#slicer_plane.location.z=- ( (longitudal_element.thickness*longitudal_element.slicer_overcut)-longitudal_element.thickness ) / 2
 
-		curve_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
-		curve_helper.hide_object(slicer_plane)
-		curve_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
+		bpy_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
+		bpy_helper.hide_object(slicer_plane)
+		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
 
 	def make_chine2(self,twist=None,inversed=False):
 
@@ -431,7 +431,7 @@ class chine_helper:
 		material_helper.assign_material(curve_object,material_helper.get_material_bool())
 		bpy.ops.transform.translate(value=(self.bool_correction_offset[0], self.bool_correction_offset[1], self.bool_correction_offset[2]))
 
-		curve_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
+		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
 		theCurveHelper.extrude_curve(self.extrude_width)
 
 		bpy_helper.select_object(curve_object,True)
@@ -470,10 +470,10 @@ class chine_helper:
 		
 		theCurveHelper.add_boolean(self.the_hull.hull_object)
 
-		curve_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
-		curve_helper.hide_object(theCurveHelper.curve_object)
+		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
+		bpy_helper.hide_object(theCurveHelper.curve_object)
 
-		curve_helper.hide_object(curve_object)
+		bpy_helper.hide_object(curve_object)
 
 		self.the_hull.chine_list.append(curve_object)
 

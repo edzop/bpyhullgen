@@ -43,13 +43,13 @@ class keel:
         self.lateral_offset=lateral_offset
         self.top_height=top_height
         self.the_hull_definition=the_hull_definition
-        self.keel_collection=curve_helper.make_collection("keels",bpy.context.scene.collection.children)
+        self.keel_collection=bpy_helper.make_collection("keels",bpy.context.scene.collection.children)
         self.station_start=station_start
         self.station_end=station_end
 
         self.thickness=the_hull_definition.structural_thickness
 
-        #curve_helper.hide_object(self.bulkhead_void_collection)
+        #bpy_helper.hide_object(self.bulkhead_void_collection)
 
 
     def make_keel(self,slicer_cut_height=0.2):
@@ -91,7 +91,7 @@ class keel:
 
 
         bpy_helper.select_object(self.keel_object,True)
-        curve_helper.move_object_to_collection(self.keel_collection,self.keel_object)
+        bpy_helper.move_object_to_collection(self.keel_collection,self.keel_object)
 
         bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
         bool_new.object = self.the_hull_definition.hull_object
@@ -133,7 +133,7 @@ class keel:
         self.keel_slicer_object.hide_viewport = True
 
         bpy_helper.select_object(self.keel_slicer_object,True)
-        curve_helper.move_object_to_collection(self.keel_collection,self.keel_slicer_object)
+        bpy_helper.move_object_to_collection(self.keel_collection,self.keel_slicer_object)
 
 
         bool_new = self.keel_slicer_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")

@@ -64,7 +64,7 @@ for lg in the_hull.longitudal_slicer_list:
     modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')
     modifier.object=lg
     modifier.operation="DIFFERENCE"
-    curve_helper.hide_object(lg)
+    bpy_helper.hide_object(lg)
 
 for lg in the_hull.longitudal_list:
     curve_helper.make_rounded(lg,0.2)

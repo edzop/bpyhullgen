@@ -36,14 +36,14 @@ def separate_active_by_material():
 
 	object_name=selected_object.name
 
-	view_collection_separated=curve_helper.make_collection(object_name,bpy.context.scene.collection.children)
+	view_collection_separated=bpy_helper.make_collection(object_name,bpy.context.scene.collection.children)
 
 	bpy.ops.mesh.separate(type='MATERIAL')
 
 	for obj in bpy.data.objects:
 		if obj.type=="MESH":
 			if obj.name.startswith(object_name):
-				curve_helper.move_object_to_collection(view_collection_separated,obj)
+				bpy_helper.move_object_to_collection(view_collection_separated,obj)
 
 				if len(obj.data.materials)>0:
 					first_material_name=obj.data.materials[0].name
@@ -313,7 +313,7 @@ def import_object(path,target_object,location,view_collection=None,rotation=None
 	ob = bpy.context.active_object
 	ob.location=location
 	if view_collection!=None:
-		curve_helper.move_object_to_collection(view_collection,ob)
+		bpy_helper.move_object_to_collection(view_collection,ob)
 
 	if rotation!=None:
 		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')

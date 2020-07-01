@@ -56,7 +56,7 @@ edge_offset=0.18
 
 
 bulkhead_definitions=[]
-for station_position in curve_helper.frange(-the_hull.hull_length/2+edge_offset,the_hull.hull_length/2-edge_offset,0.4):
+for station_position in bpy_helper.frange(-the_hull.hull_length/2+edge_offset,the_hull.hull_length/2-edge_offset,0.4):
 
 	bulkhead_definitions.append([station_position,-0.9,False,0.1])
 
