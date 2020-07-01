@@ -40,9 +40,9 @@ new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.4,wi
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-window_helper.make_window_on_chine(new_chine,0.5,-0.3)
-window_helper.make_window_on_chine(new_chine,1.5,-0.3)
-window_helper.make_window_on_chine(new_chine,-1.5,-0.3)
+window_helper.make_window_on_chine(new_chine,0.5,0.3)
+window_helper.make_window_on_chine(new_chine,1.5,0.3)
+window_helper.make_window_on_chine(new_chine,-1.5,0.3)
 
 
 new_chine.rotation=[39,0,0]

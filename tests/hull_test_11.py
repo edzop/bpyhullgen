@@ -80,9 +80,9 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.asymmetry[1]=0
 new_chine.make_chine()
 
-window_helper.make_window_on_chine(new_chine,0.5,0.32)
-window_helper.make_window_on_chine(new_chine,1.5,0.32)
-window_helper.make_window_on_chine(new_chine,-1.5,0.32)
+window_helper.make_window_on_chine(new_chine,0.5,0.34)
+window_helper.make_window_on_chine(new_chine,1.5,0.34)
+window_helper.make_window_on_chine(new_chine,-1.5,0.34)
 
 new_chine.rotation=[75,0,0]
 new_chine.offset=[0,0,0.2]

@@ -84,22 +84,43 @@ def make_window(name="window",centerpoint=(0,0,0),diameter=1,depth=0.4):
 
 	return main_circle
 
-def make_window_on_chine(new_chine,offset_x,offset_z):
+def make_window_on_chine(new_chine,offset_x,offset_z,opposite_side=False):
 	
-	curve_upper_L=new_chine.curve_object_1
-	curve_upper_R=new_chine.curve_object_2
+	# disabled temporarily for new curve functionality integration
 
-	new_window=make_window(curve_upper_L.name,(0,0,0),0.18,0.1)
-	new_window.parent=curve_upper_L
-	new_window.location.y=-new_chine.curve_width
+	curve_L=None
+	curve_R=None
+
+	for curve in new_chine.curve_objects:
+
+		if curve.name.endswith(".L"):
+			curve_L=curve
+		elif curve.name.endswith(".R"):
+			curve_R=curve
+
+	window_thickness=0.1
+		
+	new_window=make_window(curve_L.name,(0,0,0),0.18,window_thickness)
+	new_window.parent=curve_L
+
+	if opposite_side==True:
+		new_window.location.y=new_chine.curve_width+window_thickness
+	else:
+		new_window.location.y=-new_chine.curve_width #-window_thickness
+
 	new_window.location.z=offset_z
 	new_window.location.x=offset_x
 	new_window.rotation_euler[0]=radians(90)
 
-	new_window=make_window(curve_upper_R.name,(0,0,0),0.18,0.1)
-	new_window.parent=curve_upper_R
-	new_window.location.y=-new_chine.curve_width
-	new_window.location.z=-offset_z
+	new_window=make_window(curve_R.name,(0,0,0),0.18,window_thickness)
+	new_window.parent=curve_R
+
+	if opposite_side==True:
+		new_window.location.y=-new_chine.curve_width-window_thickness
+	else:
+		new_window.location.y=new_chine.curve_width #-window_thickness
+
+	new_window.location.z=offset_z
 	new_window.location.x=offset_x
 	new_window.rotation_euler[0]=radians(90)
 
