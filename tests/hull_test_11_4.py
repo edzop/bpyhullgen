@@ -34,13 +34,11 @@ the_hull.make_hull_object()
 new_chine=chine_helper.chine_helper(the_hull)
 
 new_chine.rotation=[180,0,0]
-new_chine.offset=[0,-0.06,-0.5]
+new_chine.offset=[0,-0.06,0]
 new_chine.name="side"
-new_chine.longitudal_count=1
-new_chine.longitudal_thickness=0.05
-new_chine.longitudal_width=-0.15
-
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.4,width=-0.15,thickness=0.05))
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
 window_helper.make_window_on_chine(new_chine,0.5,-0.3)
 window_helper.make_window_on_chine(new_chine,1.5,-0.3)
@@ -51,17 +49,20 @@ new_chine.rotation=[39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.longitudal_z_offset=-0.33
 new_chine.name="mid"
-new_chine.set_longitudal_curve(-0.4,-5)
-new_chine.longitudal_z_offset=-0.55
-new_chine.make_chine()
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.55,width=-0.15,thickness=0.05)
+new_longitudal.set_curve(-0.4,-5)
+new_chine.add_longitudal_element(new_longitudal)
 
-new_chine.longitudal_count=0
+new_chine.make_chine()
+new_chine.clear_longitudal_elements()
+
 new_chine.rotation=[-45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
-new_chine.longitudal_z_offset=0
-new_chine.set_longitudal_curve(0,0)
+#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.15,thickness=0.05))
+#new_chine.set_longitudal_curve(0,0)
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
 
 new_chine.longitudal_count=0
@@ -70,19 +71,21 @@ new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
-new_chine.set_longitudal_curve(0.6,-10)
-new_chine.longitudal_z_offset=0.5
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.45,width=-0.15,thickness=0.05)
+new_longitudal.set_curve(-0.6,-10)
+new_chine.add_longitudal_element(new_longitudal)
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
-new_chine.longitudal_count=1
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.0,width=-0.15,thickness=0.05))
 new_chine.rotation=[-90,0,0]
 new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
 new_chine.curve_width=0.8
 #new_chine.curve_angle=55
-new_chine.longitudal_z_offset=0
+
 new_chine.symmetrical=False
-new_chine.set_longitudal_curve(0,0)
+#new_chine.set_longitudal_curve(0,0)
 new_chine.make_chine()
 
 # ================ modify hull

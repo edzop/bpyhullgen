@@ -42,15 +42,20 @@ new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.27,-0.5]
 new_chine.name="side"
-new_chine.longitudal_count=1
-new_chine.set_longitudal_curve(-0.4,-10)
-new_chine.longitudal_z_offset=-0.405
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.46,width=-0.2,thickness=0.1)
+new_longitudal.set_curve(radius=-0.4,angle=-10)
+new_chine.add_longitudal_element(new_longitudal)
+
+
+
 
 #new_chine.curve_twist=[0,25,25]
 new_chine.make_chine(twist=[0,0,0])
+new_chine.clear_longitudal_elements()
 #new_chine.make_chine()
 
-new_chine.set_longitudal_curve(0,0)
+#new_chine.set_longitudal_curve(0,0)
+
 new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.curve_width=1.4
 
@@ -59,10 +64,11 @@ new_chine.rotation=[40,0,0]
 new_chine.offset=[0,-0.2,0.45]
 new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
-new_chine.longitudal_count=1
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
 new_chine.longitudal_z_offset=-0.7
+
 new_chine.make_chine()
-new_chine.longitudal_count=0
+new_chine.clear_longitudal_elements()
 
 new_chine.curve_width=1.1
 
@@ -85,23 +91,26 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.curve_width=1.6
 new_chine.asymmetry[1]=0
 new_chine.curve_twist=[0,30,-50]
-new_chine.longitudal_count=0
-new_chine.longitudal_bend_radius=0.2
-new_chine.set_longitudal_curve(0.2,10)
-new_chine.longitudal_z_offset=-0.4
+
+#new_chine.longitudal_count=0
+#new_chine.longitudal_bend_radius=0.2
+#new_chine.set_longitudal_curve(0.2,10)
+#new_chine.longitudal_z_offset=-0.4
 new_chine.make_chine()
 
 new_chine.asymmetry[1]=0
 new_chine.curve_length=the_hull.hull_length*1.25
 new_chine.rotation=[-90,1,0]
 new_chine.offset=[0,0,-0.51]
-new_chine.set_longitudal_curve(0,0)
+
 new_chine.name="roof"
 new_chine.curve_width=0.8
 new_chine.curve_angle=0
 new_chine.symmetrical=False
-new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=0
+
+#new_chine.set_longitudal_curve(0,0)
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1))
+
 
 # invert for reverse curve
 #new_chine.extrude_multiplier=-1

@@ -39,9 +39,9 @@ new_chine.offset=[0,-0.06,-0.5]
 new_chine.name="side"
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
-new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=0.1
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.1,width=-0.2,thickness=0.1))
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
 window_helper.make_window_on_chine(new_chine,0.5,-0.2)
 window_helper.make_window_on_chine(new_chine,1.5,-0.2)
@@ -51,15 +51,16 @@ window_helper.make_window_on_chine(new_chine,-1.5,-0.2)
 new_chine.rotation=[39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.name="mid"
-new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=-0.2
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.3,width=-0.2,thickness=0.1))
+
 #new_chine.curve_twist=[0,0,0]
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
 new_chine.rotation=[-45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
-new_chine.longitudal_count=0
+
 new_chine.make_chine()
 
 new_chine.rotation=[79,3,0]
@@ -67,10 +68,10 @@ new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
-new_chine.longitudal_count=1
-new_chine.longitudal_z_offset=-0.2
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1))
 new_chine.make_chine()
 #new_chine.curve_length=the_hull.hull_length*1.0
+new_chine.clear_longitudal_elements()
 
 new_chine.rotation=[-90,0,0]
 new_chine.offset=[0,0,-0.7]
@@ -181,7 +182,7 @@ curve_helper.hide_object(ob)
 
 view_collection_props=curve_helper.make_collection("props",bpy.context.scene.collection.children)
 import_library_path="assets/boat_assets.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,93,0))
+ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,-93,0))
 ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))
 
 

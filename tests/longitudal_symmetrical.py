@@ -32,21 +32,16 @@ new_chine.extrude_width=1
 new_chine.rotation=[0,0,0]
 new_chine.offset=[0,-0.2,0]
 new_chine.name="top"
-new_chine.longitudal_count=1
-new_chine.longitudal_thickness=0.8
-new_chine.longitudal_width=-0.15
+new_chine.add_longitudal_element(chine_helper.longitudal_element(0,-0.15,0.8))
 
 new_chine.symmetrical=True
 new_chine.make_chine()
 
-new_chine.curve_object_1.hide_viewport=False
-new_chine.curve_object_1.hide_render=False
-
-new_chine.curve_object_2.hide_viewport=False
-new_chine.curve_object_2.hide_render=False
-
-wireframe = new_chine.curve_object_2.modifiers.new(type="WIREFRAME", name="w1")
-wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="w2")
+for l in the_hull.chine_list:
+    print(l)
+    l.hide_viewport=False
+    l.hide_render=False
+    wireframe = l.modifiers.new(type="WIREFRAME", name="w2")
 
 bpy.data.objects.remove(the_hull.hull_object)
 

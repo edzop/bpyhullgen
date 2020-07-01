@@ -30,14 +30,14 @@ the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
 
-new_chine.longitudal_count=1
-new_chine.longitudal_thickness=0.3
-new_chine.longitudal_width=0.5
-new_chine.longitudal_height=0
-new_chine.slicer_longitudal_ratio=1
+new_longitudal=chine_helper.longitudal_element(0,0.5,0.3)
+new_longitudal.set_curve(radius=0.8,angle=4)
+new_longitudal.slicer_ratio=1
 
-new_chine.longitudal_bend_radius=0.8
-new_chine.longitudal_curve_angle=4
+new_chine.add_longitudal_element(new_longitudal)
+
+
+
 
 new_chine.curve_width=-1
 new_chine.curve_length=the_hull.hull_length+0.1

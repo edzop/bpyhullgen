@@ -35,21 +35,21 @@ new_chine=chine_helper.chine_helper(the_hull)
 new_chine.curve_width=1
 #new_chine.curve_height=4
 new_chine.curve_length=the_hull.hull_length*1.2
-new_chine.rotation=[180,0,0]
-new_chine.offset=[0,-0.35,-0.5]
+new_chine.rotation=[0,0,0]
+new_chine.offset=[0,0.35,0]
 new_chine.asymmetry[0]=1
-
-new_chine.longitudal_count=1
-new_chine.longitudal_width=-0.175
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1))
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.4,width=-0.13,thickness=0.2))
 
 new_chine.name="side"
 
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
+
 
 new_chine.curve_length=the_hull.hull_length*1.1
-new_chine.longitudal_count=0
 
 new_chine.rotation=[-36,0,0]
 new_chine.offset=[0,0,-0.84]
@@ -216,6 +216,11 @@ bulkhead_definitions = [
 
 #the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
 
+station_start=bulkhead_definitions[0][0]+thickness/2
+station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
+
+
+
 x_locations=[	
 				bulkhead_definitions[0][0],
 				bulkhead_definitions[len(bulkhead_definitions)-1][0]
@@ -226,75 +231,74 @@ the_hull.cleanup_longitudal_ends(x_locations)
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
 
-station_start=bulkhead_definitions[0][0]+thickness/2
-station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
+def make_keels():
 
-print("%d %d"%(station_start,station_end))
+	keel_middle_space=0.3
+	the_keel = keel.keel(the_hull,
+			lateral_offset=keel_middle_space/2,
+			top_height=levels[0],
+			station_start=station_start,
+			station_end=station_end)
 
-keel_middle_space=0.3
-the_keel = keel.keel(the_hull,
-		lateral_offset=keel_middle_space/2,
-		top_height=levels[0],
-		station_start=station_start,
-		station_end=station_end)
+	the_keel.make_keel(0.1)
+	the_hull.integrate_keel(the_keel)	
 
-the_keel.make_keel(0.1)
-the_hull.integrate_keel(the_keel)	
+	the_keel = keel.keel(the_hull,
+			lateral_offset=-keel_middle_space/2,
+			top_height=levels[0],
+			station_start=station_start,
+			station_end=station_end)
 
-the_keel = keel.keel(the_hull,
-		lateral_offset=-keel_middle_space/2,
-		top_height=levels[0],
-		station_start=station_start,
-		station_end=station_end)
+make_keels()
 
-the_keel.make_keel(0.1)
-the_hull.integrate_keel(the_keel)
+def add_fuel_tanks():
 
+	fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
+					x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
+					y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+					name="fuel_1L")
 
-fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
-				x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
-				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
-				name="fuel_1L")
-
-fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
-				x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
-				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
-				name="fuel_1R")
+	fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[0][0]+bulkhead_definitions[0][3]/2,
+					x2=bulkhead_definitions[1][0]-bulkhead_definitions[1][3]/2,
+					y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+					name="fuel_1R")
 
 
-fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
-				x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
-				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
-				name="fuel_2L")
+	fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
+					x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
+					y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+					name="fuel_2L")
 
-fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
-				x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
-				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
-				name="fuel_2R")				
+	fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[1][0]+bulkhead_definitions[1][3]/2,
+					x2=bulkhead_definitions[2][0]-bulkhead_definitions[2][3]/2,
+					y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+					name="fuel_2R")				
 
 
-fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
-				x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
-				y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
-				name="fuel_3L")
+	fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
+					x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
+					y_offset=-(keel_middle_space/2)-the_keel.thickness/2,
+					name="fuel_3L")
 
-fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
-				top=levels[0],
-				x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
-				x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
-				y_offset=(keel_middle_space/2)+the_keel.thickness/2,
-				name="fuel_3R")								
+	fuel_tank_1R=geometry_helper.create_bilgetank(the_hull,
+					top=levels[0],
+					x1=bulkhead_definitions[4][0]+bulkhead_definitions[4][3]/2,
+					x2=bulkhead_definitions[5][0]-bulkhead_definitions[5][3]/2,
+					y_offset=(keel_middle_space/2)+the_keel.thickness/2,
+					name="fuel_3R")								
 
+
+add_fuel_tanks()
 
 framedata=[
 [ 1, [2.256688,-9.173357,4.958309],[0.000000,0.000000,0.000000] ],
