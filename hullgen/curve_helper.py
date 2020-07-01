@@ -23,10 +23,6 @@ from math import radians, degrees
 
 from ..hullgen import bpy_helper
 
-def curve_helper_hello():
-	print("curve_helper_hello")
-
-
 def cleanup_shape(ob):
 	if(bpy.context.active_object.mode=="OBJECT"):
 		bpy.ops.object.editmode_toggle()
@@ -93,12 +89,8 @@ def move_object_to_collection(new_collection,the_object):
 
 	C_collection = find_collection(bpy, the_object)
 	C_collection.objects.unlink(the_object)
-	#print(the_object)
-	#print(C_collection)
 
 	new_collection.objects.link(the_object)
-
-
 
 def frange(start, stop, step):
 	i = start
@@ -106,15 +98,9 @@ def frange(start, stop, step):
 		yield i
 		i += step
 		
-
 class Curve_Helper:
 
 	coordinates = []
-
-	#	((0, -1, 0), (0, -1.5, 0), (0, -0.5, 0)),
-	#	((-1, 0, 0), (-1, -0.5, 0), (-1, 0.5, 0)),   
-	#	((0, 1, 0), (0, 0.5, 0), (0, 1.5, 0)),
-	#]
 
 	curve_length=5
 	curve_width=1.5

@@ -69,12 +69,6 @@ class chine_helper:
 
 	asymmetry=[0,0]
 
-	longitudal_count=0
-	longitudal_height=0
-	longitudal_thickness=0.05
-	longitudal_width=-0.15
-	longitudal_z_offset=0
-
 	# amount of distance slicer is poking through skin to ensure clean geometry
 	skin_pokethrough=0.01
 
