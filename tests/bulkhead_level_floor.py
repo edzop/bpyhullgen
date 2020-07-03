@@ -63,7 +63,7 @@ for station_position in bpy_helper.frange(-the_hull.hull_length/2+edge_offset,th
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
 	
-the_hull.hull_object.hide_set(True)
+the_hull.hull_object.hide_viewport=True
 #the_hull.hull_object.hide_render=True
 
 framedata=[
