@@ -25,6 +25,18 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import keel
 from bpyhullgen.hullgen import render_helper
+from bpyhullgen.hullgen import bpy_helper
+
+bulkhead_spacing=1.0
+start_bulkhead_location=-3
+bulkhead_count=6
+
+overlap_factor=0.2  # 20% overlap
+overlap_distance=bulkhead_spacing*overlap_factor #actual overlap distance
+half_overlap_distance=overlap_distance/2
+end_segment_length=bulkhead_spacing*1.5+half_overlap_distance
+full_segment_length=bulkhead_spacing*2+overlap_distance
+
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
@@ -38,15 +50,129 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.rotation=[0,0,0]
 new_chine.offset=[0,0.35,0]
 new_chine.asymmetry[0]=1
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1))
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.4,width=-0.13,thickness=0.2))
+
+finish_eval_location=2
+current_eval_location=start_bulkhead_location
+odd_spacing=True
+
+segment_thickness=0.1
+segment_z_offset=-0.2
+segment_index=0
+
+screw_positions=[]
+
+while current_eval_location<finish_eval_location:
+
+	if odd_spacing==True:
+		z_offset=segment_z_offset
+		odd_spacing=False
+	else:
+		z_offset=segment_z_offset-segment_thickness
+		odd_spacing=True
+
+	if (current_eval_location+full_segment_length<=finish_eval_location) and segment_index!=0:
+		print("full length: %d"%current_eval_location)
+
+		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
+		new_chine.add_longitudal_element(new_longitudal)
+		
+		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
+		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
+		new_chine.add_longitudal_element(new_longitudal)
+		
+
+		
+		current_eval_location+=full_segment_length-overlap_distance
+		screw_positions.append(current_eval_location-half_overlap_distance)
+
+	elif current_eval_location+end_segment_length<=finish_eval_location: # try end segment
+		print("half length: %d"%current_eval_location)
+
+		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
+		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+end_segment_length)
+		new_chine.add_longitudal_element(new_longitudal)
+
+		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+end_segment_length)
+		new_chine.add_longitudal_element(new_longitudal)
+
+		if current_eval_location+end_segment_length>=finish_eval_location:
+			current_eval_location=finish_eval_location
+		else:
+			current_eval_location+=end_segment_length-overlap_distance
+			screw_positions.append(current_eval_location-half_overlap_distance)
+	else:
+		# fill the gap with whatever is left and finish
+		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+		new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
+		new_chine.add_longitudal_element(new_longitudal)
+		current_eval_location=finish_eval_location
+
+	segment_index+=1
+
+
+#new_longitudal=chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1)
+#new_longitudal.set_limit_x_length(start_bulkhead_location+bulkhead_spacing*bulkhead_count,start_bulkhead_location+end_segment)
+#new_chine.add_longitudal_element(new_longitudal)
 
 new_chine.name="side"
 
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
 new_chine.make_chine()
+
+def make_screws():
+
+	screw_objects=[]
+
+	for chine_curve in new_chine.curve_backups:
+		for screw_position in screw_positions:
+			bpy.ops.mesh.primitive_cylinder_add(radius=0.0656/2, depth=5, enter_editmode=False, location=[0,0,0])
+			screw_object=bpy.context.view_layer.objects.active
+			screw_object.name="screw_object_%d_%s"%(screw_position,chine_curve.name)
+			print(chine_curve.name)
+			screw_object.location.y=0.065
+			screw_objects.append(screw_object)
+
+			path_follow = screw_object.constraints.new(type='FOLLOW_PATH')
+			path_follow.target=chine_curve
+			path_follow.use_fixed_location=True
+
+			#curve_overlap=new_chine.curve_length-the_hull.hull_length
+
+			
+			curve_length=new_chine.curve_length
+			curve_hull_ratio=curve_length/the_hull.hull_length
+			
+			translated_screw_position=(curve_length/2)+(screw_position*curve_hull_ratio)
+			translated_hull_start=curve_length*(curve_hull_ratio-1)/2
+			offset_translated_position=translated_screw_position+translated_hull_start
+
+			print("curve length: %f curve extra ratio: %f"%(curve_length,curve_hull_ratio))
+			print("screw position: %f tr_screw_pos: %f tr hull start: %f offset tr screw: %f"%(
+													screw_position,
+													translated_screw_position,
+													translated_hull_start,												
+													offset_translated_position))
+
+			offset_factor=offset_translated_position/curve_length
+			
+			path_follow.offset_factor=offset_factor
+
+	for longitudal_element_object in new_chine.longitudal_element_objects:
+
+		for screw_object in screw_objects:
+			modifier_name="screwhole_%s"%screw_object.name
+
+			bool_new = longitudal_element_object.modifiers.new(type="BOOLEAN", name=modifier_name)
+			bool_new.object = screw_object
+			bool_new.operation = 'DIFFERENCE'
+
+make_screws()
+
 new_chine.clear_longitudal_elements()
+
 
 
 new_chine.curve_length=the_hull.hull_length*1.1
@@ -180,39 +306,48 @@ def add_extras():
 	bpy_helper.hide_object(ob)
 
 
+def add_props():
+	view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
 
-view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
+	import_library_path="assets/actors.blend/Collection/"
+	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(0,0,-0.6),view_collection_props,rotation=(0,0,0))
 
-import_library_path="assets/actors.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(0,0,-0.6),view_collection_props,rotation=(0,0,0))
+	import_library_path="assets/boat_assets.blend/Collection/"
+	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0,0,-0.96),view_collection_props,rotation=(0,0,0))
 
-import_library_path="assets/boat_assets.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0,0,-0.96),view_collection_props,rotation=(0,0,0))
-
-
+#add_props()
 
 
 
 levels=[ -0.7]
 thickness=0.05
 
-bulkhead_definitions = [
+bulkhead_definitions = []
+
+
+current_bulkhead_location=start_bulkhead_location
+for bulkhead_index in range(0,bulkhead_count):
+	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,thickness])
+	current_bulkhead_location+=bulkhead_spacing
+
+
+#bulkhead_definitions = [
 
 					#	(5	,False		,False	,thickness),
 					#	(4	,levels[1]	,True	,thickness),
 					#	(3	,levels[1]	,False	,thickness),
-						(-3	,levels[0]	,False	,thickness),
-						(-2	,levels[0]	,False	,thickness),	
-						(-1	,levels[0]	,False	,thickness),
+#						(-3	,levels[0]	,False	,thickness),
+#						(-2	,levels[0]	,False	,thickness),	
+#						(-1	,levels[0]	,False	,thickness),
 						
-						(0	,levels[0]	,False	,thickness),
-						(1	,levels[0]	,False	,thickness),
-						(2	,levels[0]	,False	,thickness),
+#						(0	,levels[0]	,False	,thickness),
+#						(1	,levels[0]	,False	,thickness),
+#						(2	,levels[0]	,False	,thickness),
 					#	(-3	,levels[1]	,False	,thickness),						
 					#	(-4	,levels[1]	,True	,thickness)
 
 					#	(-5,False,False)
-]
+#]
 
 #the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
 
@@ -221,15 +356,16 @@ station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
 
 
 
-x_locations=[	
-				bulkhead_definitions[0][0],
-				bulkhead_definitions[len(bulkhead_definitions)-1][0]
-			]
+#x_locations=[	
+#				bulkhead_definitions[0][0],
+#				bulkhead_definitions[len(bulkhead_definitions)-1][0]
+#			]
 
-the_hull.cleanup_longitudal_ends(x_locations)
+#the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
+the_hull.hull_object.hide_viewport=True
 
 def make_keels():
 
@@ -249,9 +385,10 @@ def make_keels():
 			station_start=station_start,
 			station_end=station_end)
 
-make_keels()
+	the_keel.make_keel(0.1)
+	the_hull.integrate_keel(the_keel)				
 
-def add_fuel_tanks():
+def make_fuel_tanks():
 
 	fuel_tank_1L=geometry_helper.create_bilgetank(the_hull,
 					top=levels[0],
@@ -298,7 +435,7 @@ def add_fuel_tanks():
 					name="fuel_3R")								
 
 
-add_fuel_tanks()
+#make_keels()
 
 framedata=[
 [ 1, [2.256688,-9.173357,4.958309],[0.000000,0.000000,0.000000] ],
