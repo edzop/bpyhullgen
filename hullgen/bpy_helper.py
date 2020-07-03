@@ -2,6 +2,10 @@ import bpy
 
 def select_object(theObject,selected):
 
+	if bpy.context.active_object!=None:
+		if bpy.context.active_object.mode!='OBJECT':
+			bpy.ops.object.mode_set(mode='OBJECT')
+
 	bpy.ops.object.select_all(action='DESELECT')
 	
 	if selected==True:
@@ -13,8 +17,9 @@ def select_object(theObject,selected):
 
 def deselect_all_objects():
 
-	if bpy.context.view_layer.objects.active!=None:
-		bpy.ops.object.mode_set(mode='OBJECT')
+	if bpy.context.active_object!=None:
+		if bpy.context.active_object.mode!='OBJECT':
+			bpy.ops.object.mode_set(mode='OBJECT')
 		
 	bpy.ops.object.select_all(action='DESELECT')
 
