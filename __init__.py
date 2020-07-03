@@ -71,7 +71,8 @@ classes = (
     ui.AluminumPlatesOperator,
     ui.ShrinkOutlinerOperator,
     ui.MeasureDistanceBetweenVerticesOperator,
-    ui.ScaleToSizeOperator
+    ui.ScaleToSizeOperator,
+    ui.CleanupMeshesOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper
