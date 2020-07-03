@@ -65,7 +65,7 @@ class hull_maker:
 
         bpy_helper.find_and_remove_object_by_name(name)
 
-        # Booleans behave really strange if origin is 0,0,0 - this works
+        # Booleans behave really strange if origin is 0,0,0 - this seems to help
         #bpy.ops.mesh.primitive_cube_add(size=1.0,enter_editmode=False, location=(0.02, 0.02, 0.02))
         bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, location=(self.bool_correction_offset[0]+location[0], self.bool_correction_offset[1]+location[1], self.bool_correction_offset[2]))
 
