@@ -183,6 +183,23 @@ class DeleteAllOperator (bpy.types.Operator):
 	
 		return {'FINISHED'}
 
+# ------------------------------------------------------------------------
+#    DeleteAll
+# ------------------------------------------------------------------------
+
+class CleanupMeshesOperator (bpy.types.Operator):
+	"""Delete all loose vertices and recalculate normals for all meshes"""
+	bl_idname = "wm.cleanupmeshes"
+	bl_label = "CleanupAll"
+
+	def execute(self, context):
+
+		print("Cleanup")
+
+		geometry_helper.cleanup()
+
+		return {'FINISHED'}
+
 
 
 # ------------------------------------------------------------------------
@@ -410,6 +427,7 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
 		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.cleanupmeshes")
 
 		rowsub.operator( "wm.delete_faces_operator")
 		layout.prop( mytool, "cleanup_choice", text="Cleanup") 
