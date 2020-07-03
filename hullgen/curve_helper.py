@@ -24,8 +24,8 @@ from math import radians, degrees
 from ..hullgen import bpy_helper
 
 def cleanup_shape(ob):
-	if(bpy.context.active_object.mode=="OBJECT"):
-		bpy.ops.object.editmode_toggle()
+	if bpy.context.active_object.mode=="OBJECT":
+		bpy.ops.object.mode_set(mode='EDIT')
 
 	bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
 	#bpy.ops.mesh._convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
@@ -34,15 +34,15 @@ def cleanup_shape(ob):
 	bpy.ops.mesh.select_all(action='SELECT')
 	bpy.ops.mesh.normals_make_consistent(inside=False)
 	
-	bpy.ops.object.editmode_toggle()
+	bpy.ops.object.mode_set(mode='OBJECT')
 
 
 def make_rounded(ob,width):
 
 	bpy.context.view_layer.objects.active=ob
 
-	if(bpy.context.active_object.mode=="OBJECT"):
-		bpy.ops.object.editmode_toggle()
+	if bpy.context.active_object.mode=="OBJECT":
+		bpy.ops.object.mode_set(mode='EDIT')
 
 	bpy.ops.mesh.select_all(action='SELECT')
 	bpy.ops.mesh.normals_make_consistent(inside=False)
@@ -54,6 +54,8 @@ def make_rounded(ob,width):
 	bevel.limit_method="ANGLE"
 	
 	bpy.ops.object.modifier_add(type='SUBSURF')
+
+	bpy.ops.object.mode_set(mode='OBJECT')
 
 
 
@@ -68,6 +70,8 @@ class Curve_Helper:
 	curvedata=None
 	curve_object=None
 	curve_angle=35
+
+	make_backup=False
 
 	curve_backup=None
 
@@ -178,10 +182,10 @@ class Curve_Helper:
 		bpy_helper.select_object(self.curve_object,True)
 		bpy.ops.object.duplicate_move()
 
-		self.curve_backup=bpy.context.active_object
-		self.curve_backup.name=self.curve_object.name+"_backup"
-
-		self.curve_backup.parent=self.curve_object
+		if self.make_backup:
+			self.curve_backup=bpy.context.active_object
+			self.curve_backup.name=self.curve_object.name+"_backup"
+			self.curve_backup.parent=self.curve_object
 
 		bpy_helper.select_object(self.curve_object,True)
 		bpy.ops.object.convert(target='MESH', keep_original=False)

@@ -39,6 +39,13 @@ class longitudal_element:
 	bend_radius=0
 	curve_angle=0
 
+	limit_x_min=0
+	limit_x_max=0
+
+	def set_limit_x_length(self,min,max):
+		self.limit_x_max=max
+		self.limit_x_min=min
+
 	def set_curve(self,radius,angle):
 		self.curve_angle=angle
 		self.bend_radius=radius
@@ -73,7 +80,10 @@ class chine_helper:
 	skin_pokethrough=0.01
 
 	curve_objects=None
+	curve_backups=None
 	longitudal_elements=None
+
+	longitudal_element_objects=None
  
 
 	# view collections
@@ -95,7 +105,9 @@ class chine_helper:
 		self.the_hull=the_hull
 
 		self.curve_objects=[]
+		self.curve_backups=[]
 		self.longitudal_elements=[]
+		self.longitudal_element_objects=[]
 
 		self.longitudal_thickness=the_hull.structural_thickness
 		
@@ -380,7 +392,6 @@ class chine_helper:
 				slicer_plane.location.y=-self.skin_pokethrough
 
 		
-
 		# for some reason bool doesn't work if X is 0 on parent object... 
 		# blender coplanar surface boolean bug
 		slicer_plane.location.x=0.0001
@@ -391,7 +402,62 @@ class chine_helper:
 		bpy_helper.hide_object(slicer_plane)
 		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
 
-	def make_chine2(self,twist=None,inversed=False):
+		self.longitudal_element_objects.append(longitudal_plane)
+
+		# chop ends off if needed (based on X limits)
+		if longitudal_element.limit_x_max!=0 and longitudal_element.limit_x_min!=0:
+
+			#modifier_min_x_name="slice_min_x"
+			#modifier_max_x_name="slice_max_x"
+
+			block_width=self.the_hull.hull_length
+
+			adjusted_min_location=longitudal_element.limit_x_min
+			adjusted_min_location-=block_width/2
+
+			adjusted_max_location=longitudal_element.limit_x_max
+			adjusted_max_location+=block_width/2
+
+			object_end_clean_min = self.the_hull.make_bool_cube("end_clean_x_min"+longitudal_plane.name,location=[adjusted_min_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
+			object_end_clean_max = self.the_hull.make_bool_cube("end_clean_x_max"+longitudal_plane.name,location=[adjusted_max_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
+
+			print(object_end_clean_max.name)
+
+			bool_new = longitudal_plane.modifiers.new(type="BOOLEAN", name="Lm")
+			bool_new.object = object_end_clean_min
+			bool_new.operation = 'DIFFERENCE'
+
+			bool_new = longitudal_plane.modifiers.new(type="BOOLEAN", name="Lx")
+			bool_new.object = object_end_clean_max
+			bool_new.operation = 'DIFFERENCE'
+
+			bool_new = slicer_plane.modifiers.new(type="BOOLEAN", name="Sm")
+			bool_new.object = object_end_clean_min
+			bool_new.operation = 'DIFFERENCE'
+
+			bool_new = slicer_plane.modifiers.new(type="BOOLEAN", name="Sx")
+			bool_new.object = object_end_clean_max
+			bool_new.operation = 'DIFFERENCE'
+
+
+			bpy_helper.select_object(longitudal_plane,True)
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
+
+			bpy_helper.select_object(slicer_plane,True)
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
+
+			#bpy.data.objects.remove(object_end_clean_min)
+			object_end_clean_max.hide_viewport=True
+			#bpy.data.objects.remove(object_end_clean_max)
+			object_end_clean_min.hide_viewport=True
+
+	
+
+
+
+	def make_single_chine(self,twist=None,inversed=False):
 
 		theCurveHelper = curve_helper.Curve_Helper()
 
@@ -419,6 +485,7 @@ class chine_helper:
 				theCurveHelper.curve_twist[1]=twist[1]
 				theCurveHelper.curve_twist[2]=twist[2]
 
+		theCurveHelper.make_backup=True
 		theCurveHelper.define_curve(length=self.curve_length,width=self.curve_width)
 		theCurveHelper.curve_height=self.curve_height
 		theCurveHelper.generate_curve(curve_name)
@@ -463,15 +530,16 @@ class chine_helper:
 
 		#bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
-
-
-
 		theCurveHelper.deselect_curve()
 		
 		theCurveHelper.add_boolean(self.the_hull.hull_object)
 
 		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
 		bpy_helper.hide_object(theCurveHelper.curve_object)
+
+		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_backup)
+		bpy_helper.hide_object(theCurveHelper.curve_backup)
+		self.curve_backups.append(theCurveHelper.curve_backup)
 
 		bpy_helper.hide_object(curve_object)
 
@@ -487,7 +555,7 @@ class chine_helper:
 		# ================================================================================================ 
 		# First curve is Left Side or non-symmetrical "single side"
 		# ================================================================================================
-		newcurve=self.make_chine2(twist,False)
+		newcurve=self.make_single_chine(twist,False)
 		self.curve_objects.append(newcurve)
 
 
@@ -495,18 +563,6 @@ class chine_helper:
 		# Second curve is Right Side
 		# ================================================================================================
 		if self.symmetrical:
-			newcurve=self.make_chine2(twist,True)
+			newcurve=self.make_single_chine(twist,True)
 			self.curve_objects.append(newcurve)
 
-
-			
-
-
-
-		
-
-			
-
-
-			
-			
