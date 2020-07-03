@@ -139,63 +139,98 @@ def rotate_object_X(ob,angle):
 	bpy.context.view_layer.objects.active=ob
 	bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
 
+def cleanup():
+
+	hidden_objects=[]
+
+	# unhide all objects
+	for obj in bpy.data.objects:
+		if obj.hide_viewport==True:
+			obj.hide_viewport=False
+			hidden_objects.append(obj)
+
+	for obj in bpy.data.objects:
+		if obj.type=="MESH":
+			bpy_helper.select_object(obj,True)
+			bpy.ops.object.mode_set(mode='EDIT')
+			bpy.ops.mesh.select_all(action='SELECT')
+			bpy.ops.mesh.delete_loose()
+			bpy.ops.mesh.normals_make_consistent(inside=False)
+			bpy.ops.object.mode_set(mode='OBJECT')
+	
+	# rehide previously hidden objects
+	for obj in hidden_objects:
+		obj.hide_viewport=True
+
+	
+
+
 def apply_all_bool_modifiers():
 
 	# faster implementation maybe in future instead of bpy.ops operations?
 	#mesh = your_object.to_mesh(scene = bpy.context.scene, apply_modifiers = True, settings = 'PREVIEW')
 
-	if(bpy.context.active_object.mode!="OBJECT"):
-		bpy.ops.object.editmode_toggle()
-	
+	if bpy.context.active_object!=None:
+		if bpy.context.active_object.mode!="OBJECT":
+			bpy.ops.object.mode_set(mode='EDIT')
+
+	hidden_objects=[]
+
+	# unhide all objects
 	for obj in bpy.data.objects:
-		has_boolean=False
-		
-		for modifier in obj.modifiers:
-			if modifier.type=='BOOLEAN':
-				boolean_target_object=modifier.object
-				color_value_list=get_color_from_hash_string(boolean_target_object.name)
-				new_material_name="slicer_%s"%boolean_target_object.name
+		if obj.hide_viewport==True:
+			obj.hide_viewport=False
+			hidden_objects.append(obj)
 
-				old_hide_viewport=boolean_target_object.hide_viewport
 
-				boolean_target_object.hide_viewport=False
+	for obj in bpy.data.objects:
+		if obj.type=="MESH":
+			has_boolean=False
+			
+			for modifier in obj.modifiers:
+				if modifier.type=='BOOLEAN':
+					boolean_target_object=modifier.object
+					color_value_list=get_color_from_hash_string(boolean_target_object.name)
+					new_material_name="slicer_%s"%boolean_target_object.name
 
-				slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
+					slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
 
-				obj.data.materials.append(slicer_material)
+					obj.data.materials.append(slicer_material)
 
-				# Material index of new material should be last in list
-				new_material_index=len(obj.data.materials)-1
+					# Material index of new material should be last in list
+					new_material_index=len(obj.data.materials)-1
 
-				bpy.context.view_layer.objects.active = boolean_target_object
+					bpy.context.view_layer.objects.active = boolean_target_object
 
-				#if(bpy.context.view_layer.objects.active!="EDIT"):
+					#if(bpy.context.view_layer.objects.active!="EDIT"):
+					bpy.ops.object.mode_set(mode='EDIT')
+					bpy.ops.mesh.select_all(action='SELECT')
+					bpy.ops.object.mode_set(mode='OBJECT')
+
+					bpy.context.view_layer.objects.active = obj
+					print("Applying object: %s"%obj.name)
+
+					bpy.ops.object.mode_set(mode='EDIT')
+					bpy.ops.mesh.select_all(action='DESELECT')
+					bpy.ops.object.mode_set(mode='OBJECT')
+
+					bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+					for f in obj.data.polygons:
+						if f.select:
+							f.material_index=new_material_index
+
+					has_boolean=True
+
+			if has_boolean:
 				bpy.ops.object.mode_set(mode='EDIT')
 				bpy.ops.mesh.select_all(action='SELECT')
+				bpy.ops.mesh.normals_make_consistent(inside=False)
 				bpy.ops.object.mode_set(mode='OBJECT')
 
-				bpy.context.view_layer.objects.active = obj
-				print("Applying object: %s"%obj.name)
-				bpy.ops.object.mode_set(mode='EDIT')
-				bpy.ops.mesh.select_all(action='DESELECT')
-				bpy.ops.object.mode_set(mode='OBJECT')
-
-				# restore it to previous visual state (hidden or not hidden)
-				boolean_target_object.hide_viewport=old_hide_viewport
-
-				bpy.ops.object.modifier_apply(modifier=modifier.name)
-
-				for f in obj.data.polygons:
-					if f.select:
-						f.material_index=new_material_index
-
-				has_boolean=True
-
-		if has_boolean:
-			bpy.ops.object.editmode_toggle()
-			bpy.ops.mesh.select_all(action='SELECT')
-			bpy.ops.mesh.normals_make_consistent(inside=False)
-			bpy.ops.object.editmode_toggle()
+	# rehide previously hidden objects
+	for obj in hidden_objects:
+		obj.hide_viewport=True
 
 
 def mesh_deselect_all():
