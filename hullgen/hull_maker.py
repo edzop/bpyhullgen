@@ -25,7 +25,7 @@ from ..hullgen import material_helper
 from ..hullgen import curve_helper
 from ..hullgen import chine_helper
 from ..hullgen import bulkhead
-from ..hullgen import keel
+from ..hullgen import keel_helper
 from ..hullgen import bpy_helper
 
 class hull_maker:
@@ -44,6 +44,7 @@ class hull_maker:
     structural_thickness=0.06
 
     bulkheadlist=[]
+    keels=[]
 
     #bool_correction_offset=[ 0.0011, 0.0012, 0.0013 ]
     bool_correction_offset=[ 0.00, 0.00, 0.00 ]
@@ -181,6 +182,8 @@ class hull_maker:
         material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
 
         keel.keel_object.parent=self.hull_object
+
+        self.keels.append(keel)
 
 
 

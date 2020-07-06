@@ -23,6 +23,7 @@ from math import radians
 from ..hullgen import geometry_helper
 from ..hullgen import material_helper
 from ..hullgen import curve_helper
+from ..hullgen import bpy_helper
 
 def calc_arc_point_ellipse(centerpoint,angle,distance):
 	x= (distance[0]/2) * math.sin(math.radians(angle))
