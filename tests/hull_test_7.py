@@ -23,13 +23,16 @@ from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
-from bpyhullgen.hullgen import keel
+from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
 from bpyhullgen.hullgen import bpy_helper
+
+from math import radians
 
 bulkhead_spacing=1.0
 start_bulkhead_location=-3
 bulkhead_count=6
+bulkhead_thickness=0.05
 
 overlap_factor=0.2  # 20% overlap
 overlap_distance=bulkhead_spacing*overlap_factor #actual overlap distance
@@ -51,8 +54,8 @@ new_chine.rotation=[0,0,0]
 new_chine.offset=[0,0.35,0]
 new_chine.asymmetry[0]=1
 
-finish_eval_location=2
-current_eval_location=start_bulkhead_location
+finish_eval_location=2+bulkhead_thickness
+current_eval_location=start_bulkhead_location-bulkhead_thickness
 odd_spacing=True
 
 segment_thickness=0.1
@@ -80,34 +83,43 @@ while current_eval_location<finish_eval_location:
 		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
 		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
 		new_chine.add_longitudal_element(new_longitudal)
-		
-
-		
+			
 		current_eval_location+=full_segment_length-overlap_distance
 		screw_positions.append(current_eval_location-half_overlap_distance)
 
 	elif current_eval_location+end_segment_length<=finish_eval_location: # try end segment
 		print("half length: %d"%current_eval_location)
 
+		station_end=finish_eval_location
+
+		if segment_index==0:
+			station_end=current_eval_location+end_segment_length+bulkhead_thickness
+
 		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+end_segment_length)
+		new_longitudal.set_limit_x_length(current_eval_location,station_end)
 		new_chine.add_longitudal_element(new_longitudal)
 
 		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+end_segment_length)
+		new_longitudal.set_limit_x_length(current_eval_location,station_end)
 		new_chine.add_longitudal_element(new_longitudal)
 
-		if current_eval_location+end_segment_length>=finish_eval_location:
-			current_eval_location=finish_eval_location
-		else:
+		if segment_index==0:
 			current_eval_location+=end_segment_length-overlap_distance
 			screw_positions.append(current_eval_location-half_overlap_distance)
-	else:
+		else:
+			current_eval_location=finish_eval_location
+
+		#if current_eval_location+end_segment_length>=finish_eval_location:
+			
+		#else:
+			
+			
+	#else:
 		# fill the gap with whatever is left and finish
-		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
-		new_chine.add_longitudal_element(new_longitudal)
-		current_eval_location=finish_eval_location
+	#	new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+	#	new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
+	#	new_chine.add_longitudal_element(new_longitudal)
+	#	current_eval_location=finish_eval_location
 
 	segment_index+=1
 
@@ -118,6 +130,8 @@ while current_eval_location<finish_eval_location:
 
 new_chine.name="side"
 
+
+#new_chine.clear_longitudal_elements()
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
 new_chine.make_chine()
@@ -320,39 +334,39 @@ def add_props():
 
 
 levels=[ -0.7]
-thickness=0.05
+
 
 bulkhead_definitions = []
 
 
 current_bulkhead_location=start_bulkhead_location
 for bulkhead_index in range(0,bulkhead_count):
-	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,thickness])
+	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,bulkhead_thickness])
 	current_bulkhead_location+=bulkhead_spacing
 
 
 #bulkhead_definitions = [
 
-					#	(5	,False		,False	,thickness),
-					#	(4	,levels[1]	,True	,thickness),
-					#	(3	,levels[1]	,False	,thickness),
-#						(-3	,levels[0]	,False	,thickness),
-#						(-2	,levels[0]	,False	,thickness),	
-#						(-1	,levels[0]	,False	,thickness),
+					#	(5	,False		,False	,bulkhead_thickness),
+					#	(4	,levels[1]	,True	,bulkhead_thickness),
+					#	(3	,levels[1]	,False	,bulkhead_thickness),
+#						(-3	,levels[0]	,False	,bulkhead_thickness),
+#						(-2	,levels[0]	,False	,bulkhead_thickness),	
+#						(-1	,levels[0]	,False	,bulkhead_thickness),
 						
-#						(0	,levels[0]	,False	,thickness),
-#						(1	,levels[0]	,False	,thickness),
-#						(2	,levels[0]	,False	,thickness),
-					#	(-3	,levels[1]	,False	,thickness),						
-					#	(-4	,levels[1]	,True	,thickness)
+#						(0	,levels[0]	,False	,bulkhead_thickness),
+#						(1	,levels[0]	,False	,bulkhead_thickness),
+#						(2	,levels[0]	,False	,bulkhead_thickness),
+					#	(-3	,levels[1]	,False	,bulkhead_thickness),						
+					#	(-4	,levels[1]	,True	,bulkhead_thickness)
 
 					#	(-5,False,False)
 #]
 
-#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
+#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-bulkhead_thickness+the_hull.bool_coplaner_hack,1,1])
 
-station_start=bulkhead_definitions[0][0]+thickness/2
-station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
+station_start=bulkhead_definitions[0][0]-bulkhead_thickness
+station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]+bulkhead_thickness
 
 
 
@@ -369,24 +383,152 @@ the_hull.hull_object.hide_viewport=True
 
 def make_keels():
 
+	finish_eval_location=2+bulkhead_thickness
+	current_eval_location=start_bulkhead_location-bulkhead_thickness
+	odd_spacing=True
+
 	keel_middle_space=0.3
-	the_keel = keel.keel(the_hull,
-			lateral_offset=keel_middle_space/2,
-			top_height=levels[0],
-			station_start=station_start,
-			station_end=station_end)
+	keel_thickness=0.1
 
-	the_keel.make_keel(0.1)
-	the_hull.integrate_keel(the_keel)	
+	lateral_offset=0
+	segment_index=0
 
-	the_keel = keel.keel(the_hull,
-			lateral_offset=-keel_middle_space/2,
-			top_height=levels[0],
-			station_start=station_start,
-			station_end=station_end)
+	#print("overlap: %f")
 
-	the_keel.make_keel(0.1)
-	the_hull.integrate_keel(the_keel)				
+	screw_positions=[]
+	keel_screws=[]
+
+	while current_eval_location<finish_eval_location:
+
+		if odd_spacing==True:
+			lateral_offset=keel_middle_space/2
+			odd_spacing=False
+		else:
+			lateral_offset=keel_middle_space/2-keel_thickness/2
+			odd_spacing=True
+
+		if (current_eval_location+full_segment_length<=finish_eval_location) and segment_index!=0:
+			print("keelfull length: %f"%current_eval_location)
+
+			the_keel = keel_helper.keel(the_hull,
+					lateral_offset=lateral_offset,
+					top_height=levels[0],
+					station_start=current_eval_location,
+					station_end=current_eval_location+full_segment_length)
+
+			the_keel.make_keel(keel_thickness)
+			the_hull.integrate_keel(the_keel)
+
+			the_keel = keel_helper.keel(the_hull,
+					lateral_offset=-lateral_offset,
+					top_height=levels[0],
+					station_start=current_eval_location,
+					station_end=current_eval_location+full_segment_length)
+
+			the_keel.make_keel(keel_thickness)
+			the_hull.integrate_keel(the_keel)
+
+			current_eval_location+=full_segment_length-overlap_distance
+
+			screw_positions.append(current_eval_location+half_overlap_distance)
+
+			print("keelafter length: %f"%current_eval_location)
+
+			# screw_positions.append(current_eval_location-half_overlap_distance)
+
+		elif current_eval_location+end_segment_length<=finish_eval_location: # try end segment
+			print("keelhalf length: %f"%current_eval_location)
+
+			if segment_index==0:
+				station_end=current_eval_location+end_segment_length
+			else:
+				station_end=finish_eval_location
+				
+			the_keel = keel_helper.keel(the_hull,
+					lateral_offset=lateral_offset,
+					top_height=levels[0],
+					station_start=current_eval_location,
+					station_end=station_end)
+
+			the_keel.make_keel(keel_thickness)
+			the_hull.integrate_keel(the_keel)	
+
+			the_keel = keel_helper.keel(the_hull,
+					lateral_offset=-lateral_offset,
+					top_height=levels[0],
+					station_start=current_eval_location,
+					station_end=station_end)
+
+			the_keel.make_keel(keel_thickness)
+			the_hull.integrate_keel(the_keel)	
+
+			print("keelafter length: %f"%current_eval_location)
+
+			if segment_index==0:
+				current_eval_location+=end_segment_length-overlap_distance
+				screw_positions.append(current_eval_location+half_overlap_distance)
+			else:
+				current_eval_location=finish_eval_location
+
+			#if current_eval_location+end_segment_length>=finish_eval_location:
+				
+			#else:
+				
+			#	screw_positions.append(current_eval_location-half_overlap_distance)
+	#	else:
+	#		# fill the gap with whatever is left and finish
+	#		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+	#		new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
+	#		new_chine.add_longitudal_element(new_longitudal)
+	#		current_eval_location=finish_eval_location
+
+		segment_index+=1
+
+	for screw_position in screw_positions:
+		bpy.ops.mesh.primitive_cylinder_add(radius=0.0656/2, depth=5, enter_editmode=False, location=[0,0,0])
+		screw_object=bpy.context.view_layer.objects.active
+		screw_object.name="screw_keel_%02.2f"%(screw_position)
+		screw_object.location.x=screw_position
+		screw_object.location.z=levels[0]-0.1
+		bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
+		keel_screws.append(screw_object)
+
+		for keel in the_hull.keels:
+			if keel.keel_object!=None:
+
+				bool_new = keel.keel_object.modifiers.new(type="BOOLEAN", name="screw%02.2f"%screw_position)
+				bool_new.object = screw_object
+				bool_new.operation = 'DIFFERENCE'
+
+		screw_object.hide_viewport=True
+
+
+
+
+def disabled_keel():
+
+		keel_middle_space=0.3
+		the_keel = keel_helper.keel(the_hull,
+				lateral_offset=keel_middle_space/2,
+				top_height=levels[0],
+				station_start=station_start,
+				station_end=station_end)
+
+		the_keel.set_limit_x_length(-1-thickness,1+thickness)
+
+		the_keel.make_keel(keel_thickness)
+		the_hull.integrate_keel(the_keel)	
+
+		the_keel = keel_helper.keel(the_hull,
+				lateral_offset=-keel_middle_space/2,
+				top_height=levels[0],
+				station_start=station_start,
+				station_end=station_end)
+
+		the_keel.set_limit_x_length(-1-thickness,1+thickness)
+
+		the_keel.make_keel(keel_thickness)
+		the_hull.integrate_keel(the_keel)				
 
 def make_fuel_tanks():
 
@@ -435,7 +577,7 @@ def make_fuel_tanks():
 					name="fuel_3R")								
 
 
-#make_keels()
+make_keels()
 
 framedata=[
 [ 1, [2.256688,-9.173357,4.958309],[0.000000,0.000000,0.000000] ],

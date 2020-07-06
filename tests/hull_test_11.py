@@ -26,8 +26,8 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
 from bpyhullgen.hullgen import render_helper
-
-from bpyhullgen.hullgen import keel
+from bpyhullgen.hullgen import keel_helper
+from bpyhullgen.hullgen import bpy_helper
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
@@ -304,11 +304,11 @@ station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
 station_end=bulkhead_definitions[1][0]-thickness/2
 
 keel_middle_space=0.3
-the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel(0.1)
 the_hull.integrate_keel(the_keel)	
 
-the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel(0.1)
 the_hull.integrate_keel(the_keel)
 

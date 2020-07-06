@@ -24,7 +24,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
-from bpyhullgen.hullgen import keel
+from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
 from bpyhullgen.hullgen import bpy_helper
 
