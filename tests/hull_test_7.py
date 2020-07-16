@@ -29,18 +29,6 @@ from bpyhullgen.hullgen import bpy_helper
 
 from math import radians
 
-bulkhead_spacing=1.0
-start_bulkhead_location=-3
-bulkhead_count=6
-bulkhead_thickness=0.05
-
-overlap_factor=0.2  # 20% overlap
-overlap_distance=bulkhead_spacing*overlap_factor #actual overlap distance
-half_overlap_distance=overlap_distance/2
-end_segment_length=bulkhead_spacing*1.5+half_overlap_distance
-full_segment_length=bulkhead_spacing*2+overlap_distance
-
-
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
 the_hull.make_hull_object()
@@ -54,74 +42,10 @@ new_chine.rotation=[0,0,0]
 new_chine.offset=[0,0.35,0]
 new_chine.asymmetry[0]=1
 
-finish_eval_location=2+bulkhead_thickness
-current_eval_location=start_bulkhead_location-bulkhead_thickness
-odd_spacing=True
 
-segment_thickness=0.1
-segment_z_offset=-0.2
-segment_index=0
 
-screw_positions=[]
 
-while current_eval_location<finish_eval_location:
 
-	if odd_spacing==True:
-		z_offset=segment_z_offset
-		odd_spacing=False
-	else:
-		z_offset=segment_z_offset-segment_thickness
-		odd_spacing=True
-
-	if (current_eval_location+full_segment_length<=finish_eval_location) and segment_index!=0:
-		print("full length: %d"%current_eval_location)
-
-		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
-		new_chine.add_longitudal_element(new_longitudal)
-		
-		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
-		new_chine.add_longitudal_element(new_longitudal)
-			
-		current_eval_location+=full_segment_length-overlap_distance
-		screw_positions.append(current_eval_location-half_overlap_distance)
-
-	elif current_eval_location+end_segment_length<=finish_eval_location: # try end segment
-		print("half length: %d"%current_eval_location)
-
-		station_end=finish_eval_location
-
-		if segment_index==0:
-			station_end=current_eval_location+end_segment_length+bulkhead_thickness
-
-		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset-0.2,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,station_end)
-		new_chine.add_longitudal_element(new_longitudal)
-
-		new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-		new_longitudal.set_limit_x_length(current_eval_location,station_end)
-		new_chine.add_longitudal_element(new_longitudal)
-
-		if segment_index==0:
-			current_eval_location+=end_segment_length-overlap_distance
-			screw_positions.append(current_eval_location-half_overlap_distance)
-		else:
-			current_eval_location=finish_eval_location
-
-		#if current_eval_location+end_segment_length>=finish_eval_location:
-			
-		#else:
-			
-			
-	#else:
-		# fill the gap with whatever is left and finish
-	#	new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-	#	new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
-	#	new_chine.add_longitudal_element(new_longitudal)
-	#	current_eval_location=finish_eval_location
-
-	segment_index+=1
 
 
 #new_longitudal=chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1)
@@ -131,23 +55,31 @@ while current_eval_location<finish_eval_location:
 new_chine.name="side"
 
 
+new_chine.make_segmented_longitudals(z_offset=-0.2)
+
 #new_chine.clear_longitudal_elements()
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
 new_chine.make_chine()
+
+
 
 def make_screws():
 
 	screw_objects=[]
 
 	for chine_curve in new_chine.curve_backups:
-		for screw_position in screw_positions:
+		for screw_position in new_chine.longitudal_screw_positions:
 			bpy.ops.mesh.primitive_cylinder_add(radius=0.0656/2, depth=5, enter_editmode=False, location=[0,0,0])
 			screw_object=bpy.context.view_layer.objects.active
 			screw_object.name="screw_object_%d_%s"%(screw_position,chine_curve.name)
 			print(chine_curve.name)
 			screw_object.location.y=0.065
+			screw_object.hide_viewport=True
 			screw_objects.append(screw_object)
+
+			bpy_helper.move_object_to_collection(new_chine.view_collection_longitudals,screw_object)
+
 
 			path_follow = screw_object.constraints.new(type='FOLLOW_PATH')
 			path_follow.target=chine_curve
@@ -339,10 +271,10 @@ levels=[ -0.7]
 bulkhead_definitions = []
 
 
-current_bulkhead_location=start_bulkhead_location
-for bulkhead_index in range(0,bulkhead_count):
-	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,bulkhead_thickness])
-	current_bulkhead_location+=bulkhead_spacing
+current_bulkhead_location=the_hull.start_bulkhead_location
+for bulkhead_index in range(0,the_hull.bulkhead_count):
+	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,the_hull.bulkhead_thickness])
+	current_bulkhead_location+=the_hull.bulkhead_spacing
 
 
 #bulkhead_definitions = [
@@ -365,8 +297,8 @@ for bulkhead_index in range(0,bulkhead_count):
 
 #the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-bulkhead_thickness+the_hull.bool_coplaner_hack,1,1])
 
-station_start=bulkhead_definitions[0][0]-bulkhead_thickness
-station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]+bulkhead_thickness
+station_start=bulkhead_definitions[0][0]-the_hull.bulkhead_thickness
+station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]+the_hull.bulkhead_thickness
 
 
 
@@ -383,8 +315,16 @@ the_hull.hull_object.hide_viewport=True
 
 def make_keels():
 
-	finish_eval_location=2+bulkhead_thickness
-	current_eval_location=start_bulkhead_location-bulkhead_thickness
+	overlap_factor=0.2  # 20% overlap
+
+	overlap_distance=the_hull.bulkhead_spacing*overlap_factor #actual overlap distance
+	half_overlap_distance=overlap_distance/2
+	end_segment_length=the_hull.bulkhead_spacing*1.5+half_overlap_distance
+	full_segment_length=the_hull.bulkhead_spacing*2+overlap_distance
+
+
+	finish_eval_location=2+the_hull.bulkhead_thickness
+	current_eval_location=the_hull.start_bulkhead_location-the_hull.bulkhead_thickness
 	odd_spacing=True
 
 	keel_middle_space=0.3
@@ -492,6 +432,8 @@ def make_keels():
 		screw_object.location.z=levels[0]-0.1
 		bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
 		keel_screws.append(screw_object)
+
+		bpy_helper.move_object_to_collection(the_keel.view_keel_collection,screw_object)
 
 		for keel in the_hull.keels:
 			if keel.keel_object!=None:

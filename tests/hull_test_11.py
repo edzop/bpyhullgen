@@ -31,6 +31,9 @@ from bpyhullgen.hullgen import bpy_helper
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
+the_hull.bulkhead_count=9
+the_hull.bulkhead_start_location=-4
+
 the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
@@ -42,11 +45,14 @@ new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.27,-0.5]
 new_chine.name="side"
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.46,width=-0.2,thickness=0.1)
-new_longitudal.set_curve(radius=-0.4,angle=-10)
-new_chine.add_longitudal_element(new_longitudal)
+#new_longitudal=chine_helper.longitudal_element(z_offset=-0.46,width=-0.2,thickness=0.1)
 
 
+#
+#new_chine.add_longitudal_element(new_longitudal)
+
+
+new_chine.make_segmented_longitudals(z_offset=-0.3,start_bulkhead=0,end_bulkhead=9,radius=-0.5,angle=-10)
 
 
 #new_chine.curve_twist=[0,25,25]
@@ -64,9 +70,9 @@ new_chine.rotation=[40,0,0]
 new_chine.offset=[0,-0.2,0.45]
 new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
-new_chine.longitudal_z_offset=-0.7
-
+#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
+#new_chine.longitudal_z_offset=
+new_chine.make_segmented_longitudals(-0.7,start_bulkhead=1,end_bulkhead=6)
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
@@ -109,7 +115,9 @@ new_chine.curve_angle=0
 new_chine.symmetrical=False
 
 #new_chine.set_longitudal_curve(0,0)
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1))
+
+new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=-1,end_bulkhead=2,double_thick=False) #,radius=-0.5,angle=-10)
+#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1))
 
 
 # invert for reverse curve

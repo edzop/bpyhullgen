@@ -254,11 +254,11 @@ station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
 station_end=bulkhead_definitions[0][0]-thickness/2
 
 keel_middle_space=0.3
-the_keel = keel.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)	
 
-the_keel = keel.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
 the_keel.make_keel()
 the_hull.integrate_keel(the_keel)
 
