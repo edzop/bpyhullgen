@@ -46,6 +46,16 @@ class hull_maker:
     bulkheadlist=[]
     keels=[]
 
+
+    # longitudal spacing is based on bulkheads
+    bulkhead_spacing=1.0
+
+    start_bulkhead_location=-3
+    bulkhead_count=6
+    bulkhead_thickness=0.05
+    
+
+
     #bool_correction_offset=[ 0.0011, 0.0012, 0.0013 ]
     bool_correction_offset=[ 0.00, 0.00, 0.00 ]
 
@@ -59,7 +69,6 @@ class hull_maker:
 
         self.longitudal_list=list()
         self.longitudal_slicer_list=list()
-
 
 
     def make_bool_cube(self,name,location=(0,0,0),size=(1,1,1)):
@@ -86,6 +95,7 @@ class hull_maker:
 
         view_collection_hull=bpy_helper.make_collection("hull",bpy.context.scene.collection.children)
         bpy_helper.move_object_to_collection(view_collection_hull,self.hull_object)
+
 
         return self.hull_object
 
