@@ -232,6 +232,8 @@ def apply_all_bool_modifiers():
 	for obj in hidden_objects:
 		obj.hide_viewport=True
 
+	print("Finished!")
+
 
 def mesh_deselect_all():
 	old_mode=bpy.context.active_object.mode
