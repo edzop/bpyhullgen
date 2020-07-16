@@ -172,7 +172,7 @@ def apply_all_bool_modifiers():
 
 	if bpy.context.active_object!=None:
 		if bpy.context.active_object.mode!="OBJECT":
-			bpy.ops.object.mode_set(mode='EDIT')
+			bpy.ops.object.mode_set(mode='OBJECT')
 
 	hidden_objects=[]
 
@@ -193,7 +193,12 @@ def apply_all_bool_modifiers():
 					color_value_list=get_color_from_hash_string(boolean_target_object.name)
 					new_material_name="slicer_%s"%boolean_target_object.name
 
-					slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
+					slicer_material=None
+
+					if new_material_name in bpy.data.materials:
+						slicer_material=bpy.data.materials[new_material_name]
+					else:
+						slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
 
 					obj.data.materials.append(slicer_material)
 
@@ -202,17 +207,15 @@ def apply_all_bool_modifiers():
 
 					bpy.context.view_layer.objects.active = boolean_target_object
 
-					#if(bpy.context.view_layer.objects.active!="EDIT"):
-					bpy.ops.object.mode_set(mode='EDIT')
-					bpy.ops.mesh.select_all(action='SELECT')
-					bpy.ops.object.mode_set(mode='OBJECT')
+					# select all faces for material assignment to occur
+					for face in obj.data.polygons:
+						face.select=True
 
 					bpy.context.view_layer.objects.active = obj
 					print("Applying object: %s"%obj.name)
 
-					bpy.ops.object.mode_set(mode='EDIT')
-					bpy.ops.mesh.select_all(action='DESELECT')
-					bpy.ops.object.mode_set(mode='OBJECT')
+					for face in obj.data.polygons:
+						face.select=False
 
 					bpy.ops.object.modifier_apply(modifier=modifier.name)
 
@@ -222,11 +225,11 @@ def apply_all_bool_modifiers():
 
 					has_boolean=True
 
-			if has_boolean:
-				bpy.ops.object.mode_set(mode='EDIT')
-				bpy.ops.mesh.select_all(action='SELECT')
-				bpy.ops.mesh.normals_make_consistent(inside=False)
-				bpy.ops.object.mode_set(mode='OBJECT')
+			#if has_boolean:
+			#	bpy.ops.object.mode_set(mode='EDIT')
+			#	bpy.ops.mesh.select_all(action='SELECT')
+			#	bpy.ops.mesh.normals_make_consistent(inside=False)
+			#	bpy.ops.object.mode_set(mode='OBJECT')
 
 	# rehide previously hidden objects
 	for obj in hidden_objects:
