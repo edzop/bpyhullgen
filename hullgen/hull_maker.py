@@ -53,6 +53,9 @@ class hull_maker:
     start_bulkhead_location=-3
     bulkhead_count=6
     bulkhead_thickness=0.05
+
+    # output scale for fabrication = 1:16 = 1/16 = 0.0625
+    hull_output_scale=1
     
 
 
@@ -261,4 +264,4 @@ class hull_maker:
                 modifier.double_threshold=0
                 bpy_helper.hide_object(object_end_clean)
 
-        #bpy_helper.hide_object(view_collection_cleaner)
+        bpy_helper.hide_object(view_collection_cleaner)

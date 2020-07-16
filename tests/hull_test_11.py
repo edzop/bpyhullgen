@@ -31,12 +31,16 @@ from bpyhullgen.hullgen import bpy_helper
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
+the_hull.hull_output_scale=1/16
+target_screw_size=4.1
+
 the_hull.bulkhead_count=9
 the_hull.bulkhead_start_location=-4
 
 the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
+new_chine.target_screw_size=target_screw_size
 
 #new_chine.longitudal_thickness=0.05
 new_chine.longitudal_width=-0.15
@@ -52,12 +56,15 @@ new_chine.name="side"
 #new_chine.add_longitudal_element(new_longitudal)
 
 
-new_chine.make_segmented_longitudals(z_offset=-0.3,start_bulkhead=0,end_bulkhead=9,radius=-0.5,angle=-10)
+new_chine.make_segmented_longitudals(z_offset=-0.3,start_bulkhead=-1,end_bulkhead=8,radius=-0.5,angle=-10)
 
 
 #new_chine.curve_twist=[0,25,25]
 new_chine.make_chine(twist=[0,0,0])
+new_chine.make_screws()
+
 new_chine.clear_longitudal_elements()
+
 #new_chine.make_chine()
 
 #new_chine.set_longitudal_curve(0,0)
@@ -72,7 +79,7 @@ new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
 #new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
 #new_chine.longitudal_z_offset=
-new_chine.make_segmented_longitudals(-0.7,start_bulkhead=1,end_bulkhead=6)
+new_chine.make_segmented_longitudals(-0.7,start_bulkhead=1,end_bulkhead=7)
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
@@ -125,6 +132,14 @@ new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=-1,end_bulkhead
 #new_chine.longitudal_width=-new_chine.longitudal_width
 
 new_chine.make_chine()
+new_chine.make_screws()
+new_chine.clear_longitudal_elements()
+
+#new_chine.name="roof2"
+#new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=5,end_bulkhead=8,double_thick=False) #,radius=-0.5,angle=-10)
+#new_chine.make_chine()
+#new_chine.make_screws()
+
 
 # ================ modify hull
 
@@ -292,7 +307,7 @@ bulkhead_definitions = [
 					#	(-5,False,False)
 ]
 
-the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
+#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
 
 x_locations=[	
 				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
@@ -301,7 +316,7 @@ x_locations=[
 			]
 
 rotations=[0,tail_cut_angle]
-the_hull.cleanup_longitudal_ends(x_locations,rotations)
+#the_hull.cleanup_longitudal_ends(x_locations,rotations)
 
 
 
@@ -311,14 +326,24 @@ the_hull.make_longitudal_booleans()
 station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
 station_end=bulkhead_definitions[1][0]-thickness/2
 
-keel_middle_space=0.3
-the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel(0.1)
-the_hull.integrate_keel(the_keel)	
 
-the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel(0.1)
-the_hull.integrate_keel(the_keel)
+def make_keels():
+	the_keel_builder = keel_helper.keel_builder(the_hull)
+	the_keel_builder.make_segmented_keel(top_height=levels[0],start_bulkhead=0,end_bulkhead=6)
+	the_keel_builder.target_screw_size=target_screw_size
+	the_keel_builder.make_screws()
+
+make_keels()
+
+def disabled():
+	keel_middle_space=0.3
+	the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+	the_keel.make_keel(0.1)
+	the_hull.integrate_keel(the_keel)	
+
+	the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+	the_keel.make_keel(0.1)
+	the_hull.integrate_keel(the_keel)
 
 framedata=[
 [ 1, [3.191784,-14.714936,4.039575],[0.403186,0.026390,-0.141792] ],

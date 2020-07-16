@@ -84,12 +84,22 @@ class chine_helper:
 	longitudal_elements=None
 
 	longitudal_element_objects=None
+
+	longitudal_screw_positions=[]
  
 
 	# view collections
 	view_collection_chines=None
 	view_collection_longitudals=None
-	view_collection_longitudal_slicers=None
+	#view_collection_longitudal_slicers=None
+
+
+	# screw size in MM
+	target_screw_size=10 # target size in output model
+
+	# how big to make screws in computer model so they output correctly when scaled output
+	# hull object has hull_scale object for scale models...
+	scaled_screw_size=10 
 
 
 
@@ -99,6 +109,9 @@ class chine_helper:
 
 	def clear_longitudal_elements(self):
 		self.longitudal_elements.clear()
+		self.longitudal_screw_positions.clear()
+		self.curve_backups.clear()
+		self.longitudal_element_objects.clear()
 		
 
 	def __init__(self,the_hull):
@@ -118,7 +131,7 @@ class chine_helper:
 
 		self.view_collection_chines=bpy_helper.make_collection("chines",bpy.context.scene.collection.children)
 		self.view_collection_longitudals=bpy_helper.make_collection("longitudals",bpy.context.scene.collection.children)
-		self.view_collection_longitudal_slicers=bpy_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
+		#self.view_collection_longitudal_slicers=bpy_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
  
 	# After the boolean operation is complete the vertices can be removed that are on the other side
 	# of the plane used for the boolean operation. 
@@ -398,7 +411,7 @@ class chine_helper:
 		
 		#slicer_plane.location.z=- ( (longitudal_element.thickness*longitudal_element.slicer_overcut)-longitudal_element.thickness ) / 2
 
-		bpy_helper.move_object_to_collection(self.view_collection_longitudal_slicers,slicer_plane)
+		bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_plane)
 		bpy_helper.hide_object(slicer_plane)
 		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
 
@@ -421,7 +434,10 @@ class chine_helper:
 			object_end_clean_min = self.the_hull.make_bool_cube("end_clean_x_min"+longitudal_plane.name,location=[adjusted_min_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
 			object_end_clean_max = self.the_hull.make_bool_cube("end_clean_x_max"+longitudal_plane.name,location=[adjusted_max_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
 
-			print(object_end_clean_max.name)
+			bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_min)
+			bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_max)
+
+			#print(object_end_clean_max.name)
 
 			bool_new = longitudal_plane.modifiers.new(type="BOOLEAN", name="Lm")
 			bool_new.object = object_end_clean_min
@@ -441,17 +457,17 @@ class chine_helper:
 
 
 			bpy_helper.select_object(longitudal_plane,True)
-			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
-			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
 
 			bpy_helper.select_object(slicer_plane,True)
-			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
-			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
+			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
 
-			bpy.data.objects.remove(object_end_clean_min)
-			#object_end_clean_max.hide_viewport=True
-			bpy.data.objects.remove(object_end_clean_max)
-			#object_end_clean_min.hide_viewport=True
+			#bpy.data.objects.remove(object_end_clean_min)
+			object_end_clean_max.hide_viewport=True
+			#bpy.data.objects.remove(object_end_clean_max)
+			object_end_clean_min.hide_viewport=True
 
 	
 
@@ -565,13 +581,9 @@ class chine_helper:
 			self.curve_objects.append(newcurve)
 
 
-
-	
-	longitudal_screw_positions=[]
-
 	def make_segmented_longitudals(self,z_offset,radius=0,angle=0,start_bulkhead=1,end_bulkhead=4,double_thick=True):
 
-		print("startb: %d endb: %d"%(start_bulkhead,end_bulkhead))
+		#print("startb: %d endb: %d"%(start_bulkhead,end_bulkhead))
 
 		total_bulkhead_distance=self.the_hull.bulkhead_count*self.the_hull.bulkhead_spacing
 		eval_bulkhead_distance=(end_bulkhead*self.the_hull.bulkhead_spacing)-(start_bulkhead*self.the_hull.bulkhead_spacing)
@@ -583,10 +595,6 @@ class chine_helper:
 			half_total_bulkhead_distance))
 
 		current_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*start_bulkhead)
-
-		
-		#self.the_hull.start_bulkhead_location-self.the_hull.bulkhead_thickness						
-
 		finish_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*end_bulkhead)
 
 		current_eval_location-=self.the_hull.bulkhead_thickness
@@ -610,7 +618,10 @@ class chine_helper:
 		end_segment_length=self.the_hull.bulkhead_spacing*1.5+half_overlap_distance
 		full_segment_length=self.the_hull.bulkhead_spacing*2+overlap_distance
 
-		while current_eval_location<finish_eval_location:
+		print("chine end segment: %f full segment: %f"%(end_segment_length,full_segment_length))
+
+		# check for < 50 to prevent runaway
+		while current_eval_location<finish_eval_location and segment_index<50:
 
 			if odd_spacing==True:
 				adjusted_z_offset=z_offset
@@ -620,7 +631,7 @@ class chine_helper:
 				odd_spacing=True
 
 			if (current_eval_location+full_segment_length<=finish_eval_location) and segment_index!=0:
-				print("full length: %d"%current_eval_location)
+				print("currenteval: %f full length"%current_eval_location)
 
 				if double_thick==True:
 					new_longitudal=longitudal_element(z_offset=adjusted_z_offset,width=-0.13,thickness=segment_thickness)
@@ -642,7 +653,7 @@ class chine_helper:
 				self.longitudal_screw_positions.append(current_eval_location-half_overlap_distance)
 
 			else: # current_eval_location+end_segment_length<=finish_eval_location: # try end segment
-				print("half length: %d"%current_eval_location)
+				print("currenteval: %f remainder"%current_eval_location)
 
 				station_end=finish_eval_location
 
@@ -690,5 +701,61 @@ class chine_helper:
 			#	current_eval_location=finish_eval_location
 
 			segment_index+=1
-			print("current_eval: %f finish eval: %f"%(current_eval_location,finish_eval_location))
+			print("currenteval: %f finishval: %f segindex: %d"%(current_eval_location,finish_eval_location,segment_index))
 
+
+
+	def make_screws(self):
+
+		scaleup_factor=1/self.the_hull.hull_output_scale
+		self.scaled_screw_size=self.target_screw_size*scaleup_factor/1000
+
+		#print("target screw: %f scaleup factor: %f scaled_screw size: %f hull output scale: %f"%(self.target_screw_size,scaleup_factor,self.scaled_screw_size,self.the_hull.hull_output_scale))
+
+		screw_objects=[]
+
+		for chine_curve in self.curve_backups:
+			for screw_position in self.longitudal_screw_positions:
+				bpy.ops.mesh.primitive_cylinder_add(radius=self.scaled_screw_size/2, depth=5, enter_editmode=False, location=[0,0,0])
+				screw_object=bpy.context.view_layer.objects.active
+				screw_object.name="screw_object_%d_%s"%(screw_position,self.name)
+				
+				screw_object.location.y=0.065
+				screw_object.hide_viewport=True
+				screw_objects.append(screw_object)
+
+				bpy_helper.move_object_to_collection(self.view_collection_longitudals,screw_object)
+
+				path_follow = screw_object.constraints.new(type='FOLLOW_PATH')
+				path_follow.target=chine_curve
+				path_follow.use_fixed_location=True
+
+				#curve_overlap=new_chine.curve_length-the_hull.hull_length
+
+				
+				curve_length=self.curve_length
+				curve_hull_ratio=curve_length/self.the_hull.hull_length
+				
+				translated_screw_position=(curve_length/2)+(screw_position*curve_hull_ratio)
+				translated_hull_start=curve_length*(curve_hull_ratio-1)/2
+				offset_translated_position=translated_screw_position+translated_hull_start
+
+				#print("curve length: %f curve extra ratio: %f"%(curve_length,curve_hull_ratio))
+				#print("screw position: %f tr_screw_pos: %f tr hull start: %f offset tr screw: %f"%(
+				#										screw_position,
+				#										translated_screw_position,
+				#										translated_hull_start,												
+				#										offset_translated_position))
+
+				offset_factor=offset_translated_position/curve_length
+				
+				path_follow.offset_factor=offset_factor
+
+		for longitudal_element_object in self.longitudal_element_objects:
+
+			for screw_object in screw_objects:
+				modifier_name="screwhole_%s"%screw_object.name
+
+				bool_new = longitudal_element_object.modifiers.new(type="BOOLEAN", name=modifier_name)
+				bool_new.object = screw_object
+				bool_new.operation = 'DIFFERENCE'
