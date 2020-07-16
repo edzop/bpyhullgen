@@ -441,17 +441,17 @@ class chine_helper:
 
 
 			bpy_helper.select_object(longitudal_plane,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
 
 			bpy_helper.select_object(slicer_plane,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
 
-			#bpy.data.objects.remove(object_end_clean_min)
-			object_end_clean_max.hide_viewport=True
-			#bpy.data.objects.remove(object_end_clean_max)
-			object_end_clean_min.hide_viewport=True
+			bpy.data.objects.remove(object_end_clean_min)
+			#object_end_clean_max.hide_viewport=True
+			bpy.data.objects.remove(object_end_clean_max)
+			#object_end_clean_min.hide_viewport=True
 
 	
 
@@ -548,8 +548,6 @@ class chine_helper:
 		return curve_object
 
 
-
-
 	def make_chine(self,twist=None):
 
 		# ================================================================================================ 
@@ -565,4 +563,132 @@ class chine_helper:
 		if self.symmetrical:
 			newcurve=self.make_single_chine(twist,True)
 			self.curve_objects.append(newcurve)
+
+
+
+	
+	longitudal_screw_positions=[]
+
+	def make_segmented_longitudals(self,z_offset,radius=0,angle=0,start_bulkhead=1,end_bulkhead=4,double_thick=True):
+
+		print("startb: %d endb: %d"%(start_bulkhead,end_bulkhead))
+
+		total_bulkhead_distance=self.the_hull.bulkhead_count*self.the_hull.bulkhead_spacing
+		eval_bulkhead_distance=(end_bulkhead*self.the_hull.bulkhead_spacing)-(start_bulkhead*self.the_hull.bulkhead_spacing)
+
+		half_total_bulkhead_distance=total_bulkhead_distance/2
+
+		print("total_distance: %f eval: %f half: %f"%(total_bulkhead_distance,
+			eval_bulkhead_distance,
+			half_total_bulkhead_distance))
+
+		current_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*start_bulkhead)
+
+		
+		#self.the_hull.start_bulkhead_location-self.the_hull.bulkhead_thickness						
+
+		finish_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*end_bulkhead)
+
+		current_eval_location-=self.the_hull.bulkhead_thickness
+		finish_eval_location+=self.the_hull.bulkhead_thickness
+
+		#finish_eval_location=half_total_bulkhead_distance
+		#2+self.the_hull.bulkhead_thickness
+
+		print("current_eval: %f finish eval: %f"%(current_eval_location,finish_eval_location))
+		
+		odd_spacing=True
+
+		segment_thickness=0.1
+		#segment_z_offset=-0.2
+		segment_index=0
+
+		overlap_factor=0.2  # 20% overlap
+
+		overlap_distance=self.the_hull.bulkhead_spacing*overlap_factor #actual overlap distance
+		half_overlap_distance=overlap_distance/2
+		end_segment_length=self.the_hull.bulkhead_spacing*1.5+half_overlap_distance
+		full_segment_length=self.the_hull.bulkhead_spacing*2+overlap_distance
+
+		while current_eval_location<finish_eval_location:
+
+			if odd_spacing==True:
+				adjusted_z_offset=z_offset
+				odd_spacing=False
+			else:
+				adjusted_z_offset=z_offset-segment_thickness
+				odd_spacing=True
+
+			if (current_eval_location+full_segment_length<=finish_eval_location) and segment_index!=0:
+				print("full length: %d"%current_eval_location)
+
+				if double_thick==True:
+					new_longitudal=longitudal_element(z_offset=adjusted_z_offset,width=-0.13,thickness=segment_thickness)
+					new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
+					new_longitudal.set_curve(radius,angle)
+					self.add_longitudal_element(new_longitudal)
+				
+				
+				
+				
+
+				
+				new_longitudal=longitudal_element(z_offset=adjusted_z_offset-0.2,width=-0.13,thickness=segment_thickness)
+				new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
+				new_longitudal.set_curve(radius,angle)
+				self.add_longitudal_element(new_longitudal)
+					
+				current_eval_location+=full_segment_length-overlap_distance
+				self.longitudal_screw_positions.append(current_eval_location-half_overlap_distance)
+
+			else: # current_eval_location+end_segment_length<=finish_eval_location: # try end segment
+				print("half length: %d"%current_eval_location)
+
+				station_end=finish_eval_location
+
+				if segment_index==0:
+					station_end=current_eval_location+end_segment_length+self.the_hull.bulkhead_thickness
+
+				if station_end>finish_eval_location:
+					station_end=finish_eval_location
+
+				if double_thick==True:
+					new_longitudal=longitudal_element(z_offset=adjusted_z_offset-0.2,width=-0.13,thickness=segment_thickness)
+					new_longitudal.set_limit_x_length(current_eval_location,station_end)
+					new_longitudal.set_curve(radius,angle)
+					self.add_longitudal_element(new_longitudal)
+				
+				new_longitudal=longitudal_element(z_offset=adjusted_z_offset,width=-0.13,thickness=segment_thickness)
+				new_longitudal.set_limit_x_length(current_eval_location,station_end)
+				new_longitudal.set_curve(radius,angle)
+				self.add_longitudal_element(new_longitudal)
+
+				current_eval_location=station_end
+
+				if current_eval_location<finish_eval_location:
+
+					current_eval_location-=overlap_distance
+
+				#if segment_index==0:
+					#current_eval_location+=end_segment_length-overlap_distance
+					self.longitudal_screw_positions.append(current_eval_location)
+				#else:
+					#current_eval_location=finish_eval_location
+
+				#if current_eval_location+end_segment_length>=finish_eval_location:
+					
+				#else:
+
+				
+					
+					
+			#else:
+				# fill the gap with whatever is left and finish
+			#	new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
+			#	new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
+			#	new_chine.add_longitudal_element(new_longitudal)
+			#	current_eval_location=finish_eval_location
+
+			segment_index+=1
+			print("current_eval: %f finish eval: %f"%(current_eval_location,finish_eval_location))
 

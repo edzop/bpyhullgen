@@ -177,12 +177,10 @@ class Curve_Helper:
 				point.tilt=math.radians(self.curve_twist[idx])		
 
 		polyline.use_cyclic_u = False
-
 		
-		bpy_helper.select_object(self.curve_object,True)
-		bpy.ops.object.duplicate_move()
-
 		if self.make_backup:
+			bpy_helper.select_object(self.curve_object,True)
+			bpy.ops.object.duplicate_move()
 			self.curve_backup=bpy.context.active_object
 			self.curve_backup.name=self.curve_object.name+"_backup"
 			self.curve_backup.parent=self.curve_object

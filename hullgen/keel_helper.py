@@ -29,7 +29,7 @@ class keel:
 	the_hull=None
 	thickness=0.1
 	keel_object=None
-	keel_collection=None
+	view_keel_collection=None
 	station_start=0
 	station_end=1
 
@@ -46,7 +46,7 @@ class keel:
 		self.lateral_offset=lateral_offset
 		self.top_height=top_height
 		self.the_hull=the_hull
-		self.keel_collection=bpy_helper.make_collection("keels",bpy.context.scene.collection.children)
+		self.view_keel_collection=bpy_helper.make_collection("keels",bpy.context.scene.collection.children)
 		self.station_start=station_start
 		self.station_end=station_end
 
@@ -98,7 +98,7 @@ class keel:
 
 
 		bpy_helper.select_object(self.keel_object,True)
-		bpy_helper.move_object_to_collection(self.keel_collection,self.keel_object)
+		bpy_helper.move_object_to_collection(self.view_keel_collection,self.keel_object)
 
 		bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
 		bool_new.object = self.the_hull.hull_object
@@ -140,7 +140,7 @@ class keel:
 		self.keel_slicer_object.hide_viewport = True
 
 		bpy_helper.select_object(self.keel_slicer_object,True)
-		bpy_helper.move_object_to_collection(self.keel_collection,self.keel_slicer_object)
+		bpy_helper.move_object_to_collection(self.view_keel_collection,self.keel_slicer_object)
 
 
 		bool_new = self.keel_slicer_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
