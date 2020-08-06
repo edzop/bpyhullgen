@@ -180,7 +180,7 @@ class hull_maker:
             modifier.double_threshold=0
 
             bpy_helper.select_object(bh.bulkhead_object,True)
-            #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
+            #bpy.ops.object.modifier_apply(modifier=modifier_name)
 
             # notch the keel with modified bulkhead 
             modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
@@ -190,7 +190,7 @@ class hull_maker:
             modifier.double_threshold=0
 
             bpy_helper.select_object(keel.keel_object,True)
-            #bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier_name)
+            #bpy.ops.object.modifier_apply(modifier=modifier_name)
 
         material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
 

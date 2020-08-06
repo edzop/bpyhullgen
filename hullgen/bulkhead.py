@@ -113,7 +113,7 @@ class bulkhead:
         bool_new.operation = 'INTERSECT'
         bool_new.name="bool.hull_shape"
 
-        bpy.ops.object.modifier_apply(apply_as='DATA', modifier="bool.hull_shape")
+        bpy.ops.object.modifier_apply(modifier="bool.hull_shape")
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 

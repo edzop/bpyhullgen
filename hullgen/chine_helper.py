@@ -279,7 +279,7 @@ class chine_helper:
 		bool_cut.object = wall_curve
 		bool_cut.operation = 'DIFFERENCE'
 		
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=name_prefix)
+		bpy.ops.object.modifier_apply(modifier=name_prefix)
 		
 		self.delete_back_front(slicer1)
 
@@ -297,7 +297,7 @@ class chine_helper:
 		bool_cut.operation = 'DIFFERENCE'
 
 		bpy.context.view_layer.objects.active=slicer2
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=name_prefix)
+		bpy.ops.object.modifier_apply(modifier=name_prefix)
    
 		self.delete_back_front(slicer2)
 
@@ -457,12 +457,12 @@ class chine_helper:
 
 
 			bpy_helper.select_object(longitudal_plane,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lm")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Lx")
+			#bpy.ops.object.modifier_apply(modifier="Lm")
+			#bpy.ops.object.modifier_apply(modifier="Lx")
 
 			bpy_helper.select_object(slicer_plane,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sm")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Sx")
+			#bpy.ops.object.modifier_apply(modifier="Sm")
+			#bpy.ops.object.modifier_apply(modifier="Sx")
 
 			#bpy.data.objects.remove(object_end_clean_min)
 			object_end_clean_max.hide_viewport=True

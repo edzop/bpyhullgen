@@ -534,7 +534,7 @@ def create_bilgetank(the_hull,top,x1,x2,y_offset,name):
 	modifier.operation="INTERSECT"
 	modifier.double_threshold=0
 
-	bpy.ops.object.modifier_apply(apply_as='DATA', modifier="bilge_hull")
+	bpy.ops.object.modifier_apply(modifier="bilge_hull")
 	bpy.ops.object.mode_set(mode='EDIT')
 	bpy.ops.mesh.select_all(action='SELECT')
 	bpy.ops.mesh.normals_make_consistent(inside=False)

@@ -82,7 +82,7 @@ def make_slicer_plane(wall_curve,name,height,thickness):
     bool_two.object = wall_curve
     bool_two.operation = 'DIFFERENCE'
 
-    bpy.ops.object.modifier_apply(apply_as='DATA', modifier="slice")
+    bpy.ops.object.modifier_apply(modifier="slice")
     delete_back_front(slicer1)
 
     slicer1.select_set(False)
@@ -98,7 +98,7 @@ def make_slicer_plane(wall_curve,name,height,thickness):
     bool_two.operation = 'DIFFERENCE'
 
     bpy.context.view_layer.objects.active=slicer2
-    bpy.ops.object.modifier_apply(apply_as='DATA', modifier="slice")
+    bpy.ops.object.modifier_apply(modifier="slice")
     delete_back_front(slicer2)
 
     bpy.ops.object.mode_set(mode='OBJECT')

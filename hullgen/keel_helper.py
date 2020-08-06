@@ -107,7 +107,7 @@ class keel:
 		bool_new.operation = 'INTERSECT'
 
 		bpy_helper.select_object(self.keel_object,True)
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=bool_new.name)
+		bpy.ops.object.modifier_apply(modifier=bool_new.name)
 
 		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
@@ -150,7 +150,7 @@ class keel:
 		bool_new.operation = 'INTERSECT'
 
 		bpy_helper.select_object(self.keel_slicer_object,True)
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier=bool_new.name)
+		bpy.ops.object.modifier_apply(modifier=bool_new.name)
 
 		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
@@ -200,12 +200,12 @@ def disabled():
 
 
 			bpy_helper.select_object(self.keel_object,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Km")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Kx")
+			#bpy.ops.object.modifier_apply(modifier="Km")
+			#bpy.ops.object.modifier_apply(modifier="Kx")
 
 			bpy_helper.select_object(self.keel_slicer_object,True)
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="KSm")
-			#bpy.ops.object.modifier_apply(apply_as='DATA', modifier="KSx")
+			#bpy.ops.object.modifier_apply(modifier="KSm")
+			#bpy.ops.object.modifier_apply(modifier="KSx")
 
 			#bpy.data.objects.remove(object_end_clean_min)
 			object_end_clean_max.hide_viewport=True
