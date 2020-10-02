@@ -880,7 +880,7 @@ def get_distance_between_two_selected_points():
 		if v.select:
 			print(str(v.select))
 			co_final =  obj.matrix_world @ v.co
-			print(co_final)
+			#print(co_final)
 			selected_vertices.append(co_final)
 			
 	print(len(selected_vertices))
