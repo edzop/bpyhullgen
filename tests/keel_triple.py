@@ -20,7 +20,7 @@ import bpy
 
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
-from bpyhullgen.hullgen import keel
+from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
@@ -34,12 +34,12 @@ def make_chines():
     new_chine.curve_width=1
 #    new_chine.curve_height=0.5
     new_chine.curve_length=the_hull.hull_length*1.2
-    new_chine.rotation=[180,0,0]
+    new_chine.rotation=[-180,0,0]
     new_chine.offset=[0,-0.35,-0.5]
     new_chine.name="side"
     new_chine.make_chine()
 
-    new_chine.rotation=[82,0,0]
+    new_chine.rotation=[-82,0,0]
     new_chine.offset=[0,0,0]
     new_chine.name="low"
     new_chine.curve_length=the_hull.hull_length*1.4
@@ -47,7 +47,7 @@ def make_chines():
     new_chine.make_chine()
 
     new_chine.asymmetry[1]=0
-    new_chine.rotation=[-90,0,0]
+    new_chine.rotation=[90,0,0]
     new_chine.offset=[0,0,-0.5]
     new_chine.name="roof"
     new_chine.curve_width=0.8
@@ -75,17 +75,30 @@ station_end=3
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
 
-the_keel = keel.keel(the_hull,lateral_offset=0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
-the_keel.make_keel()
-the_hull.integrate_keel(the_keel)	
+def make_keels():
 
-the_keel = keel.keel(the_hull,lateral_offset=-0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
-the_keel.make_keel()
-the_hull.integrate_keel(the_keel)
+    the_keel = keel_helper.keel(the_hull,lateral_offset=0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
+    the_keel.make_keel()
+    the_hull.integrate_keel(the_keel)	
 
-the_keel = keel.keel(the_hull,lateral_offset=0,top_height=floor_height,station_start=station_start,station_end=station_end)
-the_keel.make_keel()
-the_hull.integrate_keel(the_keel)
+    the_keel = keel_helper.keel(the_hull,lateral_offset=-0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
+    the_keel.make_keel()
+    the_hull.integrate_keel(the_keel)
+
+    the_keel = keel_helper.keel(the_hull,lateral_offset=0,top_height=floor_height,station_start=station_start,station_end=station_end)
+    the_keel.make_keel()
+    the_hull.integrate_keel(the_keel)
+
+
+make_keels()
+
+def disabled():
+    print("d")
+
+    
+
+    
+    
 
 the_hull.hull_object.hide_viewport=True
 
