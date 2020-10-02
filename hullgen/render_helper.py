@@ -142,4 +142,5 @@ def setup_keyframes(framedata):
             highestFrame=curFrame
             
     bpy.context.scene.frame_end=highestFrame
+    bpy.context.scene.frame_set(1)
         
