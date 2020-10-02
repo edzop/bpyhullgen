@@ -1,4 +1,31 @@
 import bpy
+import time
+import functools
+import bmesh
+
+class ElapsedTimer:
+
+    start_time=0
+
+    def __init__(self):
+        self.start_time=time.time()
+
+    
+    def secondsToStr(self,t):
+        rediv = lambda ll,b : list(divmod(ll[0],b)) + ll[1:]
+        return "%d:%02d:%02d.%03d" % tuple(functools.reduce(rediv,[[t*1000,],1000,60,60]))
+
+
+    def get_elapsed_string(self):
+        elapsed_time = time.time() - self.start_time
+
+        elapsed_string="Elapsed time: %s"%(self.secondsToStr(elapsed_time))
+
+        print(elapsed_string)
+        #print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+
+        return elapsed_string
+
 
 def select_object(theObject,selected):
 
@@ -23,7 +50,16 @@ def deselect_all_objects():
 		
 	bpy.ops.object.select_all(action='DESELECT')
 
-	
+def bmesh_recalculate_normals(obj):
+	mesh=obj.data
+	bm = bmesh.new()
+	bm.from_mesh(mesh)
+	bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+	bm.to_mesh(mesh)
+	bm.clear()
+	mesh.update()
+	bm.free()
+
 def find_and_remove_object_by_name(objname):
 	for obj in bpy.data.objects:
 	#	print(obj.name)
@@ -79,3 +115,6 @@ def is_object_hidden_from_view(the_object):
 	return False
 
 
+def secondsToStr(t):
+	rediv = lambda ll,b : list(divmod(ll[0],b)) + ll[1:]
+	return "%d:%02d:%02d.%03d" % tuple(functools.reduce(rediv,[[t*1000,],1000,60,60]))
