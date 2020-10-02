@@ -36,12 +36,12 @@ def make_chines():
     new_chine.longitudal_curve_angle=40
     new_chine.curve_length=the_hull.hull_length*2
     #new_chine.curve_angle=23
-    new_chine.rotation=[180,0,0]
+    new_chine.rotation=[-180,0,0]
     new_chine.offset=[-.95,0,0]
     new_chine.name="side"
     new_chine.make_chine()
 
-    new_chine.rotation=[82,0,0]
+    new_chine.rotation=[-82,0,0]
     #new_chine.offset=[0,0,0]
     new_chine.name="low"
     #new_chine.curve_length=the_hull.hull_length*1.4
@@ -51,7 +51,7 @@ def make_chines():
 
     #new_chine.curve_length=the_hull.hull_length*1.1
     new_chine.longitudal_count=0
-    new_chine.rotation=[-36,0,0]
+    new_chine.rotation=[36,0,0]
     #new_chine.offset=[0.04,0,-0.06]
     new_chine.name="upper"
     #new_chine.curve_length=the_hull.hull_length*1.3
@@ -60,7 +60,7 @@ def make_chines():
 
 
     new_chine.asymmetry[1]=0
-    new_chine.rotation=[-90,0,0]
+    new_chine.rotation=[90,0,0]
     new_chine.offset=[.5,0,0.6]
 
     new_chine.curve_width=-0.35
@@ -79,11 +79,13 @@ def make_chines():
 make_chines()
 
 framedata=[
-[ 1, [6.096892,-5.457021,-0.208632],[1.097236,-0.166389,-0.166539] ],
-[ 2, [0.832591,-1.967613,9.744141],[0.000000,0.000000,0.000000] ],
-[ 3, [6.916142,-0.764634,0.672572],[-0.018434,0.001545,-0.917216] ],
-[ 4, [-6.122976,-4.947592,0.150181],[-0.758119,0.379426,-0.492896] ],
-[ 5, [3.023221,-0.004060,-0.149050],[0.990780,0.029352,0] ]
+
+[ 1, [2.236060,-2.631392,1.005279],[0.226258,-0.350238,0.121912] ],
+[ 2, [0.832591,-1.967613,2.672717],[0.000000,0.000000,0.000000] ],
+[ 3, [2.832714,-0.172231,0.672572],[-0.018434,0.001545,-0.012598] ],
+[ 4, [-1.995935,-2.113114,0.150181],[-0.210668,0.021942,-0.125707] ],
+[ 5, [-3.033586,-0.187909,-0.149050],[-0.837497,-0.021717,0.000000] ]
+
 ]
 
 render_helper.setup_keyframes(framedata)
