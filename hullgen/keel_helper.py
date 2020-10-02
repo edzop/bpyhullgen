@@ -30,11 +30,13 @@ class keel:
 	thickness=0.1
 	keel_object=None
 	view_keel_collection=None
+
+	# measured in Longitudal station (X position) 
 	station_start=0
 	station_end=1
 
-	limit_x_min=0
-	limit_x_max=0
+	#limit_x_min=0
+	#limit_x_max=0
 
 	
 	slicer_cut_height=0.2
@@ -54,43 +56,105 @@ class keel:
 
 		#bpy_helper.hide_object(self.bulkhead_void_collection)
 
-	def set_limit_x_length(self,min,max):
-		self.limit_x_max=max
-		self.limit_x_min=min
+	#def set_limit_x_length(self,min,max):
+	#	self.limit_x_max=max
+	#	self.limit_x_min=min
 
+
+	def make_keel_object(self,name,top_height_offset):
+
+		cube_size=1.0
+		
+		keel_length=self.station_end-self.station_start
+
+		# =====================================================
+		# Make Keel Slicer for notches
+		# =====================================================
+		bpy.ops.mesh.primitive_cube_add(size=cube_size, 
+			enter_editmode=False, 
+			location=(  self.station_start+keel_length/2, 
+						self.lateral_offset, 
+						self.top_height))
+		
+
+		bpy.ops.transform.resize(value=(keel_length, 
+								self.thickness, 
+								self.the_hull.hull_height))
+
+		bpy.ops.transform.translate(value=(0,0,-self.the_hull.hull_height/2-(top_height_offset)))
+
+		bpy.ops.object.transform_apply(scale=True,location=False)
+		
+		new_object=bpy.context.view_layer.objects.active
+		new_object.name="%s.s%0.2f"%(name,self.lateral_offset)
+
+		
+
+		bpy_helper.select_object(new_object,True)
+		bpy_helper.move_object_to_collection(self.view_keel_collection,new_object)
+
+
+		bool_new = new_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
+		bool_new.object = self.the_hull.hull_object
+		bool_new.operation = 'INTERSECT'
+
+		bpy_helper.select_object(new_object,True)
+		#bpy.ops.object.modifier_apply(modifier=bool_new.name)
+
+		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+
+		return new_object
 
 
 
 	def make_keel(self,slicer_cut_height=0.2):
+
+		self.slicer_cut_height=slicer_cut_height
+
+		self.keel_slicer_object=self.make_keel_object("Keel_Slicer",slicer_cut_height)
+		self.keel_slicer_object.display_type="WIRE"
+		self.keel_slicer_object.hide_render = True
+		self.keel_slicer_object.hide_viewport = True
+
+		self.keel_object=self.make_keel_object("Keel",0)
+		#self.keel_slicer_object.display_type="WIRE"
+		#self.keel_slicer_object.hide_render = True
+
+		return self.keel_object
+			
+
+	def make_keel_old(self,slicer_cut_height=0.2):
 		cube_size=1.0
 		self.slicer_cut_height=slicer_cut_height
 
 		thickness_shift=0
 
-		if self.lateral_offset>0:
-			thickness_shift=self.thickness
-		else:
-			thickness_shift=-self.thickness
+		# we always want to solidify from outside to inside
+		# because we use a plane so we can get square edges on bottom where it meets hull 
+		# to mimic plate material
 
-		keel_length=self.station_end-self.station_start
+		if self.lateral_offset>0:
+			thickness_shift=-self.thickness
+		else:
+			thickness_shift=self.thickness
+
 
 		bpy.ops.mesh.primitive_plane_add(size=cube_size, 
 			enter_editmode=False, 
 			location=(  self.station_start+keel_length/2, 
-						self.lateral_offset+thickness_shift, 
+						self.lateral_offset-thickness_shift/2, 
 						self.top_height))
 
 		#bpy.ops.mesh.primitive_cube_add(size=cube_size, 
 		#    enter_editmode=False, 
-		#    location=(  self.the_hull.bool_correction_offset[0], 
-		#                self.the_hull.bool_correction_offset[1]+self.lateral_offset, 
-		#                self.the_hull.bool_correction_offset[2]+self.top_height))
+		#    location=(  0, self.lateral_offset, self.top_height))
 		bpy.ops.transform.rotate(value=radians(-90),orient_axis='X')
 
 		bpy.ops.transform.resize(value=(keel_length, 
-								0, 
+								1, 
 								self.the_hull.hull_height))
-
+								
+		# Shift vertically
 		bpy.ops.transform.translate(value=(0,0,-self.the_hull.hull_height/2))
 
 		bpy.ops.object.transform_apply(scale=True,location=False)
@@ -102,33 +166,53 @@ class keel:
 		bpy_helper.select_object(self.keel_object,True)
 		bpy_helper.move_object_to_collection(self.view_keel_collection,self.keel_object)
 
+		bpy_helper.select_object(self.keel_object,True)
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='SELECT')
+
+		#if self.lateral_offset>0:
+		#	bpy.ops.mesh.normals_make_consistent(inside=True)
+		#else:
+		#	bpy.ops.mesh.normals_make_consistent(inside=False)
+
+		bpy.ops.object.mode_set(mode='OBJECT')
+
 		bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="bool.hull_shape")
 		bool_new.object = self.the_hull.hull_object
 		bool_new.operation = 'INTERSECT'
+		bool_new.use_self=1
+
 
 		bpy_helper.select_object(self.keel_object,True)
-		bpy.ops.object.modifier_apply(modifier=bool_new.name)
+		#bpy.ops.object.modifier_apply(modifier=bool_new.name)
 
-		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+		#bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
 		modifier=self.keel_object.modifiers.new(name="solidify", type='SOLIDIFY')
-		modifier.thickness=thickness_shift
-		#bpy.context.view_layer.objects.active = obj
-		bpy.ops.object.modifier_apply(modifier=modifier.name)
 
+
+		#if self.lateral_offset>0:
+		modifier.thickness=self.thickness
+		#thickness_shift
+		#else:
+		#	modifier.thickness=-thickness_shift
+
+		bpy.context.view_layer.objects.active = self.keel_object
+		#bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
+		# =====================================================
 		# Make Keel Slicer for notches
+		# =====================================================
 		bpy.ops.mesh.primitive_cube_add(size=cube_size, 
 			enter_editmode=False, 
-			location=(  self.station_start+keel_length/2+self.the_hull.bool_correction_offset[0], 
-						self.the_hull.bool_correction_offset[1]+self.lateral_offset+thickness_shift/2, 
-						self.the_hull.bool_correction_offset[2]+self.top_height))
+			location=(  self.station_start+keel_length/2, 
+						self.lateral_offset, 
+						self.top_height))
 		
-		# shift down a smidge to compensate for boolean coplanar faces bug
-		# maybe this bug will be fixed with blender > 2.83 bool rewrite
-		bool_coplanar_edge_fix=0.01
 
 		bpy.ops.transform.resize(value=(keel_length, 
-								self.thickness+bool_coplanar_edge_fix, 
+								self.thickness, 
 								self.the_hull.hull_height))
 
 		bpy.ops.transform.translate(value=(0,0,-self.the_hull.hull_height/2-(self.slicer_cut_height)))
@@ -139,7 +223,7 @@ class keel:
 		self.keel_slicer_object.name="Keel_Slicer.s%0.2f"%(self.lateral_offset)
 		self.keel_slicer_object.display_type="WIRE"
 		self.keel_slicer_object.hide_render = True
-		self.keel_slicer_object.hide_viewport = True
+		#self.keel_slicer_object.hide_viewport = True
 
 		bpy_helper.select_object(self.keel_slicer_object,True)
 		bpy_helper.move_object_to_collection(self.view_keel_collection,self.keel_slicer_object)
@@ -150,68 +234,11 @@ class keel:
 		bool_new.operation = 'INTERSECT'
 
 		bpy_helper.select_object(self.keel_slicer_object,True)
-		bpy.ops.object.modifier_apply(modifier=bool_new.name)
+		#bpy.ops.object.modifier_apply(modifier=bool_new.name)
 
 		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
-
-		
-		bpy.ops.transform.translate(value=(0,0,-bool_coplanar_edge_fix))
-
 		return self.keel_object
-
-
-def disabled():
-
-		# chop ends off if needed (based on X limits)
-		if self.limit_x_max!=0 and self.limit_x_min!=0:
-
-			#modifier_min_x_name="slice_min_x"
-			#modifier_max_x_name="slice_max_x"
-
-			block_width=self.the_hull.hull_length
-
-			adjusted_min_location=self.limit_x_min
-			adjusted_min_location-=block_width/2
-
-			adjusted_max_location=self.limit_x_max
-			adjusted_max_location+=block_width/2
-
-			object_end_clean_min = self.the_hull.make_bool_cube("end_clean_x_min"+self.keel_object.name,location=[adjusted_min_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
-			object_end_clean_max = self.the_hull.make_bool_cube("end_clean_x_max"+self.keel_object.name,location=[adjusted_max_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
-
-			print(object_end_clean_max.name)
-
-			bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="Km")
-			bool_new.object = object_end_clean_min
-			bool_new.operation = 'DIFFERENCE'
-
-			bool_new = self.keel_object.modifiers.new(type="BOOLEAN", name="Kx")
-			bool_new.object = object_end_clean_max
-			bool_new.operation = 'DIFFERENCE'
-
-			bool_new = self.keel_slicer_object.modifiers.new(type="BOOLEAN", name="KSm")
-			bool_new.object = object_end_clean_min
-			bool_new.operation = 'DIFFERENCE'
-
-			bool_new = self.keel_slicer_object.modifiers.new(type="BOOLEAN", name="KSx")
-			bool_new.object = object_end_clean_max
-			bool_new.operation = 'DIFFERENCE'
-
-
-			bpy_helper.select_object(self.keel_object,True)
-			#bpy.ops.object.modifier_apply(modifier="Km")
-			#bpy.ops.object.modifier_apply(modifier="Kx")
-
-			bpy_helper.select_object(self.keel_slicer_object,True)
-			#bpy.ops.object.modifier_apply(modifier="KSm")
-			#bpy.ops.object.modifier_apply(modifier="KSx")
-
-			#bpy.data.objects.remove(object_end_clean_min)
-			object_end_clean_max.hide_viewport=True
-			#bpy.data.objects.remove(object_end_clean_max)
-			object_end_clean_min.hide_viewport=True
-
 
 
 
@@ -278,7 +305,7 @@ class keel_builder:
 		#finish_eval_location=2+self.the_hull.bulkhead_thickness
 		#current_eval_location=self.the_hull.start_bulkhead_location-self.the_hull.bulkhead_thickness
 
-		current_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*start_bulkhead)
+		current_eval_location=self.the_hull.start_bulkhead_location #+(self.the_hull.bulkhead_spacing*start_bulkhead)
 		finish_eval_location=self.the_hull.start_bulkhead_location+(self.the_hull.bulkhead_spacing*end_bulkhead)
 
 		current_eval_location-=self.the_hull.bulkhead_thickness

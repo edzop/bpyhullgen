@@ -24,21 +24,25 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import render_helper
 
-the_hull=hull_maker.hull_maker(length=12,width=0.4,height=0.8)
+the_hull=hull_maker.hull_maker(length=12,width=5,height=0.8)
 the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
-new_chine.extrude_width=1
-new_chine.rotation=[0,0,0]
-new_chine.offset=[0,-0.2,0]
-new_chine.name="top"
-new_chine.add_longitudal_element(chine_helper.longitudal_element(0,-0.15,0.8))
+#new_chine.extrude_width=0.1
+#new_chine.rotation=[0,0,0]
+new_chine.offset=[0,-0.4,0]
+new_chine.name="side"
+new_chine.curve_width=1
+
+#chine_helper.longitudal_element(0,0.15,0.8)
+new_longitudal=chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.2)
+#new_longitudal.slicer_ratio=1
+new_chine.add_longitudal_element(new_longitudal)
 
 new_chine.symmetrical=True
 new_chine.make_chine()
 
 for l in the_hull.chine_list:
-    print(l)
     l.hide_viewport=False
     l.hide_render=False
     wireframe = l.modifiers.new(type="WIREFRAME", name="w2")

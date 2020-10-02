@@ -6,33 +6,40 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import bulkhead
 from bpyhullgen.hullgen import render_helper
+from bpyhullgen.hullgen import bpy_helper
+
+
+the_hull=hull_maker.hull_maker()
+the_hull.make_hull_object()
 
 
 def make_chines(the_hull):
 
 	new_chine=chine_helper.chine_helper(the_hull)
 
+	new_chine.curve_length=the_hull.hull_length*1.02
+
 	new_chine.rotation=[0,0,0]
 	new_chine.offset=[0,0,0]
-	new_chine.name="top"
+	new_chine.name="side"
 	new_chine.make_chine()
 
-	new_chine.rotation=[25,0,0]
+	new_chine.rotation=[-25,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="mid"
 	new_chine.make_chine()
 
-	new_chine.rotation=[-45,0,0]
+	new_chine.rotation=[45,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="upper"
 	new_chine.make_chine()
 
-	new_chine.rotation=[72,0,0]
+	new_chine.rotation=[-72,0,0]
 	new_chine.offset=[0,0,-0.5]
 	new_chine.name="low"
 	new_chine.make_chine()
 
-	new_chine.rotation=[90,0,0]
+	new_chine.rotation=[-90,0,0]
 	new_chine.offset=[0,0,0.3]
 	new_chine.name="roof"
 	new_chine.curve_width=-0.4
@@ -40,9 +47,6 @@ def make_chines(the_hull):
 	new_chine.symmetrical=False
 	new_chine.make_chine()
 
-the_hull=hull_maker.hull_maker()
-
-the_hull.make_hull_object()
 
 make_chines(the_hull)
 
@@ -57,11 +61,10 @@ edge_offset=0.18
 
 bulkhead_definitions=[]
 for station_position in bpy_helper.frange(-the_hull.hull_length/2+edge_offset,the_hull.hull_length/2-edge_offset,0.4):
-
 	bulkhead_definitions.append([station_position,-0.9,False,0.1])
 
 the_hull.make_bulkheads(bulkhead_definitions)
-the_hull.make_longitudal_booleans()
+#the_hull.make_longitudal_booleans()
 	
 the_hull.hull_object.hide_viewport=True
 #the_hull.hull_object.hide_render=True

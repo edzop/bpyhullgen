@@ -19,6 +19,7 @@
 import bpy 
 import math
 from math import radians, degrees
+import bmesh
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
@@ -38,8 +39,6 @@ class hull_maker:
     longitudal_list=None
     longitudal_slicer_list=None
 
-    bool_coplaner_hack=0.001
-
     # this will be inherited by members
     structural_thickness=0.06
 
@@ -57,10 +56,6 @@ class hull_maker:
     # output scale for fabrication = 1:16 = 1/16 = 0.0625
     hull_output_scale=1
     
-
-
-    #bool_correction_offset=[ 0.0011, 0.0012, 0.0013 ]
-    bool_correction_offset=[ 0.00, 0.00, 0.00 ]
 
     chine_list=None
 
@@ -80,7 +75,7 @@ class hull_maker:
 
         # Booleans behave really strange if origin is 0,0,0 - this seems to help
         #bpy.ops.mesh.primitive_cube_add(size=1.0,enter_editmode=False, location=(0.02, 0.02, 0.02))
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, location=(self.bool_correction_offset[0]+location[0], self.bool_correction_offset[1]+location[1], self.bool_correction_offset[2]))
+        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, location=(location[0], location[1], 0))
 
         new_object=bpy.context.view_layer.objects.active
 
@@ -117,12 +112,14 @@ class hull_maker:
                                 station=bulkhead_definition[0],
                                 watertight=bulkhead_definition[2],
                                 thickness=bulkhead_definition[3])
+                                
             bh.make_bulkhead()
 
             # If it's not watertight - there is a void in middle
             if bulkhead_definition[2]==False:
                 material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
                 
+                # floor height
                 if bulkhead_definition[1]!=False:
                     bh.move_verts_z(bh.bulkhead_void_object,bulkhead_definition[1])
 
@@ -132,14 +129,36 @@ class hull_maker:
 
             if bh.bulkhead_void_object!=None:
                 bpy_helper.select_object(bh.bulkhead_void_object,True)
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.select_all(action='SELECT')
-                bpy.ops.mesh.normals_make_consistent(inside=False)
-                bpy.ops.object.mode_set(mode='OBJECT')
-                bpy_helper.hide_object(bh.bulkhead_void_object)
+                #bpy.ops.object.mode_set(mode='EDIT')
+                #bpy.ops.mesh.select_mode(type="FACE")
+                #bpy.ops.mesh.select_all(action='SELECT')
+                   
+                # TODO - I don't know why but if I call this once it doesn't do anything
+                # IF I call it twice it works...
+                #bpy.ops.mesh.normals_make_consistent(inside=False)
+                #bpy.ops.mesh.normals_make_consistent(inside=False)
+                # - bmesh implementation seems to work better - not sure why
+                bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
 
-                bh.bulkhead_void_object.parent=self.hull_object
+                            
+                #if bh.station==0:
+                #    d
+
+
+                #if bh.station==0:
+                   
+                    #bpy.context.space_data.overlay.show_face_normals = True
+                    #bpy.context.space_data.overlay.normals_length = 0.80844
+                #    d
+
+                #bpy.ops.object.mode_set(mode='OBJECT')
+
+                bpy_helper.hide_object(bh.bulkhead_void_object)
             
+                bh.bulkhead_void_object.parent=self.hull_object
+
+
+
 
             bpy_helper.select_object(bh.bulkhead_object,True)
 
@@ -159,7 +178,6 @@ class hull_maker:
                 modifier=bh.bulkhead_object.modifiers.new(name="bool_slicer", type='BOOLEAN')
                 modifier.object=lg
                 modifier.operation="DIFFERENCE"
-                modifier.double_threshold=0
 
         for lg in self.longitudal_list:
             #material_helper.assign_material(lg,material_helper.get_material_support())
@@ -177,7 +195,6 @@ class hull_maker:
             modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
             modifier.object=keel.keel_slicer_object
             modifier.operation="DIFFERENCE"
-            modifier.double_threshold=0
 
             bpy_helper.select_object(bh.bulkhead_object,True)
             #bpy.ops.object.modifier_apply(modifier=modifier_name)
@@ -187,7 +204,6 @@ class hull_maker:
             modifier=keel.keel_object.modifiers.new(name=modifier_name, type='BOOLEAN')
             modifier.object=bh.bulkhead_object
             modifier.operation="DIFFERENCE"
-            modifier.double_threshold=0
 
             bpy_helper.select_object(keel.keel_object,True)
             #bpy.ops.object.modifier_apply(modifier=modifier_name)
@@ -217,7 +233,6 @@ class hull_maker:
             modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
             modifier.object=object_end_clean
             modifier.operation="DIFFERENCE"
-            modifier.double_threshold=0
             bpy_helper.hide_object(object_end_clean)
 
     # Trims the ends of the longitudal framing where it extends past last bulkhead
@@ -261,7 +276,6 @@ class hull_maker:
                 modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
                 modifier.object=object_end_clean
                 modifier.operation="DIFFERENCE"
-                modifier.double_threshold=0
                 bpy_helper.hide_object(object_end_clean)
 
         bpy_helper.hide_object(view_collection_cleaner)

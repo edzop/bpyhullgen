@@ -29,7 +29,7 @@ class longitudal_element:
 	width=0.1
 	thickness=0.1
 
-	# how much wider the slicers will be than the longitudals - value of 1.1 means notches will be 110 percent of longitudal
+	# how much wider the slicers will be than the longitudals - value of 1.1 means notches will be 110 percent of longitudal width
 	slicer_overcut=1.1
 
 	# ratio of longitudal to slicer means how high the slicers are in relation to longitudals
@@ -64,8 +64,6 @@ class chine_helper:
 	#curve_twist2=-20
 	the_hull=None
 	symmetrical=True
-
-	bool_correction_offset=0
 
 	curve_length=12
 	curve_width=1.2
@@ -124,9 +122,12 @@ class chine_helper:
 
 		self.longitudal_thickness=the_hull.structural_thickness
 		
-		self.bool_correction_offset=the_hull.bool_correction_offset
-
 		self.curve_height=the_hull.hull_height
+
+		# need this?
+		#self.curve_width=the_hull.hull_width
+		self.curve_length=the_hull.hull_length
+
 		self.extrude_width=the_hull.hull_height*3
 
 		self.view_collection_chines=bpy_helper.make_collection("chines",bpy.context.scene.collection.children)
@@ -135,19 +136,31 @@ class chine_helper:
  
 	# After the boolean operation is complete the vertices can be removed that are on the other side
 	# of the plane used for the boolean operation. 
-	def delete_back_front(self,ob):
+	def delete_all_except_vertex_group(self,ob,vertex_group_name):
 		ob.select_set(state=True)
 
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='DESELECT')
-		bpy.ops.object.vertex_group_set_active(group="back")
+		bpy.ops.object.vertex_group_set_active(group=vertex_group_name)
 		bpy.ops.object.vertex_group_select()
+		bpy.ops.mesh.select_all(action='INVERT')
 		bpy.ops.mesh.delete(type='VERT')
 
-		bpy.ops.mesh.select_all(action='DESELECT')
-		bpy.ops.object.vertex_group_set_active(group="front")
-		bpy.ops.object.vertex_group_select()
-		bpy.ops.mesh.delete(type='VERT')
+		# Old implementation fails because new exact boolean modifier inherits vertex groups
+		# Hopefully this can be fixed... Previous fast implementation did not inherit vertex groups
+
+		#bpy.ops.object.mode_set(mode='EDIT')
+		#bpy.ops.mesh.select_all(action='DESELECT')
+		#bpy.ops.object.vertex_group_set_active(group="back")
+		#bpy.ops.object.vertex_group_select()
+		#bpy.ops.mesh.delete(type='VERT')
+
+		#bpy.ops.mesh.select_all(action='DESELECT')
+		#bpy.ops.object.vertex_group_set_active(group="front")
+		#bpy.ops.object.vertex_group_select()
+		#bpy.ops.mesh.delete(type='VERT')
+
+		
 
 	
 	# Creates a new secondary plane that will intersect the primary plane. This new secondary plane will act as the slicer
@@ -170,7 +183,7 @@ class chine_helper:
 	
 		theCurveHelper.curve_angle=curve_angle
 
-		theCurveHelper.define_curve(self.curve_length,bend_radius)
+		theCurveHelper.define_curve(length=self.curve_length,width=bend_radius)
 		theCurveHelper.curve_height=0
 
 		theCurveHelper.generate_curve(name)
@@ -183,11 +196,15 @@ class chine_helper:
 		bpy_helper.select_object(newCurve,True)
 
 		bpy.ops.object.mode_set(mode='EDIT')
-
+		
 		# extrude thicknes along Y axis
 		bpy.ops.mesh.select_all(action='SELECT')
+
+		
+		overlap_factor=self.curve_width*4
+		
 		#bpy.ops.mesh.normals_make_consistent(inside=False)
-		bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0,self.curve_width*5,0), 
+		bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0,self.curve_width*overlap_factor,0), 
 										"constraint_axis":(False, False,True)})
 
 		
@@ -195,53 +212,104 @@ class chine_helper:
 
 		bpy.ops.object.mode_set(mode='OBJECT')
 
-		group = newCurve.vertex_groups.new()
-		group.name = "back"
+		front_group = newCurve.vertex_groups.new()
+		front_group.name = "front"
+
+		back_group = newCurve.vertex_groups.new()
+		back_group.name = "back"
+		
+		y_min=0
+		y_max=0
+
+		for vert in newCurve.data.vertices:
+			if vert.co.y>y_max:
+				y_max=vert.co.y
+
+			if vert.co.y<y_min:
+				y_min=vert.co.y
+
+		y_diff=y_max-y_min
+		y_half=0
+
+		if y_diff>0:
+			y_half=y_min+y_diff/2
+
+		front_verts=[]
+		back_verts=[]
+
 
 		# for some reason vector math type if vert.co.y==0 equals false negative because of some rounding issue so I'm using -1 as cutoff for comparison
 
-		verts = []
+		#print("+++++++++++++++")
+		#print("name: %s width: %f inverted: %d"%(name,self.curve_width,inverted_curves))
+
 		for vert in newCurve.data.vertices:
-			#print("%f %f %f"%(vert.co.x,vert.co.y,vert.co.z))
-			if vert.co.y>-1:
-				verts.append(vert.index)
+			#print("X: %f Y: %f Z: %f"%(vert.co.x,vert.co.y,vert.co.z),end =" ")
 			
-		group.add(verts, 1.0, 'ADD')
+			# this is messy hack... will refactor after easier way to identify
+			# modified vertices in new exact boolean modifier.
+			# for now there is no easy solution to identify newly created geometry
+			if self.curve_width<0:
+				if vert.co.y<y_half:
+					if inverted_curves==0:
+						front_verts.append(vert.index)
+						#print("front")
+					else:
+						back_verts.append(vert.index)
+						#print("back")
 
-		group = bpy.context.object.vertex_groups.new()
-		group.name = "front"
+				if vert.co.y>=y_half:
+					if inverted_curves==0:
+						back_verts.append(vert.index)
+						#print("back")
+					else:
+						front_verts.append(vert.index)
+						#print("front")
+			else:
+				if vert.co.y<y_half:
+					if inverted_curves==1:
+						front_verts.append(vert.index)
+						#print("front")
+					else:
+						back_verts.append(vert.index)
+						#print("back")
 
-		verts = []
-		for vert in newCurve.data.vertices:
-			if vert.co[1]<-1:
-				verts.append(vert.index)
+				if vert.co.y>=y_half:
+					if inverted_curves==1:
+						back_verts.append(vert.index)
+						#print("back")
+					else:
+						front_verts.append(vert.index)
+						#print("front")
 
-		group.add(verts, 1.0, 'ADD')
+			
+		front_group.add(front_verts, 1.0, 'ADD')
+		back_group.add(back_verts, 1.0, 'ADD')
 
 		#bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
 		#bpy.ops.object.transform_apply(rotation=True,scale=False,location=False)
 		
 		newCurve.location.z=height
 
-		y_shift=self.curve_width*5/2
-
-		
+		y_shift=self.curve_width*overlap_factor/2
 
 		#theCurveHelper.extrude_curve(newCurve)
 		#bpy.ops.object.duplicate_move(TRANSFORM_OT_translate={"value":(0, 0, 0)})
 
 		bpy.ops.object.select_all(action='DESELECT')
 
-
 		bpy.ops.object.mode_set(mode='EDIT')
 
 		bpy.ops.mesh.select_all(action='SELECT')
 		bpy.ops.transform.translate(value=(0, -y_shift, 0))
 
+
+
 		bpy.ops.object.mode_set(mode='OBJECT')
 		#newCurve.location.y+=y_shift
 
-
+		#if ".R." in name:
+		#	d
 
 		return newCurve
 
@@ -271,6 +339,7 @@ class chine_helper:
 
 		# Add first plane
 		slicer1=self.create_slicer_plane_mesh(name_prefix+name+".a",longitudal_element.z_offset,longitudal_element,inverted_curves)
+
 		
 		slicer1.select_set(True)
 		bpy.context.view_layer.objects.active=slicer1
@@ -278,28 +347,33 @@ class chine_helper:
 		bool_cut = slicer1.modifiers.new(type="BOOLEAN", name=name_prefix)
 		bool_cut.object = wall_curve
 		bool_cut.operation = 'DIFFERENCE'
-		
+
 		bpy.ops.object.modifier_apply(modifier=name_prefix)
-		
-		self.delete_back_front(slicer1)
+
+		#if ".R." in name:
+		#	d
+
+		self.delete_all_except_vertex_group(slicer1,"back")
 
 		slicer1.select_set(False)
 		
 		# Add second plane
 		slicer2=self.create_slicer_plane_mesh(name_prefix+name+".b",longitudal_element.z_offset-thickness,longitudal_element,inverted_curves)
    
-		slicer2.select_set(True)
-		
+		slicer2.select_set(True)		
 		bpy.context.view_layer.objects.active=slicer2
+		
 		
 		bool_cut = slicer2.modifiers.new(type="BOOLEAN", name=name_prefix)
 		bool_cut.object = wall_curve
 		bool_cut.operation = 'DIFFERENCE'
 
+	
 		bpy.context.view_layer.objects.active=slicer2
+
 		bpy.ops.object.modifier_apply(modifier=name_prefix)
    
-		self.delete_back_front(slicer2)
+		self.delete_all_except_vertex_group(slicer2,"back")
 
 		bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -310,7 +384,11 @@ class chine_helper:
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='SELECT')
 
+
 		bpy.ops.mesh.bridge_edge_loops()
+
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.mesh.normals_make_consistent(inside=False)
 
 		# joining 2 objects sets the origin to the last selected object
 		# so shift the object down so origin is at center of object (thickness/2)
@@ -323,10 +401,9 @@ class chine_helper:
 
 		# second object selected is left over after join
 		slicer2.name=name_prefix+name
-
+		
 		#bpy.ops.object.transform_apply(rotation=False,scale=False,location=True)
 		return slicer2
-
 	
 
 	def make_longitudal_element(self,curve_object,longitudal_element,inversed,index):
@@ -357,9 +434,13 @@ class chine_helper:
 		if inversed:
 			extrude_amount=longitudal_element.width
 			slicer_extrude_amount=longitudal_element.width*longitudal_element.slicer_ratio
-					
+
+							
 		self.select_and_extrude_slicer(longitudal_plane,extrude_amount)
 
+		#if inversed:
+		#	sd
+			
 		slicer_plane=None
 		
 		slicer_plane=self.make_slicer_plane(
@@ -404,11 +485,6 @@ class chine_helper:
 			else:
 				slicer_plane.location.y=-self.skin_pokethrough
 
-		
-		# for some reason bool doesn't work if X is 0 on parent object... 
-		# blender coplanar surface boolean bug
-		slicer_plane.location.x=0.0001
-		
 		#slicer_plane.location.z=- ( (longitudal_element.thickness*longitudal_element.slicer_overcut)-longitudal_element.thickness ) / 2
 
 		bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_plane)
@@ -466,8 +542,10 @@ class chine_helper:
 
 			#bpy.data.objects.remove(object_end_clean_min)
 			object_end_clean_max.hide_viewport=True
+			object_end_clean_max.hide_render=True
 			#bpy.data.objects.remove(object_end_clean_max)
 			object_end_clean_min.hide_viewport=True
+			object_end_clean_min.hide_render=True
 
 	
 
@@ -512,7 +590,6 @@ class chine_helper:
 		self.curve_objects.append(curve_object)
 
 		material_helper.assign_material(curve_object,material_helper.get_material_bool())
-		bpy.ops.transform.translate(value=(self.bool_correction_offset[0], self.bool_correction_offset[1], self.bool_correction_offset[2]))
 
 		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
 		theCurveHelper.extrude_curve(self.extrude_width)

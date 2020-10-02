@@ -96,9 +96,7 @@ class bulkhead:
     def make_bulkhead(self):
         bpy.ops.mesh.primitive_cube_add(size=2.0, 
             enter_editmode=False, 
-            location=(  self.the_hull_definition.bool_correction_offset[0]+self.station, 
-                        self.the_hull_definition.bool_correction_offset[1], 
-                        self.the_hull_definition.bool_correction_offset[2]))
+            location=(  self.station, 0, 0))
 
         bpy.ops.transform.resize(value=(self.thickness/2, self.the_hull_definition.hull_width, self.the_hull_definition.hull_height))
         bpy.ops.object.transform_apply(scale=True)
@@ -111,16 +109,21 @@ class bulkhead:
         bool_new = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="slice")
         bool_new.object = self.the_hull_definition.hull_object
         bool_new.operation = 'INTERSECT'
+        #bool_new.use_self=1
         bool_new.name="bool.hull_shape"
+
+        #print(self.station)
+#        if self.station==2:
+#            dd
 
         bpy.ops.object.modifier_apply(modifier="bool.hull_shape")
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-        bpy.ops.object.mode_set(mode='OBJECT')
+        #bpy.ops.object.mode_set(mode='EDIT')
+        #bpy.ops.mesh.select_all(action='SELECT')
+        #bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        #bpy.ops.object.mode_set(mode='OBJECT')
 
 
         if self.watertight==False:
@@ -132,9 +135,8 @@ class bulkhead:
 
             bpy_helper.select_object(self.bulkhead_void_object,True)
 
-            
-
             self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.station)
+
 
             mod_remesh = self.bulkhead_void_object.modifiers.new(type="REMESH", name="remesh")
             mod_remesh.mode = 'SHARP'
@@ -146,31 +148,44 @@ class bulkhead:
             # get truple of current size
             bulkhead_size=self.bulkhead_void_object.dimensions.xyz
 
+            #print(bulkhead_size)
+
             if bulkhead_size[0]==0 or bulkhead_size[1]==0 or bulkhead_size[2]==0:
                 print("Something went wrong... bulkhead size==0")
-                return None
+            else:
 
-            minimum_support_size=0.2
-            rescale_factor=[1,1,1]
+                minimum_support_size=0.2
+                rescale_factor=[1,1,1]
 
-            rescale_factor[0]=1.3
-            rescale_factor[1]=(bulkhead_size[1]-(minimum_support_size*2))*1/bulkhead_size[1]
-            rescale_factor[2]=(bulkhead_size[2]-(minimum_support_size*2))*1/bulkhead_size[2]
+                rescale_factor[0]=1.3
+                rescale_factor[1]=(bulkhead_size[1]-(minimum_support_size*2))*1/bulkhead_size[1]
+                rescale_factor[2]=(bulkhead_size[2]-(minimum_support_size*2))*1/bulkhead_size[2]
 
-            bpy.ops.transform.resize(value=rescale_factor)
+                bpy.ops.transform.resize(value=rescale_factor)
 
-            bpy.ops.object.transform_apply(scale=True)
+                bpy.ops.object.transform_apply(scale=True)
 
-            bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+                bpy_helper.select_object(self.bulkhead_void_object,True)
 
-            bpy_helper.select_object(self.bulkhead_object,True)
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.select_mode(type="FACE")
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+                bpy.ops.mesh.select_all(action='SELECT')
+                bpy.ops.mesh.normals_make_consistent(inside=False)
+                bpy.ops.object.mode_set(mode='OBJECT')
+                #bpy_helper.bmesh_recalculate_normals(self.bulkhead_void_object)
 
-            bool_void = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center")
-            bool_void.object = self.bulkhead_void_object
-            bool_void.operation = 'DIFFERENCE'
-            bool_void.double_threshold=0
+                #bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
-            bpy_helper.move_object_to_collection(self.bulkhead_void_collection,self.bulkhead_void_object)
+                bpy_helper.select_object(self.bulkhead_object,True)
+
+                bool_void = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center")
+                bool_void.object = self.bulkhead_void_object
+                bool_void.operation = 'DIFFERENCE'
+                #bool_void.use_self=True
+
+                bpy_helper.move_object_to_collection(self.bulkhead_void_collection,self.bulkhead_void_object)
 
 
         bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_object)

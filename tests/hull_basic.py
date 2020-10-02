@@ -38,7 +38,7 @@ def make_chines():
     new_chine.name="side"
     new_chine.make_chine()
 
-    new_chine.rotation=[82,0,0]
+    new_chine.rotation=[-82,0,0]
     new_chine.offset=[0,0,0]
     new_chine.name="low"
     new_chine.curve_length=the_hull.hull_length*1.4
@@ -46,7 +46,7 @@ def make_chines():
     new_chine.make_chine()
 
     new_chine.asymmetry[1]=0
-    new_chine.rotation=[-90,0,0]
+    new_chine.rotation=[90,0,0]
     new_chine.offset=[0,0,-0.5]
     new_chine.name="roof"
     new_chine.curve_width=0.8

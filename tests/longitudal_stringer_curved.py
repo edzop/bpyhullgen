@@ -18,6 +18,7 @@
 
 import bpy
    
+from bpyhullgen.hullgen import bpy_helper
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
@@ -31,20 +32,19 @@ the_hull.make_hull_object()
 new_chine=chine_helper.chine_helper(the_hull)
 
 new_longitudal=chine_helper.longitudal_element(0,0.5,0.3)
-new_longitudal.set_curve(radius=0.8,angle=4)
+#new_longitudal.set_curve(radius=0.8,angle=4)
 new_longitudal.slicer_ratio=1
 
 new_chine.add_longitudal_element(new_longitudal)
 
-
-
-
 new_chine.curve_width=-1
-new_chine.curve_length=the_hull.hull_length+0.1
+new_chine.curve_length=the_hull.hull_length
 
-new_chine.rotation=[75,0,0]
+new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0.9,0.3]
 new_chine.name="wall_curve"
+
+#new_chine.symmetrical=False
 
 new_chine.make_chine()
 
@@ -59,6 +59,8 @@ def not_used():
     new_chine.name="top_curve"
     new_chine.symmetrical=False
     new_chine.make_chine()
+
+not_used()
 
 for lg in the_hull.longitudal_slicer_list:
     modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')

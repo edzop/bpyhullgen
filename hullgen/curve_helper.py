@@ -207,7 +207,6 @@ class Curve_Helper:
 
 		self.curve_object.display_type="WIRE"
 		
-
 		bpy_helper.select_object(self.curve_object,True)
 	
 		bpy.ops.object.mode_set(mode='EDIT')
@@ -221,6 +220,9 @@ class Curve_Helper:
 
 		bpy.ops.transform.resize(value=(1, 0, 1),
 			constraint_axis=(True, False, False))
+
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.mesh.normals_make_consistent(inside=False)
 
 		bpy.ops.mesh.select_all(action='DESELECT')
 

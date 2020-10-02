@@ -18,6 +18,7 @@
 
 import bpy
   
+from bpyhullgen.hullgen import bpy_helper
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper
@@ -30,7 +31,7 @@ the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
 
-new_longitudal=chine_helper.longitudal_element(0,0.4,0.4)
+new_longitudal=chine_helper.longitudal_element(z_offset=0,width=0.4,thickness=0.4)
 new_longitudal.slicer_ratio=1
 new_chine.add_longitudal_element(new_longitudal)
 
@@ -45,31 +46,31 @@ new_chine.curve_length=the_hull.hull_length+0.1
 
 
 # MID Chine ==========================
-new_chine.rotation=[75,0,0]
+new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0.9,0.3]
 new_chine.name="mid_curve"
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
+def offline():
+    # LOW Chine ==========================
+    new_chine.longitudal_z_offset=0
+    new_chine.rotation=[-45,0,0]
+    new_chine.offset=[0,1.5,0.0]
+    new_chine.name="low_curve"
+    new_chine.clear_longitudal_elements()
+    new_longitudal=chine_helper.longitudal_element(0,0.4,0.1)
+    new_longitudal.slicer_ratio=1
+    new_chine.add_longitudal_element(new_longitudal)
+    new_chine.make_chine()
 
-# LOW Chine ==========================
-new_chine.longitudal_z_offset=0
-new_chine.rotation=[45,0,0]
-new_chine.offset=[0,1.5,0.0]
-new_chine.name="low_curve"
-new_chine.clear_longitudal_elements()
-new_longitudal=chine_helper.longitudal_element(0,0.4,0.1)
-new_longitudal.slicer_ratio=1
-new_chine.add_longitudal_element(new_longitudal)
-new_chine.make_chine()
 
-
-# TOP Chine ==========================
-new_chine.rotation=[90,0,0]
-new_chine.offset=[0,0,0.6]
-new_chine.name="top_curve"
-new_chine.symmetrical=False
-new_chine.make_chine()
+    # TOP Chine ==========================
+    new_chine.rotation=[-90,0,0]
+    new_chine.offset=[0,0,0.6]
+    new_chine.name="top_curve"
+    new_chine.symmetrical=False
+    new_chine.make_chine()
 
 for lg in the_hull.longitudal_slicer_list:
     modifier=the_hull.hull_object.modifiers.new(name="bool", type='BOOLEAN')
