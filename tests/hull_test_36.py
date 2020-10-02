@@ -29,6 +29,8 @@ from bpyhullgen.hullgen import render_helper
 from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import bpy_helper
 
+performance_timer = bpy_helper.ElapsedTimer()
+
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 
 the_hull.hull_output_scale=1/16
@@ -40,6 +42,7 @@ the_hull.bulkhead_start_location=-4
 the_hull.make_hull_object()
 
 new_chine=chine_helper.chine_helper(the_hull)
+
 new_chine.target_screw_size=target_screw_size
 
 #new_chine.longitudal_thickness=0.05
@@ -49,19 +52,17 @@ new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.27,-0.5]
 new_chine.name="side"
-#new_longitudal=chine_helper.longitudal_element(z_offset=-0.46,width=-0.2,thickness=0.1)
+
+new_longitudal=chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1)
+new_chine.add_longitudal_element(new_longitudal)
 
 
-#
-#new_chine.add_longitudal_element(new_longitudal)
-
-
-new_chine.make_segmented_longitudals(z_offset=-0.3,start_bulkhead=-1,end_bulkhead=8,radius=-0.5,angle=-10)
+#new_chine.make_segmented_longitudals(z_offset=-0.3,start_bulkhead=-1,end_bulkhead=8,radius=-0.5,angle=-10)
 
 
 #new_chine.curve_twist=[0,25,25]
 new_chine.make_chine(twist=[0,0,0])
-new_chine.make_screws()
+#new_chine.make_screws()
 
 new_chine.clear_longitudal_elements()
 
@@ -73,19 +74,19 @@ new_chine.curve_length=the_hull.hull_length*1.1
 new_chine.curve_width=1.4
 
 
-new_chine.rotation=[40,0,0]
+new_chine.rotation=[-40,0,0]
 new_chine.offset=[0,-0.2,0.45]
 new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
-#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
+new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.83,width=-0.2,thickness=0.1))
 #new_chine.longitudal_z_offset=
-new_chine.make_segmented_longitudals(-0.7,start_bulkhead=1,end_bulkhead=7)
+#new_chine.make_segmented_longitudals(-0.7,start_bulkhead=1,end_bulkhead=7)
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
 new_chine.curve_width=1.1
 
-new_chine.rotation=[-36,0,0]
+new_chine.rotation=[36,0,0]
 new_chine.offset=[0,0,-0.9]
 new_chine.curve_width=1.1
 new_chine.name="upper"
@@ -93,11 +94,13 @@ new_chine.curve_length=the_hull.hull_length*1.2
 new_chine.asymmetry[1]=0
 new_chine.make_chine()
 
-window_helper.make_window_on_chine(new_chine,0.5,0.34)
-window_helper.make_window_on_chine(new_chine,1.5,0.34)
-window_helper.make_window_on_chine(new_chine,-1.5,0.34)
+#window_helper.make_window_on_chine(new_chine,0.5,0.34)
+#window_helper.make_window_on_chine(new_chine,1.5,0.34)
+#window_helper.make_window_on_chine(new_chine,-1.5,0.34)
 
-new_chine.rotation=[75,0,0]
+
+
+new_chine.rotation=[-75,0,0]
 new_chine.offset=[0,0,0.2]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.2
@@ -105,26 +108,26 @@ new_chine.curve_width=1.6
 new_chine.asymmetry[1]=0
 new_chine.curve_twist=[0,30,-50]
 
-#new_chine.longitudal_count=0
-#new_chine.longitudal_bend_radius=0.2
+new_chine.longitudal_count=0
+new_chine.longitudal_bend_radius=0.2
 #new_chine.set_longitudal_curve(0.2,10)
-#new_chine.longitudal_z_offset=-0.4
+new_chine.longitudal_z_offset=-0.4
 new_chine.make_chine()
+new_chine.clear_longitudal_elements()
 
 new_chine.asymmetry[1]=0
 new_chine.curve_length=the_hull.hull_length*1.25
-new_chine.rotation=[-90,1,0]
+new_chine.rotation=[90,1,0]
 new_chine.offset=[0,0,-0.51]
 
 new_chine.name="roof"
 new_chine.curve_width=0.8
 new_chine.curve_angle=0
 new_chine.symmetrical=False
-
 #new_chine.set_longitudal_curve(0,0)
-
-new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=-1,end_bulkhead=2,double_thick=False) #,radius=-0.5,angle=-10)
-#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1))
+new_longitudal=chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.1)
+#new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=-1,end_bulkhead=2,double_thick=False) #,radius=-0.5,angle=-10)
+new_chine.add_longitudal_element(new_longitudal)
 
 
 # invert for reverse curve
@@ -132,7 +135,7 @@ new_chine.make_segmented_longitudals(z_offset=0.1,start_bulkhead=-1,end_bulkhead
 #new_chine.longitudal_width=-new_chine.longitudal_width
 
 new_chine.make_chine()
-new_chine.make_screws()
+#new_chine.make_screws()
 new_chine.clear_longitudal_elements()
 
 #new_chine.name="roof2"
@@ -141,26 +144,29 @@ new_chine.clear_longitudal_elements()
 #new_chine.make_screws()
 
 
-# ================ modify hull
-
-# ================ Add deck cockpit
-bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-5.3, 0, 0) )
-
-ob = bpy.context.active_object
-
-ob.name="deck_cockpit"
+# ================ modify hull ==============================
 
 tail_cut_angle=22
 
-bpy.ops.transform.resize(value=(1,1,2))
-bpy.ops.object.transform_apply(scale=True,location=False)
-bpy.ops.transform.rotate(value=radians(tail_cut_angle),orient_axis='Y')
+def add_deck_cockpit():
 
-bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
-bool_new.object = ob
-bool_new.operation = 'DIFFERENCE'
+	# ================ Add deck cockpit
+	bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-5.3, 0, 0) )
 
-bpy_helper.hide_object(ob)
+	ob = bpy.context.active_object
+
+	ob.name="deck_cockpit"
+	
+	bpy.ops.transform.resize(value=(1,1,2))
+	bpy.ops.object.transform_apply(scale=True,location=False)
+	bpy.ops.transform.rotate(value=radians(tail_cut_angle),orient_axis='Y')
+
+	bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
+	bool_new.object = ob
+	bool_new.operation = 'DIFFERENCE'
+
+	bpy_helper.hide_object(ob)
+
 
 
 def add_pilot_house():
@@ -201,7 +207,7 @@ def add_pilot_house():
 
 	bpy_helper.hide_object(ob)
 
-add_pilot_house()
+#add_pilot_house()
 
 def add_extras():
 	# ================ Add Rudder
@@ -256,7 +262,7 @@ def offline():
 
 # =======================================================
 
-add_extras()
+# add_extras()
 
 def add_props():
 
@@ -273,15 +279,16 @@ def add_props():
 	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.05,0,-1.2),view_collection_props,rotation=(0,-93,0),parent=the_hull.hull_object)
 
 
-add_props()
+#add_props()
 
-#clean_distance=0.5
-#x_locations=[	-the_hull.hull_length/2+clean_distance,
-#				the_hull.hull_length/2-clean_distance]
+rotations=[0,tail_cut_angle]
+clean_distance=0.5
+x_locations=[	-the_hull.hull_length/2+clean_distance,
+				the_hull.hull_length/2-clean_distance]
 
 
 
-#the_hull.cleanup_longitudal_ends(x_locations,rotations)
+the_hull.cleanup_longitudal_ends(x_locations,rotations)
 
 # Make bulkheads
 
@@ -307,15 +314,15 @@ bulkhead_definitions = [
 					#	(-5,False,False)
 ]
 
-#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
+#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-thickness)
 
-x_locations=[	
-				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
-				-the_hull.hull_length/2+0.5
+#x_locations=[	
+#				bulkhead_definitions[0][0]+thickness/2,
+#				-the_hull.hull_length/2+0.5
 				#bulkhead_definitions[len(bulkhead_definitions)-1][0]
-			]
+#			]
 
-rotations=[0,tail_cut_angle]
+
 #the_hull.cleanup_longitudal_ends(x_locations,rotations)
 
 
@@ -328,12 +335,19 @@ station_end=bulkhead_definitions[1][0]-thickness/2
 
 
 def make_keels():
-	the_keel_builder = keel_helper.keel_builder(the_hull)
-	the_keel_builder.make_segmented_keel(top_height=levels[0],start_bulkhead=0,end_bulkhead=6)
-	the_keel_builder.target_screw_size=target_screw_size
-	the_keel_builder.make_screws()
+
+	the_keel = keel_helper.keel(the_hull,lateral_offset=0,top_height=levels[0],station_start=station_start,station_end=station_end)
+	the_keel.make_keel()
+	the_hull.integrate_keel(the_keel)	
+	
+	#the_keel_builder = keel_helper.keel_builder(the_hull)
+	#the_keel_builder.make_segmented_keel(top_height=levels[0],start_bulkhead=0,end_bulkhead=6)
+	#the_keel_builder.target_screw_size=target_screw_size
+	#the_keel_builder.make_screws()
 
 make_keels()
+
+the_hull.hull_object.hide_viewport=True
 
 def disabled():
 	keel_middle_space=0.3
@@ -354,3 +368,5 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
+
+performance_timer.get_elapsed_string()

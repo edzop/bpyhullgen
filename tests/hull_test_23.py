@@ -29,10 +29,12 @@ from bpyhullgen.hullgen import bpy_helper
 
 from math import radians
 
+performance_timer = bpy_helper.ElapsedTimer()
+
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
-#the_hull.start_bulkhead_location=-3
+the_hull.start_bulkhead_location=-3
 
 the_hull.hull_output_scale=1/16
 target_screw_size=4.1 # mm
@@ -50,22 +52,20 @@ new_chine.rotation=[0,0,0]
 new_chine.offset=[0,0.35,0]
 new_chine.asymmetry[0]=1
 
-
-#new_longitudal=chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1)
-#new_longitudal.set_limit_x_length(start_bulkhead_location+bulkhead_spacing*bulkhead_count,start_bulkhead_location+end_segment)
-#new_chine.add_longitudal_element(new_longitudal)
-
 new_chine.name="side"
 
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1)
+new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
+#new_chine.add_longitudal_element(new_longitudal)
 
-new_chine.make_segmented_longitudals(z_offset=-0.2,start_bulkhead=0,end_bulkhead=5)
+#new_chine.make_segmented_longitudals(z_offset=-0.2,start_bulkhead=0,end_bulkhead=5)
 
 #new_chine.clear_longitudal_elements()
 #new_chine.curve_twist=[0,-25,-25]
 #new_chine.make_chine(twist=[0,1,2])
 new_chine.make_chine()
 
-new_chine.make_screws()
+#new_chine.make_screws()
 
 new_chine.clear_longitudal_elements()
 
@@ -73,14 +73,14 @@ new_chine.clear_longitudal_elements()
 
 new_chine.curve_length=the_hull.hull_length*1.1
 
-new_chine.rotation=[-36,0,0]
+new_chine.rotation=[36,0,0]
 new_chine.offset=[0,0,-0.84]
 new_chine.name="upper"
 new_chine.curve_length=the_hull.hull_length*1.3
 new_chine.make_chine()
 
 new_chine.curve_length=the_hull.hull_length*1.3
-new_chine.rotation=[39,0,0]
+new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,0.331]
 new_chine.name="mid"
 #new_chine.curve_twist=[0,0,0]
@@ -88,7 +88,7 @@ new_chine.make_chine()
 
 
 
-new_chine.rotation=[82,0,0]
+new_chine.rotation=[-82,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.4
@@ -99,7 +99,7 @@ new_chine.asymmetry[1]=0
 #new_chine.curve_length=the_hull.hull_length*1.0
 
 
-new_chine.rotation=[-90,0,0]
+new_chine.rotation=[90,0,0]
 new_chine.offset=[0,0,-0.5]
 new_chine.name="roof"
 new_chine.curve_width=0.8
@@ -225,6 +225,7 @@ current_bulkhead_location=the_hull.start_bulkhead_location
 for bulkhead_index in range(0,the_hull.bulkhead_count):
 	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,the_hull.bulkhead_thickness])
 	current_bulkhead_location+=the_hull.bulkhead_spacing
+	print("add bulkhead: %d %f"%(bulkhead_index,current_bulkhead_location))
 
 
 #bulkhead_definitions = [
@@ -245,7 +246,7 @@ for bulkhead_index in range(0,the_hull.bulkhead_count):
 					#	(-5,False,False)
 #]
 
-#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-bulkhead_thickness+the_hull.bool_coplaner_hack,1,1])
+#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-bulkhead_thickness+the_hull,1,1])
 
 station_start=bulkhead_definitions[0][0]-the_hull.bulkhead_thickness
 station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]+the_hull.bulkhead_thickness
@@ -265,11 +266,11 @@ the_hull.hull_object.hide_viewport=True
 
 def make_keels():
 	the_keel_builder = keel_helper.keel_builder(the_hull)
-	the_keel_builder.make_segmented_keel(top_height=levels[0])
+	the_keel_builder.make_segmented_keel(top_height=levels[0],start_bulkhead=1,end_bulkhead=6)
 	the_keel_builder.target_screw_size=target_screw_size
-	the_keel_builder.make_screws()
+	#the_keel_builder.make_screws()
 
-
+make_keels()
 
 
 def disabled_keel():
@@ -355,3 +356,5 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
+
+performance_timer.get_elapsed_string()

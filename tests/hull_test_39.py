@@ -28,7 +28,9 @@ from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
 from bpyhullgen.hullgen import bpy_helper
 
-the_hull=hull_maker.hull_maker(length=11.2,width=3.9,height=3.6)
+performance_timer = bpy_helper.ElapsedTimer()
+
+the_hull=hull_maker.hull_maker(length=11.9,width=3.9,height=3.6)
 
 the_hull.make_hull_object()
 
@@ -43,12 +45,12 @@ new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.1,wi
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-window_helper.make_window_on_chine(new_chine,0.5,-0.2)
-window_helper.make_window_on_chine(new_chine,1.5,-0.2)
-window_helper.make_window_on_chine(new_chine,-1.5,-0.2)
+#window_helper.make_window_on_chine(new_chine,0.5,-0.2)
+#window_helper.make_window_on_chine(new_chine,1.5,-0.2)
+#window_helper.make_window_on_chine(new_chine,-1.5,-0.2)
 
 
-new_chine.rotation=[39,0,0]
+new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.name="mid"
 new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.3,width=-0.2,thickness=0.1))
@@ -57,13 +59,13 @@ new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=-0.3,w
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-new_chine.rotation=[-45,0,0]
+new_chine.rotation=[45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
 
 new_chine.make_chine()
 
-new_chine.rotation=[79,3,0]
+new_chine.rotation=[-79,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
@@ -73,7 +75,7 @@ new_chine.make_chine()
 #new_chine.curve_length=the_hull.hull_length*1.0
 new_chine.clear_longitudal_elements()
 
-new_chine.rotation=[-90,0,0]
+new_chine.rotation=[90,0,0]
 new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
 new_chine.curve_width=0.8
@@ -180,12 +182,14 @@ bpy_helper.hide_object(ob)
 #geometry_helper.apply_all_bool_modifiers()
 #bpy_helper.select_object(the_hull.hull_object,True)
 
-view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
-import_library_path="assets/boat_assets.blend/Collection/"
-ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,-93,0))
-ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))
 
+def add_props():
+	view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
+	import_library_path="assets/boat_assets.blend/Collection/"
+	ob = geometry_helper.import_object(import_library_path,"propshaft",(-4.8,0,-1.4),view_collection_props,rotation=(0,93,0))
+	ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.95,0,-1.1),view_collection_props,rotation=(0,4,0))
 
+add_props()
 
 
 levels=[ -0.9,-0.5 ]
@@ -215,14 +219,16 @@ bulkhead_definitions = [
 ]
 
 x_locations=[	
-				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
-				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+				bulkhead_definitions[0][0]+thickness/2,
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
 			]
 
 the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
+
+the_hull.hull_object.hide_viewport=True
 
 framedata=[
 [ 1, [3.096725,-15.350384,4.958309],[0.308127,0.029809,-0.078311] ],
@@ -233,3 +239,5 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
+
+performance_timer.get_elapsed_string()

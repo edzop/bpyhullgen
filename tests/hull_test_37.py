@@ -28,7 +28,9 @@ from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import bpy_helper
 from bpyhullgen.hullgen import render_helper
 
-the_hull=hull_maker.hull_maker(length=11.4,width=3.9,height=3.6)
+performance_timer = bpy_helper.ElapsedTimer()
+
+the_hull=hull_maker.hull_maker(length=11.3,width=3.9,height=3.6)
 
 the_hull.make_hull_object()
 
@@ -37,27 +39,29 @@ new_chine=chine_helper.chine_helper(the_hull)
 new_chine.rotation=[180,0,0]
 new_chine.offset=[0,-0.06,0]
 new_chine.name="side"
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.4,width=-0.15,thickness=0.05))
+new_longitudal=chine_helper.longitudal_element(z_offset=0.4,width=-0.15,thickness=0.05)
+new_longitudal.set_limit_x_length(-4.5,4.5)
+new_chine.add_longitudal_element(new_longitudal)
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-window_helper.make_window_on_chine(new_chine,0.5,0.3)
-window_helper.make_window_on_chine(new_chine,1.5,0.3)
-window_helper.make_window_on_chine(new_chine,-1.5,0.3)
+#window_helper.make_window_on_chine(new_chine,0.5,0.3)
+#window_helper.make_window_on_chine(new_chine,1.5,0.3)
+#window_helper.make_window_on_chine(new_chine,-1.5,0.3)
 
-
-new_chine.rotation=[39,0,0]
+new_chine.rotation=[-39,0,0]
 new_chine.offset=[0,-0.2,-0.4]
 new_chine.longitudal_z_offset=-0.33
 new_chine.name="mid"
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.55,width=-0.15,thickness=0.05)
-new_longitudal.set_curve(-0.4,-5)
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.63,width=-0.15,thickness=0.05)
+new_longitudal.set_curve(0.4,5)
+new_longitudal.set_limit_x_length(-4.5,4.5)
 new_chine.add_longitudal_element(new_longitudal)
 
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-new_chine.rotation=[-45,0,0]
+new_chine.rotation=[45,0,0]
 new_chine.offset=[0,0,-0.31]
 new_chine.name="upper"
 #new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.15,thickness=0.05))
@@ -67,19 +71,22 @@ new_chine.clear_longitudal_elements()
 
 
 new_chine.longitudal_count=0
-new_chine.rotation=[79,0,0]
+new_chine.rotation=[-79,0,0]
 new_chine.offset=[0,0,0]
 new_chine.name="low"
 new_chine.curve_length=the_hull.hull_length*1.5
 new_chine.curve_width=1.6
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.45,width=-0.15,thickness=0.05)
-new_longitudal.set_curve(-0.6,-10)
+new_longitudal=chine_helper.longitudal_element(z_offset=-0.62,width=-0.15,thickness=0.05)
+new_longitudal.set_curve(0.6,10)
+new_longitudal.set_limit_x_length(-3.4,3.4)
 new_chine.add_longitudal_element(new_longitudal)
 new_chine.make_chine()
 new_chine.clear_longitudal_elements()
 
-new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0.0,width=-0.15,thickness=0.05))
-new_chine.rotation=[-90,0,0]
+new_longitudal=chine_helper.longitudal_element(z_offset=0.0,width=-0.15,thickness=0.05)
+new_longitudal.set_limit_x_length(-4.7,4.7)
+new_chine.add_longitudal_element(new_longitudal)
+new_chine.rotation=[90,0,0]
 new_chine.offset=[0,0,-0.7]
 new_chine.name="roof"
 new_chine.curve_width=0.8
@@ -178,21 +185,21 @@ def add_props():
 
 	import_library_path="assets/actors.blend/Collection/"
 	ob = geometry_helper.import_object(import_library_path,"man.stand",(0,0.4,-1.3),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.lie_down",(1.05,0,-0.64),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"man.lie_down",(1.05,0,-0.77),view_collection_props)
 	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(-0.35,0,-0.75),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.sit_lean",(-2.1,0.13,-0.87),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"man.sit_lean",(-2.1,0.13,-1.02),view_collection_props)
 
 
 	import_library_path="assets/boat_assets.blend/Collection/"
 	
-	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(2,0,-0.9),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(-2,0,-0.9),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(2,0,-1.1),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(-2,0,-1.1),view_collection_props)
 
 	ob = geometry_helper.import_object(import_library_path,"rope_coils_2_high",(4.7,0,-0.7),view_collection_props)
 	ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.4,0,-1.1),view_collection_props)
 
 
-	ob = geometry_helper.import_object(import_library_path,"chair.reading_sitting_up_full",(-0.7,0,-0.2),view_collection_props)
+	ob = geometry_helper.import_object(import_library_path,"chair.reading_sitting_up_full",(-0.50,0,-0.52),view_collection_props)
 
 	ob = geometry_helper.import_object(import_library_path,"anchor",(5.9,0.15,-0.25),view_collection_props)
 	ob = geometry_helper.import_object(import_library_path,"anchor",(5.9,-0.15,-0.25),view_collection_props)
@@ -213,7 +220,6 @@ x_locations=[	-the_hull.hull_length/2+clean_distance,
 				the_hull.hull_length/2-clean_distance]
 
 the_hull.cleanup_longitudal_ends(x_locations)
-
 
 
 levels=[ -1.1,-0.5 ]
@@ -238,14 +244,14 @@ bulkhead_definitions = [
 ]
 
 x_locations=[	
-				bulkhead_definitions[0][0]+thickness/2-the_hull.bool_coplaner_hack,
-				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2+the_hull.bool_coplaner_hack
+				bulkhead_definitions[0][0]+thickness/2,
+				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
 			]
 
-#the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4-thickness+the_hull.bool_coplaner_hack,1,1])
-the_hull.cleanup_center(clean_location=[-1.5,0,0],clean_size=[5-thickness+the_hull.bool_coplaner_hack,1,1])			
+#the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4-thickness,1,1])
+the_hull.cleanup_center(clean_location=[-1.5,0,0],clean_size=[5-thickness,1,1])			
 
-the_hull.cleanup_longitudal_ends(x_locations)
+#the_hull.cleanup_longitudal_ends(x_locations)
 
 the_hull.make_bulkheads(bulkhead_definitions)
 the_hull.make_longitudal_booleans()
@@ -253,14 +259,19 @@ the_hull.make_longitudal_booleans()
 station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
 station_end=bulkhead_definitions[0][0]-thickness/2
 
-keel_middle_space=0.3
-the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel()
-the_hull.integrate_keel(the_keel)	
+def make_keels():
+	keel_middle_space=0.3
+	the_keel = keel_helper.keel(the_hull,lateral_offset=keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+	the_keel.make_keel()
+	the_hull.integrate_keel(the_keel)	
 
-the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
-the_keel.make_keel()
-the_hull.integrate_keel(the_keel)
+	the_keel = keel_helper.keel(the_hull,lateral_offset=-keel_middle_space/2,top_height=levels[0],station_start=station_start,station_end=station_end)
+	the_keel.make_keel()
+	the_hull.integrate_keel(the_keel)
+
+
+the_hull.hull_object.hide_viewport=True
+
 
 framedata=[
 [ 1, [3.191784,-15.956328,4.894828],[0.403186,0.026390,-0.141792] ],
@@ -272,3 +283,4 @@ framedata=[
 
 render_helper.setup_keyframes(framedata)
 
+performance_timer.get_elapsed_string()
