@@ -157,7 +157,7 @@ def cut_windows():
 		if o.type=="MESH":
 			if o.name.startswith("hull_object_slicer"):
 				hull_walls.append(o)
-				print(o.name)
+				print("window cut: %s"%o.name)
 
 	for hull_wall in hull_walls:
 		for window_object in view_collection_windows.objects:
