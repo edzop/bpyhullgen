@@ -91,6 +91,7 @@ def make_backdrop():
 	bpy.ops.mesh.primitive_plane_add(size=80, enter_editmode=False, location=(0, 0, -2))
 
 	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="EDGE")
 	bpy.ops.mesh.select_all(action='DESELECT')
 	bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -433,7 +434,7 @@ def inside_shrink_OLD(amount=0.1):
 	face_indexes=[]
 
 	polygoncount=len(ob.data.polygons)
-	print("Poly counnt %d"%polygoncount)
+	print("Poly count %d"%polygoncount)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -445,7 +446,7 @@ def inside_shrink_OLD(amount=0.1):
 			face_indexes.append(i)
 			print("added: %d %s"%(i,str(face.normal)))
 
-	print(face_indexes)
+	print("Face Indexes: %s"%face_indexes)
 
 	'''
 	bpy.ops.object.mode_set(mode='EDIT')
