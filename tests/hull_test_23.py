@@ -29,86 +29,76 @@ from bpyhullgen.hullgen import bpy_helper
 
 from math import radians
 
-performance_timer = bpy_helper.ElapsedTimer()
-
-
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
-
-the_hull.start_bulkhead_location=-3
-
-the_hull.hull_output_scale=1/16
-target_screw_size=4.1 # mm
-
 the_hull.make_hull_object()
 
-new_chine=chine_helper.chine_helper(the_hull)
+the_hull.start_bulkhead_location=-3
+the_hull.hull_output_scale=1/16
+the_hull.target_screw_size=4.1 # mm
 
-new_chine.target_screw_size=target_screw_size
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side",
+	length=the_hull.hull_length*1.2,
+	width=1,
+	offset=[0,0.35,0],
+	asymmetry=[1,0])
 
-new_chine.curve_width=1
-#new_chine.curve_height=4
-new_chine.curve_length=the_hull.hull_length*1.2
-new_chine.rotation=[0,0,0]
-new_chine.offset=[0,0.35,0]
-new_chine.asymmetry[0]=1
-
-new_chine.name="side"
-
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.2,width=-0.13,thickness=0.1)
+new_longitudal=chine_helper.longitudal_definition(z_offset=-0.2,width=-0.13,thickness=0.1)
 new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
-#new_chine.add_longitudal_element(new_longitudal)
 
-#new_chine.make_segmented_longitudals(z_offset=-0.2,start_bulkhead=0,end_bulkhead=5)
+new_chine.add_longitudal_definition(new_longitudal)
 
-#new_chine.clear_longitudal_elements()
-#new_chine.curve_twist=[0,-25,-25]
-#new_chine.make_chine(twist=[0,1,2])
-new_chine.make_chine()
+the_hull.add_chine(new_chine)
 
-#new_chine.make_screws()
+new_chine=chine_helper.chine_helper(the_hull,
+	name="upper",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	rotation=[-36,0,0],
+	offset=[0,0,-0.84],
+	asymmetry=[1,0]
+	)
 
-new_chine.clear_longitudal_elements()
+the_hull.add_chine(new_chine)
 
+new_chine=chine_helper.chine_helper(the_hull,
+	name="mid",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	rotation=[39,0,0],
+	offset=[0,-0.2,0.331],
+	asymmetry=[1,0]
+	)
 
-
-new_chine.curve_length=the_hull.hull_length*1.1
-
-new_chine.rotation=[36,0,0]
-new_chine.offset=[0,0,-0.84]
-new_chine.name="upper"
-new_chine.curve_length=the_hull.hull_length*1.3
-new_chine.make_chine()
-
-new_chine.curve_length=the_hull.hull_length*1.3
-new_chine.rotation=[-39,0,0]
-new_chine.offset=[0,-0.2,0.331]
-new_chine.name="mid"
-#new_chine.curve_twist=[0,0,0]
-new_chine.make_chine()
+the_hull.add_chine(new_chine)
 
 
+new_chine=chine_helper.chine_helper(the_hull,
+	name="low",
+	length=the_hull.hull_length*1.4,
+	width=1,
+	rotation=[82,0,0],
+	asymmetry=[1,0]
+	)
 
-new_chine.rotation=[-82,0,0]
-new_chine.offset=[0,0,0]
-new_chine.name="low"
-new_chine.curve_length=the_hull.hull_length*1.4
-#new_chine.curve_width=1.6
-new_chine.asymmetry[1]=0
-new_chine.make_chine()
-new_chine.asymmetry[1]=0
-#new_chine.curve_length=the_hull.hull_length*1.0
+new_longitudal=chine_helper.longitudal_definition(width=-0.13,thickness=0.1)
+new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
+new_chine.add_longitudal_definition(new_longitudal)
+
+the_hull.add_chine(new_chine)
 
 
-new_chine.rotation=[90,0,0]
-new_chine.offset=[0,0,-0.5]
-new_chine.name="roof"
-new_chine.curve_width=0.8
-#new_chine.curve_angle=10
-#new_chine.curve_length=13
-new_chine.symmetrical=False
+new_chine=chine_helper.chine_helper(the_hull,
+	name="roof",
+	length=the_hull.hull_length*1.4,
+	width=0.8,
+	rotation=[-90,0,0],
+	asymmetry=[1,0],
+	offset=[0,0,-0.5],
+	symmetrical=False
+	)
 
-#new_chine.longitudal_width=0.15
-new_chine.make_chine()
+the_hull.add_chine(new_chine)
 
 
 # ================ modify hull
@@ -202,101 +192,14 @@ def add_extras():
 	bpy_helper.hide_object(ob)
 
 
-def add_props():
-	view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
-
-	import_library_path="assets/actors.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(0,0,-0.6),view_collection_props,rotation=(0,0,0))
-
-	import_library_path="assets/boat_assets.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"wheel_axle.8ft",(0,0,-0.96),view_collection_props,rotation=(0,0,0))
-
-#add_props()
-
-
+the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.sit_chair",location=[0,0,-0.6])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="wheel_axle.8ft",location=[0,0,-0.96])
 
 levels=[ -0.7]
 
 
-bulkhead_definitions = []
-
-
-current_bulkhead_location=the_hull.start_bulkhead_location
-for bulkhead_index in range(0,the_hull.bulkhead_count):
-	bulkhead_definitions.append([current_bulkhead_location,-0.7,False,the_hull.bulkhead_thickness])
-	current_bulkhead_location+=the_hull.bulkhead_spacing
-	print("add bulkhead: %d %f"%(bulkhead_index,current_bulkhead_location))
-
-
-#bulkhead_definitions = [
-
-					#	(5	,False		,False	,bulkhead_thickness),
-					#	(4	,levels[1]	,True	,bulkhead_thickness),
-					#	(3	,levels[1]	,False	,bulkhead_thickness),
-#						(-3	,levels[0]	,False	,bulkhead_thickness),
-#						(-2	,levels[0]	,False	,bulkhead_thickness),	
-#						(-1	,levels[0]	,False	,bulkhead_thickness),
-						
-#						(0	,levels[0]	,False	,bulkhead_thickness),
-#						(1	,levels[0]	,False	,bulkhead_thickness),
-#						(2	,levels[0]	,False	,bulkhead_thickness),
-					#	(-3	,levels[1]	,False	,bulkhead_thickness),						
-					#	(-4	,levels[1]	,True	,bulkhead_thickness)
-
-					#	(-5,False,False)
-#]
-
-#the_hull.cleanup_center(clean_location=[0.0,0,0],clean_size=[4-bulkhead_thickness+the_hull,1,1])
-
-station_start=bulkhead_definitions[0][0]-the_hull.bulkhead_thickness
-station_end=bulkhead_definitions[len(bulkhead_definitions)-1][0]+the_hull.bulkhead_thickness
-
-
-
-#x_locations=[	
-#				bulkhead_definitions[0][0],
-#				bulkhead_definitions[len(bulkhead_definitions)-1][0]
-#			]
-
-#the_hull.cleanup_longitudal_ends(x_locations)
-
-the_hull.make_bulkheads(bulkhead_definitions)
-the_hull.make_longitudal_booleans()
-the_hull.hull_object.hide_viewport=True
-
-def make_keels():
-	the_keel_builder = keel_helper.keel_builder(the_hull)
-	the_keel_builder.make_segmented_keel(top_height=levels[0],start_bulkhead=1,end_bulkhead=6)
-	the_keel_builder.target_screw_size=target_screw_size
-	#the_keel_builder.make_screws()
-
-make_keels()
-
-
-def disabled_keel():
-
-		keel_middle_space=0.3
-		the_keel = keel_helper.keel(the_hull,
-				lateral_offset=keel_middle_space/2,
-				top_height=levels[0],
-				station_start=station_start,
-				station_end=station_end)
-
-		the_keel.set_limit_x_length(-1-thickness,1+thickness)
-
-		the_keel.make_keel(keel_thickness)
-		the_hull.integrate_keel(the_keel)	
-
-		the_keel = keel_helper.keel(the_hull,
-				lateral_offset=-keel_middle_space/2,
-				top_height=levels[0],
-				station_start=station_start,
-				station_end=station_end)
-
-		the_keel.set_limit_x_length(-1-thickness,1+thickness)
-
-		the_keel.make_keel(keel_thickness)
-		the_hull.integrate_keel(the_keel)				
+the_keel_builder = keel_helper.keel_builder(the_hull)
+the_keel_builder.make_solid_double_keel(top_height=levels[0],start_bulkhead=1,end_bulkhead=6)
 
 def make_fuel_tanks():
 
@@ -344,8 +247,7 @@ def make_fuel_tanks():
 					y_offset=(keel_middle_space/2)+the_keel.thickness/2,
 					name="fuel_3R")								
 
-
-#make_keels()
+the_hull.integrate_components()
 
 framedata=[
 [ 1, [2.256688,-9.173357,4.958309],[0.000000,0.000000,0.000000] ],
@@ -357,4 +259,3 @@ framedata=[
 
 render_helper.setup_keyframes(framedata)
 
-performance_timer.get_elapsed_string()

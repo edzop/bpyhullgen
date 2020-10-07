@@ -27,255 +27,461 @@ from ..hullgen import curve_helper
 from ..hullgen import chine_helper
 from ..hullgen import bulkhead
 from ..hullgen import keel_helper
+from ..hullgen import geometry_helper
 from ..hullgen import bpy_helper
+from bpyhullgen.hullgen import prop_helper
 
 class hull_maker:
-    hull_length=11.4
-    hull_width=3.9
-    hull_height=3.6
-    hull_name="hull_object"
-    hull_object=None
+	hull_length=11.4
+	hull_width=3.9
+	hull_height=3.6
 
-    longitudal_list=None
-    longitudal_slicer_list=None
+	default_floor_height=-0.7
 
-    # this will be inherited by members
-    structural_thickness=0.06
+	hull_name="hull_object"
+	cleaner_collection_name="cleaner"
 
-    bulkheadlist=[]
-    keels=[]
+	hull_object=None
 
+	curve_resolution=12
+	
+	chine_list=None
 
-    # longitudal spacing is based on bulkheads
-    bulkhead_spacing=1.0
+	# this will be inherited by members
+	structural_thickness=0.06
 
-    start_bulkhead_location=-3
-    bulkhead_count=6
-    bulkhead_thickness=0.05
+	bulkhead_instances=None
+	keel_list=None
+	props=None
 
-    # output scale for fabrication = 1:16 = 1/16 = 0.0625
-    hull_output_scale=1
-    
+	bulkhead_definitions=None
 
-    chine_list=None
+	# Objects that are subtracted from hull to modify final shape
+	subtractive_objects=None
 
-    def __init__(self,length=11.4,width=3.9,height=3.6):
-        self.hull_height=height
-        self.hull_length=length
-        self.hull_width=width
-        self.chine_list=[]
 
-        self.longitudal_list=list()
-        self.longitudal_slicer_list=list()
+	# longitudal spacing is based on bulkheads
+	bulkhead_spacing=1.0
 
+	start_bulkhead_location=-3
+	bulkhead_count=6
+	bulkhead_thickness=0.05
 
-    def make_bool_cube(self,name,location=(0,0,0),size=(1,1,1)):
+	# output scale for fabrication = 1:16 = 1/16 = 0.0625
+	hull_output_scale=1
 
-        bpy_helper.find_and_remove_object_by_name(name)
+	# screw size in MM
+	target_screw_size=10 # target size in output model
 
-        # Booleans behave really strange if origin is 0,0,0 - this seems to help
-        #bpy.ops.mesh.primitive_cube_add(size=1.0,enter_editmode=False, location=(0.02, 0.02, 0.02))
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, location=(location[0], location[1], 0))
+	
+	def clear_all(self):
 
-        new_object=bpy.context.view_layer.objects.active
+		# A temporary list of things to delete
+		delete_list=[]
 
-        bpy.ops.transform.resize(value=size)
-        bpy.ops.object.transform_apply(scale=True,location=False)
+		if self.hull_object != None:
+			delete_list.append(self.hull_object)
 
-        new_object.name=name
 
-        return new_object
+		for bh in self.bulkhead_instances:
+			delete_list.append(bh.bulkhead_void_object)
+			delete_list.append(bh.bulkhead_object)
 
-    def make_hull_object(self):
-        self.hull_object=self.make_bool_cube(self.hull_name,size=(self.hull_length, self.hull_width, self.hull_height))
+		for chine in self.chine_list:
+			for chine_instance in chine.chine_instances:
 
-        material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
+				delete_list.append(chine_instance.curve_object)
+				delete_list.append(chine_instance.curve_backup)
+				
+				for lg in chine_instance.longitudal_slicers:
+					delete_list.append(lg)
 
-        view_collection_hull=bpy_helper.make_collection("hull",bpy.context.scene.collection.children)
-        bpy_helper.move_object_to_collection(view_collection_hull,self.hull_object)
+				for lg in chine_instance.longitudal_objects:
+					delete_list.append(lg)
 
+		for keel in self.keel_list:
+			delete_list.append(keel.keel_slicer_object)
+			delete_list.append(keel.keel_object)
 
-        return self.hull_object
+		
+		if len(delete_list) > 0:
+			#print("Delete:%s"%delete_list)
+			bpy.ops.object.select_all(action='DESELECT')
 
-    # A list of bulkhead_definitions[ position, height, watertight]
-    # If height == False - do not adjust height 
-    # If height == float - adjust z verts of bulkhead void to constant height (floor)
+			objs = bpy.data.objects
 
+			for ob in delete_list:
+				objs.remove(ob, do_unlink=True)
 
-    # (0	,levels[0]	,False	,thickness),
+		self.hull_object=None
 
-    def make_bulkheads(self,bulkhead_definitions):
+		self.keel_list.clear()
+		self.bulkhead_definitions.clear()
+		self.chine_list.clear()
+		self.props.clear()
+		self.bulkhead_instances.clear()
+		self.subtractive_objects.clear()
+	
 
-        for bulkhead_definition in bulkhead_definitions:
 
-            bh=bulkhead.bulkhead(self,
-                                station=bulkhead_definition[0],
-                                watertight=bulkhead_definition[2],
-                                thickness=bulkhead_definition[3])
-                                
-            bh.make_bulkhead()
+	def __init__(self,length=11.4,width=3.9,height=3.6):
 
-            # If it's not watertight - there is a void in middle
-            if bulkhead_definition[2]==False:
-                material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
-                
-                # floor height
-                if bulkhead_definition[1]!=False:
-                    bh.move_verts_z(bh.bulkhead_void_object,bulkhead_definition[1])
+		self.keel_list=[]
+		self.bulkhead_definitions=[]
+		self.chine_list=[]
+		self.props=[]
+		self.bulkhead_instances=[]
+		self.subtractive_objects=[]
 
-            self.bulkheadlist.append(bh)
 
-            material_helper.assign_material(bh.bulkhead_object,material_helper.get_material_bulkhead())
+		self.hull_height=height
+		self.hull_length=length
+		self.hull_width=width
 
-            if bh.bulkhead_void_object!=None:
-                bpy_helper.select_object(bh.bulkhead_void_object,True)
-                #bpy.ops.object.mode_set(mode='EDIT')
-                #bpy.ops.mesh.select_mode(type="FACE")
-                #bpy.ops.mesh.select_all(action='SELECT')
-                   
-                # TODO - I don't know why but if I call this once it doesn't do anything
-                # IF I call it twice it works...
-                #bpy.ops.mesh.normals_make_consistent(inside=False)
-                #bpy.ops.mesh.normals_make_consistent(inside=False)
-                # - bmesh implementation seems to work better - not sure why
-                bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
+	def add_chine(self,new_chine):
+		self.chine_list.append(new_chine)
 
-                            
-                #if bh.station==0:
-                #    d
+	def add_subtractive_object(self,object):
+		self.subtractive_objects.append(object)
 
 
-                #if bh.station==0:
-                   
-                    #bpy.context.space_data.overlay.show_face_normals = True
-                    #bpy.context.space_data.overlay.normals_length = 0.80844
-                #    d
+	def make_hull_object(self):
+		self.hull_object=geometry_helper.make_cube(self.hull_name,size=(self.hull_length, self.hull_width, self.hull_height))
 
-                #bpy.ops.object.mode_set(mode='OBJECT')
+		material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
 
-                bpy_helper.hide_object(bh.bulkhead_void_object)
-            
-                bh.bulkhead_void_object.parent=self.hull_object
+		view_collection_hull=bpy_helper.make_collection("hull",bpy.context.scene.collection.children)
+		bpy_helper.move_object_to_collection(view_collection_hull,self.hull_object)
 
 
+		return self.hull_object
 
 
-            bpy_helper.select_object(bh.bulkhead_object,True)
+	def add_auto_bulkheads(self):
 
-            bh.bulkhead_object.parent=self.hull_object
+		current_bulkhead_location=self.start_bulkhead_location
+		for bulkhead_index in range(0,self.bulkhead_count):
+			watertight=False
+			floor_height=self.default_floor_height
+			self.bulkhead_definitions.append([current_bulkhead_location,floor_height,watertight,self.bulkhead_thickness])
+			current_bulkhead_location+=self.bulkhead_spacing
+			#print("add bulkhead %d station: %f watertight: %d floor: %f"%(bulkhead_index,current_bulkhead_location,watertight,floor_height))
 
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.normals_make_consistent(inside=False)
-            bpy.ops.object.mode_set(mode='OBJECT')
 
-    def make_longitudal_booleans(self):
-        for lg in self.longitudal_slicer_list:
+	def make_bulkheads(self,bulkhead_definitions):
 
-            #material_helper.assign_material(lg,material_helper.get_material_stringer())
-            
-            for bh in self.bulkheadlist:
-                modifier=bh.bulkhead_object.modifiers.new(name="bool_slicer", type='BOOLEAN')
-                modifier.object=lg
-                modifier.operation="DIFFERENCE"
+		for bulkhead_definition in self.bulkhead_definitions:
 
-        for lg in self.longitudal_list:
-            #material_helper.assign_material(lg,material_helper.get_material_support())
+			bh=bulkhead.bulkhead(self,
+								station=bulkhead_definition[0],
+								watertight=bulkhead_definition[2],
+								thickness=bulkhead_definition[3])
+								
+			bh.make_bulkhead()
 
-            for bh in self.bulkheadlist:
-                modifier=lg.modifiers.new(name="bool_bh", type='BOOLEAN')
-                modifier.object=bh.bulkhead_object
-                modifier.operation="DIFFERENCE"
+			# If it's not watertight - there is a void in middle
+			if bulkhead_definition[2]==False:
+				material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
+				
+				floor_height_z=bulkhead_definition[1]
 
-    def integrate_keel(self,keel):
-        for bh in self.bulkheadlist:
+				# floor height
+				if floor_height_z!=False:
 
-            # notch the bulkhead with keel_slicer_object
-            modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
-            modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-            modifier.object=keel.keel_slicer_object
-            modifier.operation="DIFFERENCE"
+					floor_bool_name="floor_bool_%s"%floor_height_z
 
-            bpy_helper.select_object(bh.bulkhead_object,True)
-            #bpy.ops.object.modifier_apply(modifier=modifier_name)
+					ob = bpy.data.objects.get(floor_bool_name)
 
-            # notch the keel with modified bulkhead 
-            modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
-            modifier=keel.keel_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-            modifier.object=bh.bulkhead_object
-            modifier.operation="DIFFERENCE"
+					if ob is None:
+						ob = geometry_helper.make_cube(name=floor_bool_name,
+							location=[0,0,0],
+							size=[self.hull_length,self.hull_width,self.hull_height])
 
-            bpy_helper.select_object(keel.keel_object,True)
-            #bpy.ops.object.modifier_apply(modifier=modifier_name)
+						ob.location.z=0-(self.hull_height/2)+floor_height_z
+						ob.hide_viewport=True
+						ob.hide_render=True
 
-        material_helper.assign_material(keel.keel_object,material_helper.get_material_bulkhead())
+						view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
+						bpy_helper.move_object_to_collection(view_collection_cleaner,ob)
 
-        keel.keel_object.parent=self.hull_object
+						
+					modifier=bh.bulkhead_void_object.modifiers.new(name="floor", type='BOOLEAN')
+					modifier.object=ob
+					modifier.operation="DIFFERENCE"
 
-        self.keels.append(keel)
+		
+			self.bulkhead_instances.append(bh)
 
+			material_helper.assign_material(bh.bulkhead_object,material_helper.get_material_bulkhead())
 
+			if bh.bulkhead_void_object!=None:
+				bpy_helper.select_object(bh.bulkhead_void_object,True)
+			
+				bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
+				
+				bpy_helper.hide_object(bh.bulkhead_void_object)
+			
+			bpy_helper.parent_objects_keep_transform(parent=self.hull_object,child=bh.bulkhead_object)
 
-    # Cleans up longitudal framing in center of hull for access to entrance / pilothouse 
-    # so longitudal frames don't block entrance
-    def cleanup_center(self,clean_location,clean_size):
+			bh.bulkhead_object.parent=self.hull_object
 
-        view_collection_cleaner=bpy_helper.make_collection("cleaner",bpy.context.scene.collection.children)
 
-        object_end_clean = self.make_bool_cube("mid_clean_%s"%clean_location[0],location=clean_location,size=clean_size)
+	def add_prop(self, rotation=None,
+						location=None,
+						blend_file="props.blend",
+						library_path="Collection",
+						target_object="myprop",
+						parent=None):
+		# this is a bit redundant - passing all the parameters through like this
+		# but it allows us to make one call add_prop without having to make the object
+		# then add to the hull from the external caller
+		new_prop=prop_helper.prop_helper(blend_file=blend_file,
+			rotation=rotation, location=location,
+			library_path=library_path,
+			target_object=target_object,
+			parent=parent)
+		
+		self.props.append(new_prop)
 
-        bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+	def integrate_props(self):
+		view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
 
-        material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
+		for prop in self.props:
+			ob=prop.import_object(view_collection_props)
+			bpy_helper.move_object_to_collection(view_collection_props,ob)
 
-        for lg in self.longitudal_list:
+	def integrate_components(self):
+		# The order of boolean operations is important... If order not organized correctly strange things happen
 
-            modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
-            modifier.object=object_end_clean
-            modifier.operation="DIFFERENCE"
-            bpy_helper.hide_object(object_end_clean)
+		print("Integrate")
 
-    # Trims the ends of the longitudal framing where it extends past last bulkhead
-    # x_locations is a list of stations where they will be chopped
-    # rotations is a corresponding list of rotations in the Y axis. Bulkheads are assumed to be not rotated on X an Z axises. 
-    def cleanup_longitudal_ends(self,x_locations,rotations=None):
+		performance_timer = bpy_helper.ElapsedTimer()
 
-        view_collection_cleaner=bpy_helper.make_collection("cleaner",bpy.context.scene.collection.children)
+		
 
-        end_clean_list=[]
+		make_bulkheads=False
+		make_keel_list=False
+		hide_hull=False
+		make_longitudals=False
+		use_subtractive_objects=False
+		use_props=False
 
-        for index,x_location in enumerate(x_locations):
-            # =========================================
-            # Clean up ends of longitudal slicers
+		#======================================
+		# Single configuration area for generation
+		#======================================
+		make_bulkheads=True
+		make_keel_list=True
+		#hide_hull=True
+		make_longitudals=True
+		use_subtractive_objects=True
+		use_props=True
+		#======================================
+		
+		# Longitudal stringers created at same time as chines so as to reuse the curve
+		for chine_object in self.chine_list:
+				chine_object.make_chine()
 
-            block_width=self.hull_width
 
-            adjusted_location=x_location
-            if adjusted_location<0:
-                adjusted_location=adjusted_location-block_width/2
+		self.make_chine_hull_booleans()				
 
-            if adjusted_location>0:
-                adjusted_location=adjusted_location+block_width/2
+		if make_keel_list:
+			for keel in self.keel_list:
+				keel.make_keel()
 
-            object_end_clean = self.make_bool_cube("end_clean_%s"%index,location=[adjusted_location,0,0],size=(block_width,block_width,self.hull_height))
+		if make_bulkheads:
+			self.add_auto_bulkheads()
+			self.make_bulkheads(self.bulkhead_definitions)			
 
-            if rotations!=None:
-                bpy_helper.select_object(object_end_clean,True)
-                bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
+		if use_props:
+			self.integrate_props()	
 
-            bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+		if make_keel_list:
+			self.make_keel_booleans()
 
-            material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
-            end_clean_list.append(object_end_clean)
+		if make_bulkheads:
+			self.make_bulkhead_booleans()
 
-        # ===================================================================
+		if make_longitudals:
+			self.make_longitudal_booleans()
 
-        for lg in self.longitudal_list:
+		if use_subtractive_objects:
+			self.apply_subtractive_objects()
 
-            for object_end_clean in end_clean_list:		
-                modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
-                modifier.object=object_end_clean
-                modifier.operation="DIFFERENCE"
-                bpy_helper.hide_object(object_end_clean)
+		if hide_hull:
+			self.hull_object.hide_viewport=True
 
-        bpy_helper.hide_object(view_collection_cleaner)
+		performance_timer.get_elapsed_string()
+
+	def add_keel(self,keel):
+		self.keel_list.append(keel)
+
+	def apply_subtractive_objects(self):
+
+		for ob in self.subtractive_objects:
+
+			ob.hide_render=True
+			ob.hide_viewport=True
+			ob.display_type="WIRE"
+
+			bool_name="subtract_%s"%ob.name
+			bool_new = self.hull_object.modifiers.new(type="BOOLEAN", name=bool_name)
+			bool_new.object = ob
+			bool_new.operation = 'DIFFERENCE'
+
+			for chine in self.chine_list:
+				for chine_instance in chine.chine_instances:
+					for lg in chine_instance.longitudal_objects:				
+						if geometry_helper.check_intersect(ob,lg):
+							modifier=lg.modifiers.new(type='BOOLEAN',name=bool_name)
+							modifier.object=ob
+							modifier.operation="DIFFERENCE"
+
+
+	def make_bulkhead_booleans(self):
+	
+		for bh in self.bulkhead_instances:
+			bool_void = bh.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center_%d"%bh.station)
+			bool_void.object = bh.bulkhead_void_object
+			bool_void.operation = 'DIFFERENCE'
+
+
+	def make_longitudal_booleans(self):
+
+		for chine in self.chine_list:
+			for chine_instance in chine.chine_instances:
+
+				
+				
+				for lg in chine_instance.longitudal_slicers:
+
+					for bh in self.bulkhead_instances:
+						#print("bh: %s"%bh.bulkhead_object.name,end=" ")
+						# TODO for some reason interection code not returning correct result
+						if geometry_helper.check_intersect(bh.bulkhead_object,lg) or True:
+							modifier=bh.bulkhead_object.modifiers.new(name=lg.name, type='BOOLEAN')
+							modifier.object=lg
+							modifier.operation="DIFFERENCE"
+
+				for lg in chine_instance.longitudal_objects:
+						for bh in self.bulkhead_instances:
+							# TODO for some reason interection code not returning correct result
+							if geometry_helper.check_intersect(bh.bulkhead_object,lg) or True:
+								modifier=lg.modifiers.new(name=bh.bulkhead_object.name, type='BOOLEAN')
+								modifier.object=bh.bulkhead_object
+								modifier.operation="DIFFERENCE"
+
+
+
+	def make_longitudal_elements(self):
+		for chine_object in self.chine_list:
+			chine_object.make_longitudal_elements()
+
+	def make_chine_hull_booleans(self):
+
+		for chine_object in self.chine_list:	
+			for chine_instance in chine_object.chine_instances:		
+				slicename="slice.%s"%chine_instance.curve_object.name
+
+				bool_new = self.hull_object.modifiers.new(type="BOOLEAN", name=slicename)
+				bool_new.object = chine_instance.curve_object
+				bool_new.operation = 'DIFFERENCE'
+
+
+	def make_keel_booleans(self):
+
+		for keel in self.keel_list:
+
+			for bh in self.bulkhead_instances:
+
+				if geometry_helper.check_intersect(bh.bulkhead_object,keel.keel_slicer_object):
+
+					# notch the bulkhead with keel_slicer_object
+					modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
+					modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+					modifier.object=keel.keel_slicer_object
+					modifier.operation="DIFFERENCE"
+
+					bpy_helper.select_object(bh.bulkhead_object,True)
+  
+
+					# notch the keel with modified bulkhead 
+					modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
+					modifier=keel.keel_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+					modifier.object=bh.bulkhead_object
+					modifier.operation="DIFFERENCE"
+
+			bpy_helper.select_object(keel.keel_object,True)
+
+			material_helper.assign_material(keel.keel_object,material_helper.get_material_keel())
+
+			keel.keel_object.parent=self.hull_object
+
+
+	# Cleans up longitudal framing in center of hull for access to entrance / pilothouse 
+	# so longitudal frames don't block entrance
+	def cleanup_center(self,clean_location,clean_size):
+
+		view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
+
+		object_end_clean = geometry_helper.make_cube("mid_clean_%s"%clean_location[0],location=clean_location,size=clean_size)
+
+		bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+
+		material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
+
+		for lg in self.longitudal_list:
+
+			modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
+			modifier.object=object_end_clean
+			modifier.operation="DIFFERENCE"
+			bpy_helper.hide_object(object_end_clean)
+
+	# Trims the ends of the longitudal framing where it extends past last bulkhead
+	# x_locations is a list of stations where they will be chopped
+	# rotations is a corresponding list of rotations in the Y axis. Bulkheads are assumed to be not rotated on X an Z axises. 
+	def cleanup_longitudal_ends(self,x_locations,rotations=None):
+
+		view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
+
+		end_clean_list=[]
+
+		for index,x_location in enumerate(x_locations):
+			# =========================================
+			# Clean up ends of longitudal slicers
+
+			block_width=self.hull_width
+
+			adjusted_location=x_location
+			if adjusted_location<0:
+				adjusted_location=adjusted_location-block_width/2
+
+			if adjusted_location>0:
+				adjusted_location=adjusted_location+block_width/2
+
+			object_end_clean = geometry_helper.make_cube("end_clean_%s"%index,location=[adjusted_location,0,0],size=(block_width,block_width,self.hull_height))
+
+			if rotations!=None:
+				bpy_helper.select_object(object_end_clean,True)
+				bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
+
+			bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
+
+			material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
+			end_clean_list.append(object_end_clean)
+
+		# ===================================================================
+
+			for chine_object in self.chine_list:	
+				for chine_instance in chine_object.chine_instances:	
+					#print("chine: %s"%chine_instance)
+					for lg in chine_instance.longitudal_objects:
+						#print("eval: %s"%lg.name)
+						for object_end_clean in end_clean_list:
+							#print("clean: %s"%object_end_clean.name)
+							if geometry_helper.check_intersect(lg,object_end_clean):
+								modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
+								modifier.object=object_end_clean
+								modifier.operation="DIFFERENCE"
+								bpy_helper.hide_object(object_end_clean)
+
+		bpy_helper.hide_object(view_collection_cleaner)

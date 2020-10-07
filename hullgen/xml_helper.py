@@ -1,0 +1,212 @@
+import xml.etree.ElementTree as ET
+import xml.dom.minidom
+import os
+
+from bpyhullgen.hullgen import hull_maker
+from bpyhullgen.hullgen import chine_helper
+from bpyhullgen.hullgen import keel_helper
+
+
+def pretty_print_xml_given_root(root, output_xml):
+    """
+    Useful for when you are editing xml data on the fly
+    """
+    xml_string = xml.dom.minidom.parseString(ET.tostring(root)).toprettyxml()
+    xml_string = os.linesep.join([s for s in xml_string.splitlines() if s.strip()]) # remove the weird newline issue
+    with open(output_xml, "w") as file_out:
+        file_out.write(xml_string)
+
+def pretty_print_xml_given_file(input_xml, output_xml):
+    """
+    Useful for when you want to reformat an already existing xml file
+    """
+    tree = ET.parse(input_xml)
+    root = tree.getroot()
+    pretty_print_xml_given_root(root, output_xml)
+
+
+def dump_hull(the_hull):
+    print("Size: (L: %f W: %f H: %f)"%(the_hull.hull_length,
+        the_hull.hull_width,
+        the_hull.hull_height))
+
+    print("bulkhead: (start: %f count: %f thickness: %f)"%(the_hull.start_bulkhead_location,
+        the_hull.bulkhead_count,
+        the_hull.bulkhead_thickness))
+
+    for chine in the_hull.chine_list:
+        print("chine '%s': curve(%f %f %f) extrude_width: %f offset(%f %f %f) rotation(%f %f %f)"%(chine.name,
+            chine.curve_length,
+            chine.curve_width,
+            chine.curve_height,
+            chine.extrude_width,
+            chine.offset[0],
+            chine.offset[1],
+            chine.offset[2],
+            chine.rotation[0],
+            chine.rotation[1],
+            chine.rotation[2]))
+
+
+
+def parse_float_val(elem,name,default=0):
+    val=default
+    if elem.attrib[name]!=None:
+        val = float(elem.attrib[name])
+    return val
+
+def parse_str_val(elem,name,default="?"):
+    val=default
+    if elem.attrib[name]!=None:
+        val = elem.attrib[name]
+    return val    
+
+def read_hull(filename):
+
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    newhull=hull_maker.hull_maker(0,0,0)
+
+
+    for elem in root:
+
+        #================================================================
+        if elem.tag=="size":
+            newhull.hull_width=parse_float_val(elem,"width",0)
+            newhull.hull_length=parse_float_val(elem,"length",0)
+            newhull.hull_height=parse_float_val(elem,"height",0)
+
+
+        #================================================================
+        if elem.tag=="bulkheads":
+            newhull.start_bulkhead_location=parse_float_val(elem,"start_location",0)
+            newhull.bulkhead_count=parse_float_val(elem,"count",0)
+            newhull.bulkhead_thickness=parse_float_val(elem,"thickness",0)
+
+        #================================================================
+        if elem.tag=="keels":
+
+            for keel_elem in elem:
+
+                station_start=parse_float_val(keel_elem,"station_start",0)
+                station_end=parse_float_val(keel_elem,"station_end",0)
+                lateral_offset=parse_float_val(keel_elem,"lateral_offset",0)
+                top_height=parse_float_val(keel_elem,"top_height",0)
+
+                keel = keel_helper.keel(newhull,lateral_offset,top_height,station_start,station_end)
+
+                newhull.add_keel(keel)
+
+
+        #================================================================
+        if elem.tag=="chines":
+
+            for chine_elem in elem:
+
+                name=parse_str_val(chine_elem,"name")
+                length=0
+                width=0
+                height=0
+                extrude_width=0
+                
+                offset=[0,0,0]
+                rotation=[0,0,0]
+
+                for subelem in chine_elem:
+
+                    if subelem.tag=="curve":
+                        length=parse_float_val(subelem,"length",0)
+                        width=parse_float_val(subelem,"width",0)
+                        height=parse_float_val(subelem,"height",0)
+                        extrude_width=parse_float_val(subelem,"extrude_width",0)
+
+                    if subelem.tag=="offset":
+                        offset[0]=parse_float_val(subelem,"x",0)
+                        offset[1]=parse_float_val(subelem,"y",0)
+                        offset[2]=parse_float_val(subelem,"z",0)
+
+                    if subelem.tag=="rotation":
+                        rotation[0]=parse_float_val(subelem,"x",0)
+                        rotation[1]=parse_float_val(subelem,"y",0)
+                        rotation[2]=parse_float_val(subelem,"z",0)
+
+
+                new_chine=chine_helper.chine_helper(newhull,
+                    name=name,length=length,width=width)
+                new_chine.curve_height=height
+                new_chine.offset=offset
+                new_chine.rotation=rotation
+                new_chine.extrude_width=extrude_width
+                newhull.add_chine(new_chine)
+
+    
+    return newhull
+
+def write_xml(the_hull,filename):
+    # create the file structure
+    hull = ET.Element('hull')
+
+    #data.set('data','vvv')
+
+
+    #================================================================
+    size = ET.SubElement(hull, "size")
+    size.set('length',str(the_hull.hull_length))
+    size.set("width", str(the_hull.hull_width))
+    size.set("height", str(the_hull.hull_height))
+
+
+
+    #================================================================
+    node_bulkheads = ET.SubElement(hull, "bulkheads")
+    node_bulkheads.set('start_location',str(the_hull.start_bulkhead_location))
+    node_bulkheads.set("count", str(the_hull.bulkhead_count))
+    node_bulkheads.set("thickness", str(the_hull.bulkhead_thickness))
+
+
+    #================================================================
+    node_keels = ET.SubElement(hull, 'keels')
+
+    for keel in the_hull.keel_list:
+        node_keel=ET.SubElement(node_keels, 'keel')
+
+        node_keel.set('lateral_offset',str(keel.lateral_offset))
+        node_keel.set('top_height',str(keel.top_height))
+
+        node_keel.set('station_start',str(keel.station_start))
+        node_keel.set('station_end',str(keel.station_end))
+
+
+    #================================================================
+    node_chines = ET.SubElement(hull, 'chines')
+
+    for chine in the_hull.chine_list:
+        node_chine=ET.SubElement(node_chines, 'chine')
+
+        node_chine.set("name",chine.name)
+
+        node_curve = ET.SubElement(node_chine, "curve")
+        node_curve.set('length',str(chine.curve_length))
+        node_curve.set("width", str(chine.curve_width))
+        node_curve.set("height", str(chine.curve_height))
+        node_curve.set("extrude_width", str(chine.extrude_width))
+
+
+        node_offset = ET.SubElement(node_chine, "offset")
+        node_offset.set('x',str(chine.offset[0]))
+        node_offset.set("y", str(chine.offset[1]))
+        node_offset.set("z", str(chine.offset[2]))
+
+        node_rotation = ET.SubElement(node_chine, "rotation")
+        node_rotation.set('x',str(chine.rotation[0]))
+        node_rotation.set("y", str(chine.rotation[1]))
+        node_rotation.set("z", str(chine.rotation[2]))
+
+        node_asymmetry = ET.SubElement(node_chine, "asymmetry")
+        node_asymmetry.set('a0',str(chine.asymmetry[0]))
+        node_asymmetry.set("a1", str(chine.asymmetry[1]))
+
+    pretty_print_xml_given_root(hull,filename)
+
+

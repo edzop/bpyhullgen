@@ -26,7 +26,7 @@ def make_subsurf_material(name,color):
 	nodes=tree.nodes
 
 	shader_node = nodes['Principled BSDF']
-	#color=[1,0.3,0.3,1]
+	#color=[1,0.3,0.3,1] RGBA
 	shader_node.inputs[0].default_value=color
 
 	# subsurf
@@ -151,6 +151,16 @@ def get_material_bulkhead():
 	return make_subsurf_material(material_name,[0.5,0.5,0.9,1])
 
 
+def get_material_keel(): 
+	material_name="keel"
+
+	if material_name in bpy.data.materials:
+		return bpy.data.materials[material_name]
+
+	return make_subsurf_material(material_name,[0.45,0.7,0.9,1])
+
+
+
 def get_material_bool(): 
 	material_name="bool"
 
@@ -169,14 +179,10 @@ def get_material_fueltank():
 
 
 def disable_cutaway(mat):
-	#mat=bpy.data.materials["hull"]
-	#print(mat.name)
+
 	node_tree=mat.node_tree
 	nodes=node_tree.nodes
 	links = mat.node_tree.links
-
-	#for n in nodes:
-	#	print(n)
 		
 	node_mix_shader = nodes['Mix Shader']
 
@@ -220,7 +226,6 @@ def get_material_hull():
 	
 	links.new(node_separateXYZ.outputs[1], node_color_math.inputs[0])
 	
-
 	node_transparent = nodes.new(type='ShaderNodeBsdfTransparent')
 	node_transparent.location = 100,-300
 
@@ -270,8 +275,6 @@ def make_aluminum_material(material_name):
 	mat.use_nodes=True
 	tree=mat.node_tree
 	nodes=tree.nodes
-	
-	#delete_all_nodes_except_output_material(nodes)
 	
 	links = mat.node_tree.links
 

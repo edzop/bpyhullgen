@@ -1,9 +1,5 @@
 
-==============================================
-boat_ui.py ----------> boat_curve_2.py
-==============================================
-boat_curve.test()
-boat_curve.clean()
+
 
 curve_test.py
 curve_test3D.py
@@ -33,3 +29,12 @@ export as DXF
 # Method I use to call blender for debugging so I can see code window simultaneously
 
 blender -p 10 200 1900 1200 -P tests/filename
+
+===================================
+
+extrude lines (normal orientation)
+
+add circle - bool subtract rathole
+
+perpendicular cuts instead of angle 
+

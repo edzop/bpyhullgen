@@ -21,7 +21,6 @@
 import bpy
 
 from .hullgen import geometry_helper as geometry_helper
-from .hullgen import boat_curve_2 as boat_curve
 from .hullgen import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .hullgen import measure_helper as measure_helper
@@ -38,7 +37,7 @@ from bpy.props import (StringProperty,
 
 from bpy.types import (Panel,
 					Operator,
-					PropertyGroup,
+					PropertyGroup
 					)
 
 
@@ -46,6 +45,7 @@ from bpy.types import (Panel,
 # ------------------------------------------------------------------------
 #    store properties in the active scene
 # ------------------------------------------------------------------------
+
 
 class hullgen_Properties (PropertyGroup):
 
@@ -135,15 +135,11 @@ class ApplyAllBoolOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		print("Apply All Bool")
-
 		geometry_helper.apply_all_bool_modifiers()
 
 	 
 		return {'FINISHED'}
 
-
-### TODO ADD bpy.ops.mesh.separate(type='SELECTED') operator
 
 # ------------------------------------------------------------------------
 #    Export Data
@@ -193,8 +189,6 @@ class CleanupMeshesOperator (bpy.types.Operator):
 	bl_label = "CleanupAll"
 
 	def execute(self, context):
-
-		print("Cleanup")
 
 		geometry_helper.cleanup()
 
@@ -375,7 +369,7 @@ class ScaleToSizeOperator (bpy.types.Operator):
 
 
 # ------------------------------------------------------------------------
-#    my tool in objectmode
+#    bpyHullGen in objectmode
 # ------------------------------------------------------------------------
 
 class OBJECT_PT_bpyhullgen_panel (Panel):
@@ -439,5 +433,3 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		rowsub.operator( "wm.insideshrink")
 		rowsub.operator( "wm.shrinkoutliner")
 
-		#layout.menu( "OBJECT_MT_select_test", text="Presets", icon="SCENE")
-		

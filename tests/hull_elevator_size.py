@@ -26,57 +26,50 @@ the_hull=hull_maker.hull_maker(width=1,length=1.95,height=1)
 
 the_hull.make_hull_object()
 
-def make_chines():
 
-    new_chine=chine_helper.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side",
+	length=the_hull.hull_length*2.0,
+	width=0.35,
+	offset=[-.95,0,0],
+	asymmetry=[1,0])
 
-    new_chine.asymmetry[0]=1
+the_hull.add_chine(new_chine)
 
-    new_chine.curve_width=0.35
-    new_chine.longitudal_curve_angle=40
-    new_chine.curve_length=the_hull.hull_length*2
-    #new_chine.curve_angle=23
-    new_chine.rotation=[-180,0,0]
-    new_chine.offset=[-.95,0,0]
-    new_chine.name="side"
-    new_chine.make_chine()
+new_chine=chine_helper.chine_helper(the_hull,
+	name="low",
+	length=the_hull.hull_length*2.0,
+	width=0.35,
+	offset=[-.95,0,0],
+	asymmetry=[1,0],
+    rotation=[82,0,0])
 
-    new_chine.rotation=[-82,0,0]
-    #new_chine.offset=[0,0,0]
-    new_chine.name="low"
-    #new_chine.curve_length=the_hull.hull_length*1.4
-#    new_chine.asymmetry[1]=0
-    new_chine.make_chine()
+the_hull.add_chine(new_chine)
 
 
-    #new_chine.curve_length=the_hull.hull_length*1.1
-    new_chine.longitudal_count=0
-    new_chine.rotation=[36,0,0]
-    #new_chine.offset=[0.04,0,-0.06]
-    new_chine.name="upper"
-    #new_chine.curve_length=the_hull.hull_length*1.3
-    new_chine.make_chine()
+new_chine=chine_helper.chine_helper(the_hull,
+	name="upper",
+	length=the_hull.hull_length*2.0,
+	width=0.35,
+	offset=[-.95,0,0],
+	asymmetry=[1,0],
+    rotation=[36,0,0])
+
+the_hull.add_chine(new_chine)
 
 
+new_chine=chine_helper.chine_helper(the_hull,
+	name="roof",
+	length=the_hull.hull_length*3.0,
+	width=-0.35,
+	offset=[-0.5,0,1.65],
+	asymmetry=[1,0],
+    rotation=[-90,12,0],
+    symmetrical=False)
 
-    new_chine.asymmetry[1]=0
-    new_chine.rotation=[90,0,0]
-    new_chine.offset=[.5,0,0.6]
+the_hull.add_chine(new_chine)
 
-    new_chine.curve_width=-0.35
-    new_chine.curve_length=the_hull.hull_length*3
-
-    new_chine.name="roof"
-    new_chine.width=-1
-    new_chine.extrude_width=-1
-    new_chine.symmetrical=False
-
-    new_chine.make_chine()
-
-
-
-
-make_chines()
+the_hull.integrate_components()
 
 framedata=[
 

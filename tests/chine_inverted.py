@@ -32,34 +32,50 @@ from bpyhullgen.hullgen import render_helper
 the_hull=hull_maker.hull_maker(length=12,width=1,height=0.8)
 the_hull.make_hull_object()
 
-new_chine=chine_helper.chine_helper(the_hull)
-new_chine.extrude_width=1
 
-new_chine.longitudal_count=1
-new_chine.longitudal_thickness=1
-#new_chine.curve_width=1
-new_chine.rotation=[180,0,0]
-new_chine.symmetrical=False
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side1",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	offset=[0,0,0],
+    symmetrical=False
+	)
 
-new_chine.longitudal_width=-.4
-new_chine.offset=[0,0.5,0]
-new_chine.name="side"
-new_chine.make_chine()
-new_chine.curve_object_1.hide_viewport=False
-new_chine.curve_object_1.hide_render=False
-wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="wireframe")
+new_longitudal=chine_helper.longitudal_definition(z_offset=-0.2,width=-0.4,thickness=0.1)
+new_longitudal.set_limit_x_length(-6,6)
+new_chine.add_longitudal_definition(new_longitudal)
 
-new_chine.offset=[0,-0.5,0]
-new_chine.name="side2"
-new_chine.extrude_width=-1
-new_chine.longitudal_width=.4
-new_chine.make_chine()
-new_chine.curve_object_1.hide_viewport=False
-new_chine.curve_object_1.hide_render=False
-wireframe = new_chine.curve_object_1.modifiers.new(type="WIREFRAME", name="wireframe")
+the_hull.add_chine(new_chine)
 
-bpy.data.objects.remove(the_hull.hull_object)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side2",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	offset=[0,0.0,0],
+    symmetrical=False,
+    rotation=[-180,0,0]
+	)
 
+new_longitudal=chine_helper.longitudal_definition(z_offset=-0.2,width=-0.4,thickness=0.1)
+new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
+new_chine.add_longitudal_definition(new_longitudal)
+
+the_hull.add_chine(new_chine)
+
+the_hull.bulkhead_count=0
+
+the_hull.integrate_components()
+
+for chine in the_hull.chine_list:
+    for chine_instance in chine.chine_instances:
+        curve = chine_instance.curve_object
+
+        curve.hide_viewport=False
+        curve.hide_render=False
+        wireframe = curve.modifiers.new(type="WIREFRAME", name="wireframe")
+
+the_hull.hull_object.hide_render=True
+the_hull.hull_object.hide_viewport=True
 
 info_text="Demonstration of two chines with reverse extrude directions"
 geometry_helper.add_info_text(info_text)

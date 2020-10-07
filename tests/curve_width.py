@@ -20,6 +20,7 @@ import bpy
    
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import render_helper
+from bpyhullgen.hullgen import bpy_helper
 
 theCurveHelper = curve_helper.Curve_Helper()
 

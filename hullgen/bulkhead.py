@@ -38,23 +38,15 @@ class bulkhead:
 
         self.the_hull_definition=the_hull_definition
         self.bulkhead_collection=bpy_helper.make_collection("bulkheads",bpy.context.scene.collection.children)
-        self.bulkhead_void_collection=bpy_helper.make_collection("bulkhead_void",bpy.context.scene.collection.children)
-
-        #bpy_helper.hide_object(self.bulkhead_void_collection)
 
     def move_verts_z(self,ob,new_val):
 
         vert_list=[]
 
         for v in ob.data.vertices:
-            #print(v.index)  
-            #print(v.co.z)
             
             vert_list.append([v.index,v.co.z])
             
-    #    print("presort")
-    #    for v in vert_list:
-    #        print("%d %f" % (v[0],v[1]))
             
 
         def secondVal(val):
@@ -62,35 +54,21 @@ class bulkhead:
 
         vert_list.sort(key=secondVal)
 
-    #    print("postsort")
-    #    for v in vert_list:
-    #        print("%d %f" % (v[0],v[1]))
-
         mat_world = ob.matrix_world
-        #print("world: %s"%mat_world)
+
             
         for i in range(0,len(vert_list)):
-    #    for i in range(0,filter_lowest):
-            #print(" ")
+
             vert=ob.data.vertices[vert_list[i][0]].co
-            #print("vert %d: %s"%(i,vert_list[i]))
-            #vert.z=0
             
             pos_world = mat_world @ vert
-            #print("world original: %s"%pos_world)
             
             if pos_world.z<new_val:
                 pos_world.z=new_val
-            #print("world modified: %s"%pos_world)
             
             new_vert=mat_world.inverted() @ pos_world
-            #print("new_vert modified: %s"%new_vert)
             
             vert.z=new_vert.z
-            #vert.x=new_vert.x
-            #vert.y=new_vert.y
-            
-            #print("vert modified: %s"%vert)
         
 
     def make_bulkhead(self):
@@ -106,24 +84,15 @@ class bulkhead:
 
         bpy_helper.select_object(self.bulkhead_object,True)
 
-        bool_new = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="slice")
+        bool_new = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="hull_slice")
         bool_new.object = self.the_hull_definition.hull_object
         bool_new.operation = 'INTERSECT'
-        #bool_new.use_self=1
         bool_new.name="bool.hull_shape"
 
-        #print(self.station)
-#        if self.station==2:
-#            dd
 
         bpy.ops.object.modifier_apply(modifier="bool.hull_shape")
 
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
-
-        #bpy.ops.object.mode_set(mode='EDIT')
-        #bpy.ops.mesh.select_all(action='SELECT')
-        #bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-        #bpy.ops.object.mode_set(mode='OBJECT')
 
 
         if self.watertight==False:
@@ -137,18 +106,8 @@ class bulkhead:
 
             self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.station)
 
-
-            mod_remesh = self.bulkhead_void_object.modifiers.new(type="REMESH", name="remesh")
-            mod_remesh.mode = 'SHARP'
-            mod_remesh.octree_depth = 4
-            mod_remesh.scale = 0.99
-            bpy.ops.object.modifier_apply(modifier="remesh")
-
-
             # get truple of current size
             bulkhead_size=self.bulkhead_void_object.dimensions.xyz
-
-            #print(bulkhead_size)
 
             if bulkhead_size[0]==0 or bulkhead_size[1]==0 or bulkhead_size[2]==0:
                 print("Something went wrong... bulkhead size==0")
@@ -167,26 +126,11 @@ class bulkhead:
 
                 bpy_helper.select_object(self.bulkhead_void_object,True)
 
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.select_mode(type="FACE")
-                bpy.ops.mesh.select_all(action='SELECT')
-                bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-                bpy.ops.mesh.select_all(action='SELECT')
-                bpy.ops.mesh.normals_make_consistent(inside=False)
-                bpy.ops.object.mode_set(mode='OBJECT')
-                #bpy_helper.bmesh_recalculate_normals(self.bulkhead_void_object)
+                
+                bpy_helper.parent_objects_keep_transform(parent=self.bulkhead_object,child=self.bulkhead_void_object)               
 
-                #bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
-
-                bpy_helper.select_object(self.bulkhead_object,True)
-
-                bool_void = self.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center")
-                bool_void.object = self.bulkhead_void_object
-                bool_void.operation = 'DIFFERENCE'
-                #bool_void.use_self=True
-
-                bpy_helper.move_object_to_collection(self.bulkhead_void_collection,self.bulkhead_void_object)
-
+                bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_void_object)
+  
 
         bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_object)
 

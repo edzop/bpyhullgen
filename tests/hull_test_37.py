@@ -28,76 +28,92 @@ from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import bpy_helper
 from bpyhullgen.hullgen import render_helper
 
-performance_timer = bpy_helper.ElapsedTimer()
-
 the_hull=hull_maker.hull_maker(length=11.3,width=3.9,height=3.6)
 
 the_hull.make_hull_object()
 
-new_chine=chine_helper.chine_helper(the_hull)
 
-new_chine.rotation=[180,0,0]
-new_chine.offset=[0,-0.06,0]
-new_chine.name="side"
-new_longitudal=chine_helper.longitudal_element(z_offset=0.4,width=-0.15,thickness=0.05)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	rotation=[180,0,0],
+	offset=[0,0.06,0],
+	)
+
+new_longitudal=chine_helper.longitudal_definition(z_offset=0.4,width=-0.15,thickness=0.05)
 new_longitudal.set_limit_x_length(-4.5,4.5)
-new_chine.add_longitudal_element(new_longitudal)
-new_chine.make_chine()
-new_chine.clear_longitudal_elements()
+new_chine.add_longitudal_definition(new_longitudal)
+
+the_hull.add_chine(new_chine)
+
 
 #window_helper.make_window_on_chine(new_chine,0.5,0.3)
 #window_helper.make_window_on_chine(new_chine,1.5,0.3)
 #window_helper.make_window_on_chine(new_chine,-1.5,0.3)
 
-new_chine.rotation=[-39,0,0]
-new_chine.offset=[0,-0.2,-0.4]
-new_chine.longitudal_z_offset=-0.33
-new_chine.name="mid"
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.63,width=-0.15,thickness=0.05)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="mid",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	rotation=[39,0,0],
+	offset=[0,-0.2,-0.4],
+	)
+
+new_longitudal=chine_helper.longitudal_definition(z_offset=0.15,width=-0.15,thickness=0.05)
 new_longitudal.set_curve(0.4,5)
 new_longitudal.set_limit_x_length(-4.5,4.5)
-new_chine.add_longitudal_element(new_longitudal)
-
-new_chine.make_chine()
-new_chine.clear_longitudal_elements()
-
-new_chine.rotation=[45,0,0]
-new_chine.offset=[0,0,-0.31]
-new_chine.name="upper"
-#new_chine.add_longitudal_element(chine_helper.longitudal_element(z_offset=0,width=-0.15,thickness=0.05))
-#new_chine.set_longitudal_curve(0,0)
-new_chine.make_chine()
-new_chine.clear_longitudal_elements()
+new_chine.add_longitudal_definition(new_longitudal)
+the_hull.add_chine(new_chine)
 
 
-new_chine.longitudal_count=0
-new_chine.rotation=[-79,0,0]
-new_chine.offset=[0,0,0]
-new_chine.name="low"
-new_chine.curve_length=the_hull.hull_length*1.5
-new_chine.curve_width=1.6
-new_longitudal=chine_helper.longitudal_element(z_offset=-0.62,width=-0.15,thickness=0.05)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="upper",
+	length=the_hull.hull_length*1.3,
+	width=1,
+	rotation=[-45,0,0],
+	offset=[0,0,-0.31],
+	)
+
+
+the_hull.add_chine(new_chine)
+
+
+new_chine=chine_helper.chine_helper(the_hull,
+	name="low",
+	length=the_hull.hull_length*1.5,
+	width=1.6,
+	rotation=[79,0,0],
+	)
+
+new_longitudal=chine_helper.longitudal_definition(z_offset=0.65,width=-0.15,thickness=0.05)
 new_longitudal.set_curve(0.6,10)
 new_longitudal.set_limit_x_length(-3.4,3.4)
-new_chine.add_longitudal_element(new_longitudal)
-new_chine.make_chine()
-new_chine.clear_longitudal_elements()
+new_chine.add_longitudal_definition(new_longitudal)
 
-new_longitudal=chine_helper.longitudal_element(z_offset=0.0,width=-0.15,thickness=0.05)
+the_hull.add_chine(new_chine)
+
+
+
+new_chine=chine_helper.chine_helper(the_hull,
+	name="roof",
+	length=the_hull.hull_length*1.4,
+	width=0.8,
+	rotation=[-90,0,0],
+	#asymmetry=[1,0],
+	offset=[0,0,-0.7],
+	symmetrical=False
+	)
+
+new_longitudal=chine_helper.longitudal_definition(z_offset=0.0,width=-0.15,thickness=0.05)
 new_longitudal.set_limit_x_length(-4.7,4.7)
-new_chine.add_longitudal_element(new_longitudal)
-new_chine.rotation=[90,0,0]
-new_chine.offset=[0,0,-0.7]
-new_chine.name="roof"
-new_chine.curve_width=0.8
-#new_chine.curve_angle=55
+new_chine.add_longitudal_definition(new_longitudal)
 
-new_chine.symmetrical=False
-#new_chine.set_longitudal_curve(0,0)
-new_chine.make_chine()
+the_hull.add_chine(new_chine)
+
+
 
 # ================ modify hull
-
 
 
 # ================ Add Pilot House
@@ -141,7 +157,7 @@ def add_pilot_house(the_hull):
 
 	bpy_helper.hide_object(ob)
 
-add_pilot_house(the_hull)
+#add_pilot_house(the_hull)
 
 def add_window(the_hull):
 	# ================ Add Window
@@ -177,49 +193,36 @@ def add_deck_cockpit(the_hull):
 
 	bpy_helper.hide_object(ob)
 
-add_deck_cockpit(the_hull)
+#add_deck_cockpit(the_hull)
 
 # ============================================================================================
-def add_props():
-	view_collection_props=bpy_helper.make_collection("props",bpy.context.scene.collection.children)
-
-	import_library_path="assets/actors.blend/Collection/"
-	ob = geometry_helper.import_object(import_library_path,"man.stand",(0,0.4,-1.3),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.lie_down",(1.05,0,-0.77),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.sit_chair",(-0.35,0,-0.75),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"man.sit_lean",(-2.1,0.13,-1.02),view_collection_props)
 
 
-	import_library_path="assets/boat_assets.blend/Collection/"
-	
-	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(2,0,-1.1),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"mattress.twin",(-2,0,-1.1),view_collection_props)
+the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.stand",location=[0,0.4,-1.3])
+the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.lie_down",location=[1.05,0,-0.77])
+the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.sit_chair",location=[-0.35,0,-0.75])
+the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.sit_lean",location=[-2.1,0.13,-1.02])
 
-	ob = geometry_helper.import_object(import_library_path,"rope_coils_2_high",(4.7,0,-0.7),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"yahama_gm_30hp",(-2.4,0,-1.1),view_collection_props)
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="mattress.twin",location=[2,0,-1.1])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="mattress.twin",location=[-2,0,-1.1])
 
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="rope_coils_2_high",location=[4.7,0,-0.7])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="yahama_gm_30hp",location=[-2.4,0,-1.1])
 
-	ob = geometry_helper.import_object(import_library_path,"chair.reading_sitting_up_full",(-0.50,0,-0.52),view_collection_props)
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="anchor",location=[5.9,0.15,-0.25])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="anchor",location=[5.9,-0.15,-0.25])
 
-	ob = geometry_helper.import_object(import_library_path,"anchor",(5.9,0.15,-0.25),view_collection_props)
-	ob = geometry_helper.import_object(import_library_path,"anchor",(5.9,-0.15,-0.25),view_collection_props)
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="tank_fuel_5gal",location=[-0.35,0.65,-1.15],rotation=[-90,0,90])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="tank_fuel_5gal",location=[-0.60,0.65,-1.15],rotation=[-90,0,90])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="tank_fuel_5gal",location=[-0.85,0.65,-1.15],rotation=[-90,0,90])
 
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="chair.reading_sitting_up_full",location=[-0.50,0,-0.52])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="battery",location=[0.6,0.17,-1.15])
 
-	ob = geometry_helper.import_object(import_library_path,"tank_fuel_5gal",(-0.60,0.65,-1.15),view_collection_props,rotation=(-90,0,90))
-	ob = geometry_helper.import_object(import_library_path,"tank_fuel_5gal",(-0.85,0.65,-1.15),view_collection_props,rotation=(-90,0,90))
-	ob = geometry_helper.import_object(import_library_path,"tank_fuel_5gal",(-0.35,0.65,-1.15),view_collection_props,rotation=(-90,0,90))
-
-
-	ob = geometry_helper.import_object(import_library_path,"battery",(0.6,0.17,-1.15),view_collection_props,rotation=(0,0,0))
-
-
-add_props()
 
 clean_distance=0.33
 x_locations=[	-the_hull.hull_length/2+clean_distance,
 				the_hull.hull_length/2-clean_distance]
-
-the_hull.cleanup_longitudal_ends(x_locations)
 
 
 levels=[ -1.1,-0.5 ]
@@ -247,15 +250,7 @@ x_locations=[
 				bulkhead_definitions[0][0]+thickness/2,
 				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
 			]
-
-#the_hull.cleanup_center(clean_location=[-1.2,0,0],clean_size=[4-thickness,1,1])
-the_hull.cleanup_center(clean_location=[-1.5,0,0],clean_size=[5-thickness,1,1])			
-
-#the_hull.cleanup_longitudal_ends(x_locations)
-
-the_hull.make_bulkheads(bulkhead_definitions)
-the_hull.make_longitudal_booleans()
-		
+	
 station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
 station_end=bulkhead_definitions[0][0]-thickness/2
 
@@ -270,8 +265,7 @@ def make_keels():
 	the_hull.integrate_keel(the_keel)
 
 
-the_hull.hull_object.hide_viewport=True
-
+the_hull.integrate_components()
 
 framedata=[
 [ 1, [3.191784,-15.956328,4.894828],[0.403186,0.026390,-0.141792] ],
@@ -282,5 +276,3 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
-
-performance_timer.get_elapsed_string()

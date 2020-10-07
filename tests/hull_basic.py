@@ -26,35 +26,39 @@ the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
 the_hull.make_hull_object()
 
-def make_chines():
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side",
+	length=the_hull.hull_length*1.2,
+	width=1,
+	offset=[0,-0.35,-0.5],
+	rotation=[180,0,0])
 
-    new_chine=chine_helper.chine_helper(the_hull)
+the_hull.add_chine(new_chine)
 
-    new_chine.curve_width=1
-#    new_chine.curve_height=0.5
-    new_chine.curve_length=the_hull.hull_length*1.2
-    new_chine.rotation=[180,0,0]
-    new_chine.offset=[0,-0.35,-0.5]
-    new_chine.name="side"
-    new_chine.make_chine()
 
-    new_chine.rotation=[-82,0,0]
-    new_chine.offset=[0,0,0]
-    new_chine.name="low"
-    new_chine.curve_length=the_hull.hull_length*1.4
-    new_chine.asymmetry[1]=0
-    new_chine.make_chine()
+new_chine=chine_helper.chine_helper(the_hull,
+	name="low",
+	length=the_hull.hull_length*1.4,
+	width=1,
+	offset=[0,0,0],
+	rotation=[82,0,0])
 
-    new_chine.asymmetry[1]=0
-    new_chine.rotation=[90,0,0]
-    new_chine.offset=[0,0,-0.5]
-    new_chine.name="roof"
-    new_chine.curve_width=0.8
-    new_chine.symmetrical=False
+the_hull.add_chine(new_chine)
 
-    new_chine.make_chine()
 
-make_chines()
+new_chine=chine_helper.chine_helper(the_hull,
+	name="roof",
+	length=the_hull.hull_length*1.4,
+	width=0.8,
+	rotation=[-90,1,0],
+	offset=[0,0,-0.5],
+	symmetrical=False)
+
+the_hull.add_chine(new_chine)
+
+the_hull.bulkhead_count=0
+
+the_hull.integrate_components()
 
 framedata=[
 [ 1, [6.096892,-5.457021,-0.208632],[1.097236,-0.166389,-0.166539] ],

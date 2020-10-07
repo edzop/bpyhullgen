@@ -131,14 +131,10 @@ def add_info_text(info_text):
 	new_txt.location.z=-1
 	return new_txt
 
-def set_object_rotation(ob,angle):
-	bpy.ops.object.select_all(action='DESELECT')
-	ob.select_set(state=True)
-	bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
-
-def rotate_object_X(ob,angle):
-	bpy.context.view_layer.objects.active=ob
-	bpy.ops.transform.rotate(value=radians(angle),orient_axis='X')
+def set_rotation_degrees(ob,degrees):
+	ob.rotation_euler.x=radians(degrees[0])
+	ob.rotation_euler.y=radians(degrees[1])
+	ob.rotation_euler.z=radians(degrees[2])
 
 def cleanup():
 
@@ -225,12 +221,6 @@ def apply_all_bool_modifiers():
 							f.material_index=new_material_index
 
 					has_boolean=True
-
-			#if has_boolean:
-			#	bpy.ops.object.mode_set(mode='EDIT')
-			#	bpy.ops.mesh.select_all(action='SELECT')
-			#	bpy.ops.mesh.normals_make_consistent(inside=False)
-			#	bpy.ops.object.mode_set(mode='OBJECT')
 
 	# rehide previously hidden objects
 	for obj in hidden_objects:
@@ -336,7 +326,6 @@ def delete_non_aligned_faces(ob,func):
 	old_mode=bpy.context.active_object.mode
 
 	func(ob)
-	#select_only_going_front(ob)
 
 	bpy.ops.object.mode_set(mode='EDIT')
 	bpy.ops.mesh.select_mode(type="FACE")
@@ -357,11 +346,7 @@ def import_object(path,target_object,location,view_collection=None,rotation=None
 		bpy_helper.move_object_to_collection(view_collection,ob)
 
 	if rotation!=None:
-		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
-
-		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
-
-		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
+		geometry_helper.set_rotation_degrees(ob,rotation)
 
 	if parent!=None:
 		ob.parent=parent
@@ -448,17 +433,7 @@ def inside_shrink_OLD(amount=0.1):
 
 	print("Face Indexes: %s"%face_indexes)
 
-	'''
-	bpy.ops.object.mode_set(mode='EDIT')
-	bpy.ops.mesh.select_all(action='DESELECT')
-	bpy.ops.object.mode_set(mode='OBJECT')
-	for i in face_indexes:
-		face=ob.data.polygons[i]
-		face.select=True
 
-	bpy.ops.object.mode_set(mode='EDIT')	
-	return
-	'''
 	
 
 
@@ -562,3 +537,27 @@ def create_bilgetank(the_hull,top,x1,x2,y_offset,name):
 	bilgetank_object.parent=the_hull.hull_object
 
 	return bilgetank_object
+
+
+def make_cube(name,location=[0,0,0],size=[1,1,1],rotation=[0,0,0]):
+
+	bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, location=location)
+
+	new_object=bpy.context.view_layer.objects.active
+
+	bpy.ops.transform.resize(value=size)
+	bpy.ops.object.transform_apply(scale=True,location=False)
+
+	if rotation!=[0,0,0]:
+		print("doing rotation")
+		new_object.rotation_euler.x=radians(rotation[0])
+		new_object.rotation_euler.y=radians(rotation[1])
+		new_object.rotation_euler.z=radians(rotation[2])
+
+	new_object.name=name
+
+	return new_object	
+
+def find_object_by_name(name):
+	ob = bpy.data.objects.get(name)
+	return ob

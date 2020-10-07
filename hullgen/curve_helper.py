@@ -28,7 +28,7 @@ def cleanup_shape(ob):
 		bpy.ops.object.mode_set(mode='EDIT')
 
 	bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-	#bpy.ops.mesh._convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+
 	bpy.ops.mesh.tris_convert_to_quads(seam=False, sharp=False, materials=True)
 
 	bpy.ops.mesh.select_all(action='SELECT')
@@ -65,7 +65,7 @@ class Curve_Helper:
 
 	curve_length=5
 	curve_width=1.5
-	curve_resolution=64
+	curve_resolution=5
 	curve_height=1
 	curvedata=None
 	curve_object=None
@@ -75,19 +75,14 @@ class Curve_Helper:
 
 	curve_backup=None
 
-	#extrude_multiplier=1
-
 	asymmetry=[0,0]
 
 	curve_twist=[ 0,0,0 ]
 
-	def __init__(self):
+	def __init__(self,curve_resolution=5):
 		curvedata=None
 		curve_object=None
-
-	def deselect_curve(self):
-		self.curve_object.select_set(state=False)
-
+		self.curve_resolution=curve_resolution
 
 	def define_curve(self,length,width):
 
@@ -99,8 +94,6 @@ class Curve_Helper:
 		handle_width=self.curve_length/6
 		half_length=self.curve_length/2
 		angle=radians(self.curve_angle)
-
-
 
 		# Curve handle = point, handle_left of point, handle right of point
 
@@ -190,17 +183,6 @@ class Curve_Helper:
 		bpy.ops.object.shade_flat()
 		
 
-	def add_boolean(self,hull_object):
-		bpy_helper.select_object(hull_object,True)
-
-		slicename="slice.%s"%self.curve_object.name
-
-		bool_new = hull_object.modifiers.new(type="BOOLEAN", name=slicename)
-		bool_new.object = self.curve_object
-		bool_new.operation = 'DIFFERENCE'
-
-		bpy_helper.select_object(hull_object,False)
-
 	def extrude_curve(self,extrude_width):
 
 		bpy.ops.object.select_all(action='DESELECT')
@@ -233,13 +215,4 @@ class Curve_Helper:
 		#bpy.ops.transform.translate(value=(0, 0, 0.5))
 		bpy.ops.transform.translate(value=space)
 
-	def rotate_curve(self,rotation):
-		bpy.ops.transform.rotate(value=radians(rotation[0]),orient_axis='X')
-		bpy.ops.transform.rotate(value=radians(rotation[1]),orient_axis='Y')
-		bpy.ops.transform.rotate(value=radians(rotation[2]),orient_axis='Z')
 
-
-
-#bpy.ops.transform.rotate(value=0.785398, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
-#bpy.ops.transform.rotate(value=0.785398, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)

@@ -22,8 +22,8 @@ bl_info = {
     "name": "bpyhullgen",
     "description": "Parametric BoatCurve",
     "author": "Ed Kraus",
-    "version": (0, 0, 3),
-    "blender": (2, 80, 0),
+    "version": (0, 0, 4),
+    "blender": (2, 90, 0),
     "location": "3D View > Tools",
     "warning": "", # used for warning icon and text in addons panel
     "wiki_url": "https://edzop.github.io/bpyhullgen/",
@@ -45,16 +45,47 @@ else:
 
     import bpy
 
-    from bpy.props import PointerProperty
+    from bpy.props import PointerProperty,CollectionProperty,IntProperty
 
     from . import (
-            ui
+            ui,
+            genui
             )
 
-
-
 classes = (
+
     ui.hullgen_Properties,
+
+    genui.hullgendef_keel_Properties,
+    genui.hullgendef_longitudal_Properties,
+    genui.hullgendef_chine_Properties,
+    genui.hullgendef_hull_Properties,
+    
+    
+    
+    genui.hullgendef_file_Properties,
+
+    genui.LIST_OT_NewChineItem,
+    genui.LIST_OT_DeleteChineItem,
+
+    genui.LIST_OT_DeleteLongitudalItem,
+    genui.LIST_OT_NewLongitudalItem,
+
+    genui.LIST_OT_NewKeelItem,
+    genui.LIST_OT_DeleteKeelItem,
+
+    genui.MY_UL_NameList,
+    genui.FILE_UL_List,
+    genui.OBJECT_PT_bpyhullgendef_panel,
+    genui.OBJECT_PT_bpyhullgendef_load_save_panel,
+    genui.LIST_OT_GenHull,
+    genui.LIST_OT_DeleteHull,
+    genui.LIST_OT_SaveConfig,
+    genui.LIST_OT_LoadConfig,
+    genui.LIST_OT_Newconfig,
+    genui.LIST_OT_RefreshConfig,
+
+
     ui.OBJECT_PT_bpyhullgen_panel,
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
@@ -76,11 +107,11 @@ classes = (
 )
 
 from .hullgen import geometry_helper as geometry_helper
-from .hullgen import boat_curve_2 as boat_curve
 from .hullgen import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .hullgen import measure_helper as measure_helper
 from .hullgen import curve_helper as curve_helper
+from .hullgen import hull_maker as hull_maker
 
 def register():
     for cls in classes:
@@ -88,9 +119,21 @@ def register():
 
     bpy.types.Scene.hullgen_Props = PointerProperty( type = ui.hullgen_Properties )
 
+    the_hull = hull_maker.hull_maker()
+
+    bpy.types.Scene.the_hull = the_hull
+
+    bpy.types.Scene.hull_properties = PointerProperty( type = genui.hullgendef_hull_Properties )
+
+    bpy.types.Scene.hullgen_file_properties = CollectionProperty( type = genui.hullgendef_file_Properties )
+    bpy.types.Scene.hullgen_file_index = IntProperty(name = "Index for hullgen_file_properties", default = 0)
+
+
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Scene.hullgen_Props
+    del bpy.types.Scene.hull_properties
+    del bpy.types.Scene.hullgen_file_properties
+    del bpy.types.Scene.the_hull

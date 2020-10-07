@@ -27,27 +27,34 @@ from bpyhullgen.hullgen import render_helper
 the_hull=hull_maker.hull_maker(length=12,width=5,height=0.8)
 the_hull.make_hull_object()
 
-new_chine=chine_helper.chine_helper(the_hull)
-#new_chine.extrude_width=0.1
-#new_chine.rotation=[0,0,0]
-new_chine.offset=[0,-0.4,0]
-new_chine.name="side"
-new_chine.curve_width=1
+the_hull.bulkhead_count=0
 
-#chine_helper.longitudal_element(0,0.15,0.8)
-new_longitudal=chine_helper.longitudal_element(z_offset=0,width=-0.2,thickness=0.2)
-#new_longitudal.slicer_ratio=1
-new_chine.add_longitudal_element(new_longitudal)
+new_chine=chine_helper.chine_helper(the_hull,
+	name="side",
+	length=the_hull.hull_length,
+	width=-1,
+	offset=[0,0.7,0])
 
-new_chine.symmetrical=True
-new_chine.make_chine()
+new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+    width=0.2,
+    thickness=0.2)
 
-for l in the_hull.chine_list:
-    l.hide_viewport=False
-    l.hide_render=False
-    wireframe = l.modifiers.new(type="WIREFRAME", name="w2")
+new_chine.add_longitudal_definition(new_longitudal)
 
-bpy.data.objects.remove(the_hull.hull_object)
+the_hull.add_chine(new_chine)
+
+
+the_hull.integrate_components()
+
+for chine in the_hull.chine_list:
+    for chine_instance in chine.chine_instances:        
+        ob=chine_instance.curve_object
+        ob.hide_viewport=False
+        ob.hide_render=False
+        wireframe = ob.modifiers.new(type="WIREFRAME", name="w2")
+
+the_hull.hull_object.hide_viewport=True
+the_hull.hull_object.hide_render=True
 
 framedata=[
 [ 1, [0.000000,-2.867616,18.242138],[0.000000,0.000000,-0.166539] ],

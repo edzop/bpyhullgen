@@ -22,7 +22,6 @@ class ElapsedTimer:
         elapsed_string="Elapsed time: %s"%(self.secondsToStr(elapsed_time))
 
         print(elapsed_string)
-        #print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
         return elapsed_string
 
@@ -61,13 +60,9 @@ def bmesh_recalculate_normals(obj):
 	bm.free()
 
 def find_and_remove_object_by_name(objname):
-	for obj in bpy.data.objects:
-	#	print(obj.name)
-		if(obj.name==objname):
-	#		print("found")
-	#        bpy.context.scene.collection.objects.unlink(obj)
-			bpy.data.objects.remove(obj)
-
+	ob = bpy.data.objects.get(objname)
+	if ob is not None:
+		bpy.data.objects.remove(ob)
 
 # works on object or collection
 def hide_object(ob):
@@ -113,6 +108,13 @@ def is_object_hidden_from_view(the_object):
 		return True
 
 	return False
+
+def parent_objects_keep_transform(parent,child):
+	bpy.ops.object.select_all(action='DESELECT')
+	parent.select_set(True)
+	child.select_set(True)
+	bpy.context.view_layer.objects.active = parent
+	bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
 
 
 def secondsToStr(t):

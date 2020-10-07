@@ -23,8 +23,10 @@ from math import radians, degrees
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
 from ..hullgen import bpy_helper
+from ..hullgen import geometry_helper
+from ..hullgen import bpy_helper
 
-class longitudal_element:
+class longitudal_definition:
 	z_offset=0
 	width=0.1
 	thickness=0.1
@@ -50,20 +52,44 @@ class longitudal_element:
 		self.curve_angle=angle
 		self.bend_radius=radius
 
-	def __init__(self,z_offset,width=0.1,thickness=0.1):
+	def __init__(self,z_offset=0,width=0.1,thickness=0.1,slicer_ratio=0.5):
 		self.z_offset=z_offset
 		self.width=width
 		self.thickness=thickness
+		self.slicer_ratio=slicer_ratio
+
+
+class chine_instance_definition:
+	curve_object=None
+	curve_backup=None
+	inverted=True
+
+	longitudal_objects=None
+	longitudal_slicers=None
+
+	def __init__(self,curve_object,curve_backup,inverted):
+		self.curve_object=curve_object
+		self.curve_backup=curve_backup
+		self.inverted=inverted
+		self.longitudal_objects=[]
+		self.longitudal_slicers=[]
+
+	def add_longitudal_instance(self,longitudal_object,longitudal_slicer):
+		self.longitudal_objects.append(longitudal_object)
+		self.longitudal_slicers.append(longitudal_slicer)
+
+
 
 class chine_helper:
 
 	rotation=[0,0,0]
 	offset=[0,0,0]
 	name="chine_"
-	#curve_twist1=-20
-	#curve_twist2=-20
+
 	the_hull=None
 	symmetrical=True
+
+	longitudal_elements_enabled=True
 
 	curve_length=12
 	curve_width=1.2
@@ -77,62 +103,56 @@ class chine_helper:
 	# amount of distance slicer is poking through skin to ensure clean geometry
 	skin_pokethrough=0.01
 
-	curve_objects=None
-	curve_backups=None
-	longitudal_elements=None
+	longitudal_definitions=None
 
-	longitudal_element_objects=None
 
-	longitudal_screw_positions=[]
+	chine_instances=None
+
+	longitudal_screw_positions=None
  
 
 	# view collections
 	view_collection_chines=None
 	view_collection_longitudals=None
-	#view_collection_longitudal_slicers=None
-
-
-	# screw size in MM
-	target_screw_size=10 # target size in output model
 
 	# how big to make screws in computer model so they output correctly when scaled output
 	# hull object has hull_scale object for scale models...
 	scaled_screw_size=10 
 
+	def add_chine_instance(self,new_instance):
+		self.chine_instances.append(new_instance)
+
+	def add_longitudal_definition(self,new_element):
+		self.longitudal_definitions.append(new_element)
 
 
-	def add_longitudal_element(self,new_element):
-#		new_element=longitudal_element(offset,width)
-		self.longitudal_elements.append(new_element)
-
-	def clear_longitudal_elements(self):
-		self.longitudal_elements.clear()
-		self.longitudal_screw_positions.clear()
-		self.curve_backups.clear()
-		self.longitudal_element_objects.clear()
-		
-
-	def __init__(self,the_hull):
+	
+	def __init__(self,the_hull,name,length,width,rotation=[0,0,0],offset=[0,0,0],asymmetry=[0,0],symmetrical=True):
 		self.the_hull=the_hull
 
-		self.curve_objects=[]
-		self.curve_backups=[]
-		self.longitudal_elements=[]
-		self.longitudal_element_objects=[]
+		self.longitudal_screw_positions=[]
+		self.longitudal_definitions=[]
+		self.chine_instances=[]
+
+		self.name=name
+		self.curve_length=length
+		self.curve_width=width
+
+		self.offset=offset
+		self.asymmetry=asymmetry
+		self.rotation=rotation
+		self.symmetrical=symmetrical
 
 		self.longitudal_thickness=the_hull.structural_thickness
 		
 		self.curve_height=the_hull.hull_height
 
-		# need this?
-		#self.curve_width=the_hull.hull_width
-		self.curve_length=the_hull.hull_length
 
 		self.extrude_width=the_hull.hull_height*3
 
 		self.view_collection_chines=bpy_helper.make_collection("chines",bpy.context.scene.collection.children)
 		self.view_collection_longitudals=bpy_helper.make_collection("longitudals",bpy.context.scene.collection.children)
-		#self.view_collection_longitudal_slicers=bpy_helper.make_collection("longitudal_slicers",bpy.context.scene.collection.children)
+
  
 	# After the boolean operation is complete the vertices can be removed that are on the other side
 	# of the plane used for the boolean operation. 
@@ -160,8 +180,6 @@ class chine_helper:
 		#bpy.ops.object.vertex_group_select()
 		#bpy.ops.mesh.delete(type='VERT')
 
-		
-
 	
 	# Creates a new secondary plane that will intersect the primary plane. This new secondary plane will act as the slicer
 	# It marks the front and back vertex groups for reference later after boolean operation
@@ -171,13 +189,6 @@ class chine_helper:
 
 		theCurveHelper = curve_helper.Curve_Helper()
 
-		#curve_angle=0
-		#bend_radius=0
-
-		#if inverted_curves:
-		#	curve_angle=longitudal_element.curve_angle
-		#	bend_radius=longitudal_element.bend_radius
-		#else:
 		curve_angle=longitudal_element.curve_angle
 		bend_radius=longitudal_element.bend_radius
 	
@@ -187,13 +198,13 @@ class chine_helper:
 		theCurveHelper.curve_height=0
 
 		theCurveHelper.generate_curve(name)
+		newCurve=theCurveHelper.curve_object
+		bpy_helper.select_object(newCurve,True)
 
-		bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
+		geometry_helper.set_rotation_degrees(newCurve,[90,0,0])
+
 		bpy.ops.object.transform_apply(rotation=True,scale=False,location=False)
 
-		newCurve=theCurveHelper.curve_object
-
-		bpy_helper.select_object(newCurve,True)
 
 		bpy.ops.object.mode_set(mode='EDIT')
 		
@@ -286,15 +297,9 @@ class chine_helper:
 		front_group.add(front_verts, 1.0, 'ADD')
 		back_group.add(back_verts, 1.0, 'ADD')
 
-		#bpy.ops.transform.rotate(value=radians(90),orient_axis='X')
-		#bpy.ops.object.transform_apply(rotation=True,scale=False,location=False)
-		
 		newCurve.location.z=height
 
 		y_shift=self.curve_width*overlap_factor/2
-
-		#theCurveHelper.extrude_curve(newCurve)
-		#bpy.ops.object.duplicate_move(TRANSFORM_OT_translate={"value":(0, 0, 0)})
 
 		bpy.ops.object.select_all(action='DESELECT')
 
@@ -303,16 +308,9 @@ class chine_helper:
 		bpy.ops.mesh.select_all(action='SELECT')
 		bpy.ops.transform.translate(value=(0, -y_shift, 0))
 
-
-
 		bpy.ops.object.mode_set(mode='OBJECT')
-		#newCurve.location.y+=y_shift
-
-		#if ".R." in name:
-		#	d
 
 		return newCurve
-
 			
 	# =====================================
 
@@ -321,16 +319,18 @@ class chine_helper:
 		bpy.ops.object.select_all(action='DESELECT')
 		bpy.context.view_layer.objects.active = slicer
 		slicer.select_set(True)
+				
 		bpy.ops.object.mode_set(mode='EDIT')
 
 		# extrude thicknes along Y axis
 		bpy.ops.mesh.select_all(action='SELECT')
-		#bpy.ops.mesh.normals_make_consistent(inside=False)
+
 		bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, amount, 0), 
 										"constraint_axis":(False, True, False)})
 		bpy.ops.object.mode_set(mode='OBJECT')
-		bpy.ops.object.select_all(action='DESELECT')
 
+		bpy_helper.bmesh_recalculate_normals(slicer)
+		
 
 	# for symmetrical chines - if there is any curve in slicer plane - it needs to be inverted for opposite side (symmetrical)
 	def make_slicer_plane(self,wall_curve,name,thickness,longitudal_element,inverted_curves=False):
@@ -350,9 +350,7 @@ class chine_helper:
 
 		bpy.ops.object.modifier_apply(modifier=name_prefix)
 
-		#if ".R." in name:
-		#	d
-
+		
 		self.delete_all_except_vertex_group(slicer1,"back")
 
 		slicer1.select_set(False)
@@ -384,94 +382,72 @@ class chine_helper:
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='SELECT')
 
-
 		bpy.ops.mesh.bridge_edge_loops()
 
-		bpy.ops.mesh.select_all(action='SELECT')
-		bpy.ops.mesh.normals_make_consistent(inside=False)
+		bpy.ops.object.mode_set(mode='OBJECT')
 
 		# joining 2 objects sets the origin to the last selected object
 		# so shift the object down so origin is at center of object (thickness/2)
 		bpy.ops.transform.translate(value=(0, 0, -(thickness/2)))
 		
-		bpy.ops.object.mode_set(mode='OBJECT')
-		#bpy.ops.mesh.select_all(action='DESELECT')
 
 		slicer2.location.z+=thickness
 
 		# second object selected is left over after join
 		slicer2.name=name_prefix+name
 		
-		#bpy.ops.object.transform_apply(rotation=False,scale=False,location=True)
 		return slicer2
 	
 
-	def make_longitudal_element(self,curve_object,longitudal_element,inversed,index):
+	def make_longitudal_element(self,chine_instance,longitudal_element,index):
 		longitudal_plane=None
 
-		longitudal_name="%s.longitudal.%02d"%(curve_object.name,index)
-		slicer_name="%s.slicer.%02d"%(curve_object.name,index)
+		longitudal_name="%s.longitudal.%02d"%(chine_instance.curve_object.name,index)
+		slicer_name="%s.slicer.%02d"%(chine_instance.curve_object.name,index)
 
-		#longitudal_z_offset=longitudal_element.z_offset
-
-		#if inversed==False:
-		#	longitudal_z_offset=-longitudal_element.z_offset
 
 		longitudal_plane=self.make_slicer_plane(
-			wall_curve=curve_object,
+			wall_curve=chine_instance.curve_object,
 			name=longitudal_name,
 			longitudal_element=longitudal_element,
 			thickness=longitudal_element.thickness,
-			#z_offset=longitudal_z_offset,
-			inverted_curves=inversed)
+
+			inverted_curves=chine_instance.inverted)
 
 		material_helper.assign_material(longitudal_plane,material_helper.get_material_stringer())
-		self.the_hull.longitudal_list.append(longitudal_plane)
 
 		extrude_amount=-longitudal_element.width
 		slicer_extrude_amount=-longitudal_element.width*longitudal_element.slicer_ratio
 
-		if inversed:
+		if chine_instance.inverted:
 			extrude_amount=longitudal_element.width
 			slicer_extrude_amount=longitudal_element.width*longitudal_element.slicer_ratio
-
 							
 		self.select_and_extrude_slicer(longitudal_plane,extrude_amount)
-
-		#if inversed:
-		#	sd
 			
 		slicer_plane=None
 		
 		slicer_plane=self.make_slicer_plane(
-			wall_curve=curve_object,
+			wall_curve=chine_instance.curve_object,
 			name=slicer_name,
 			longitudal_element=longitudal_element,
 			thickness=longitudal_element.thickness*longitudal_element.slicer_overcut,
-			#z_offset=longitudal_z_offset,
-			inverted_curves=inversed)
+			inverted_curves=chine_instance.inverted)
 
 		
 		material_helper.assign_material(slicer_plane,material_helper.get_material_support())
-		self.the_hull.longitudal_slicer_list.append(slicer_plane)
-
 		
+			
 		self.select_and_extrude_slicer(slicer_plane,slicer_extrude_amount)
-
-#		bpy_helper.select_object(slicer_plane,True)
-#		bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
-
-		#bpy_helper.select_object(longitudal_plane,True)
-		#bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
-
+		
 		slicer_plane.parent=longitudal_plane
 
 		slicer_plane.location.z=0
 
-		longitudal_plane.parent=curve_object
-		longitudal_plane.matrix_parent_inverse = curve_object.matrix_world.inverted()
+		longitudal_plane.parent=chine_instance.curve_object
+		longitudal_plane.matrix_parent_inverse = chine_instance.curve_object.matrix_world.inverted()
 
-		if inversed:
+		if chine_instance.inverted:
 
 			if self.curve_width<0:
 				slicer_plane.location.y=-self.skin_pokethrough
@@ -485,19 +461,16 @@ class chine_helper:
 			else:
 				slicer_plane.location.y=-self.skin_pokethrough
 
-		#slicer_plane.location.z=- ( (longitudal_element.thickness*longitudal_element.slicer_overcut)-longitudal_element.thickness ) / 2
-
 		bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_plane)
 		bpy_helper.hide_object(slicer_plane)
 		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
 
-		self.longitudal_element_objects.append(longitudal_plane)
+		chine_instance.add_longitudal_instance(longitudal_plane,slicer_plane)
+
+
 
 		# chop ends off if needed (based on X limits)
 		if longitudal_element.limit_x_max!=0 and longitudal_element.limit_x_min!=0:
-
-			#modifier_min_x_name="slice_min_x"
-			#modifier_max_x_name="slice_max_x"
 
 			block_width=self.the_hull.hull_length
 
@@ -507,13 +480,23 @@ class chine_helper:
 			adjusted_max_location=longitudal_element.limit_x_max
 			adjusted_max_location+=block_width/2
 
-			object_end_clean_min = self.the_hull.make_bool_cube("end_clean_x_min"+longitudal_plane.name,location=[adjusted_min_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
-			object_end_clean_max = self.the_hull.make_bool_cube("end_clean_x_max"+longitudal_plane.name,location=[adjusted_max_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
+			end_clean_min_name="end_clean_min_%f"%(adjusted_min_location)
+			end_clean_max_name="end_clean_max_%f"%(adjusted_min_location)
 
-			bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_min)
-			bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_max)
+			object_end_clean_min = bpy.data.objects.get(end_clean_min_name)
+			object_end_clean_max = bpy.data.objects.get(end_clean_max_name)
 
-			#print(object_end_clean_max.name)
+			if object_end_clean_min is None:
+				object_end_clean_min = geometry_helper.make_cube(end_clean_min_name,location=[adjusted_min_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
+				bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_min)
+				object_end_clean_min.hide_viewport=True
+				object_end_clean_min.hide_render=True
+
+			if object_end_clean_max is None:
+				object_end_clean_max = geometry_helper.make_cube(end_clean_max_name,location=[adjusted_max_location,0,0],size=(block_width,block_width,self.the_hull.hull_height))
+				bpy_helper.move_object_to_collection(self.view_collection_longitudals,object_end_clean_max)
+				object_end_clean_max.hide_viewport=True
+				object_end_clean_max.hide_render=True
 
 			bool_new = longitudal_plane.modifiers.new(type="BOOLEAN", name="Lm")
 			bool_new.object = object_end_clean_min
@@ -531,29 +514,11 @@ class chine_helper:
 			bool_new.object = object_end_clean_max
 			bool_new.operation = 'DIFFERENCE'
 
-
-			bpy_helper.select_object(longitudal_plane,True)
-			#bpy.ops.object.modifier_apply(modifier="Lm")
-			#bpy.ops.object.modifier_apply(modifier="Lx")
-
-			bpy_helper.select_object(slicer_plane,True)
-			#bpy.ops.object.modifier_apply(modifier="Sm")
-			#bpy.ops.object.modifier_apply(modifier="Sx")
-
-			#bpy.data.objects.remove(object_end_clean_min)
-			object_end_clean_max.hide_viewport=True
-			object_end_clean_max.hide_render=True
-			#bpy.data.objects.remove(object_end_clean_max)
-			object_end_clean_min.hide_viewport=True
-			object_end_clean_min.hide_render=True
-
 	
 
+	def make_single_chine(self,twist=None,inverted=False):
 
-
-	def make_single_chine(self,twist=None,inversed=False):
-
-		theCurveHelper = curve_helper.Curve_Helper()
+		theCurveHelper = curve_helper.Curve_Helper(curve_resolution=self.the_hull.curve_resolution)
 
 		theCurveHelper.asymmetry=self.asymmetry
 
@@ -564,13 +529,13 @@ class chine_helper:
 		curve_name=name_prefix+self.name
 
 		if self.symmetrical:
-		   if inversed:
+		   if inverted:
 			   curve_name+=".R"
 		   else:
 			   curve_name+=".L"
 
 		if twist!=None:
-			if inversed:
+			if inverted:
 				theCurveHelper.curve_twist[0]=-twist[0]
 				theCurveHelper.curve_twist[1]=-twist[1]
 				theCurveHelper.curve_twist[2]=-twist[2]
@@ -584,10 +549,7 @@ class chine_helper:
 		theCurveHelper.curve_height=self.curve_height
 		theCurveHelper.generate_curve(curve_name)
 
-
 		curve_object=theCurveHelper.curve_object
-
-		self.curve_objects.append(curve_object)
 
 		material_helper.assign_material(curve_object,material_helper.get_material_bool())
 
@@ -596,50 +558,45 @@ class chine_helper:
 
 		bpy_helper.select_object(curve_object,True)
 
-		if inversed:
-			theCurveHelper.rotate_curve([180,0,0])
+		if inverted:
+			geometry_helper.set_rotation_degrees(curve_object,[180,0,0])
 			bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-		
+					
+		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
+		bpy_helper.hide_object(curve_object)
 
-		for i in range(len(self.longitudal_elements)):
-			self.make_longitudal_element(curve_object,self.longitudal_elements[i],inversed,i)
+		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_backup)
+		bpy_helper.hide_object(theCurveHelper.curve_backup)
 
 
-		bpy_helper.select_object(curve_object,True)
+		chine_instance=chine_instance_definition(curve_object,theCurveHelper.curve_backup,inverted)
 
-		if inversed:
+		self.add_chine_instance(chine_instance)
+
+		for i in range(len(self.longitudal_definitions)):
+			if self.longitudal_elements_enabled==True:
+				self.make_longitudal_element(chine_instance,self.longitudal_definitions[i],i)
+
+		# Can only do rotation after we generate the longitudal elements because the slicers
+		# depend on zero rotation 
+
+		if inverted:
 			rotation_opposite=[-self.rotation[0],
 							self.rotation[1],
 							self.rotation[2],
 							]
 
-			theCurveHelper.rotate_curve(rotation_opposite)
-			
-			bpy.ops.transform.translate(value=(self.offset[0], -self.offset[1], self.offset[2]))
-		else:    
-			theCurveHelper.rotate_curve(self.rotation)
-			bpy.ops.transform.translate(value=(self.offset[0], self.offset[1], self.offset[2]))
+			geometry_helper.set_rotation_degrees(curve_object,rotation_opposite)
+			curve_object.location.x=self.offset[0]
+			curve_object.location.y=-self.offset[1]
+			curve_object.location.z=self.offset[2]
+		else:
+			geometry_helper.set_rotation_degrees(curve_object,self.rotation)
+			curve_object.location=self.offset
 
 
-		#bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-
-		theCurveHelper.deselect_curve()
-		
-		theCurveHelper.add_boolean(self.the_hull.hull_object)
-
-		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_object)
-		bpy_helper.hide_object(theCurveHelper.curve_object)
-
-		bpy_helper.move_object_to_collection(self.view_collection_chines,theCurveHelper.curve_backup)
-		bpy_helper.hide_object(theCurveHelper.curve_backup)
-		self.curve_backups.append(theCurveHelper.curve_backup)
-
-		bpy_helper.hide_object(curve_object)
-
-		self.the_hull.chine_list.append(curve_object)
 
 		return curve_object
-
 
 	def make_chine(self,twist=None):
 
@@ -647,7 +604,7 @@ class chine_helper:
 		# First curve is Left Side or non-symmetrical "single side"
 		# ================================================================================================
 		newcurve=self.make_single_chine(twist,False)
-		self.curve_objects.append(newcurve)
+
 
 
 		# ================================================================================================ 
@@ -655,7 +612,7 @@ class chine_helper:
 		# ================================================================================================
 		if self.symmetrical:
 			newcurve=self.make_single_chine(twist,True)
-			self.curve_objects.append(newcurve)
+			#self.curve_objects.append(newcurve)
 
 
 	def make_segmented_longitudals(self,z_offset,radius=0,angle=0,start_bulkhead=1,end_bulkhead=4,double_thick=True):
@@ -677,15 +634,11 @@ class chine_helper:
 		current_eval_location-=self.the_hull.bulkhead_thickness
 		finish_eval_location+=self.the_hull.bulkhead_thickness
 
-		#finish_eval_location=half_total_bulkhead_distance
-		#2+self.the_hull.bulkhead_thickness
-
 		print("current_eval: %f finish eval: %f"%(current_eval_location,finish_eval_location))
 		
 		odd_spacing=True
 
 		segment_thickness=0.1
-		#segment_z_offset=-0.2
 		segment_index=0
 
 		overlap_factor=0.2  # 20% overlap
@@ -714,17 +667,13 @@ class chine_helper:
 					new_longitudal=longitudal_element(z_offset=adjusted_z_offset,width=-0.13,thickness=segment_thickness)
 					new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
 					new_longitudal.set_curve(radius,angle)
-					self.add_longitudal_element(new_longitudal)
+					self.add_longitudal_definition(new_longitudal)
 				
-				
-				
-				
-
 				
 				new_longitudal=longitudal_element(z_offset=adjusted_z_offset-0.2,width=-0.13,thickness=segment_thickness)
 				new_longitudal.set_limit_x_length(current_eval_location,current_eval_location+full_segment_length)
 				new_longitudal.set_curve(radius,angle)
-				self.add_longitudal_element(new_longitudal)
+				self.add_longitudal_definition(new_longitudal)
 					
 				current_eval_location+=full_segment_length-overlap_distance
 				self.longitudal_screw_positions.append(current_eval_location-half_overlap_distance)
@@ -744,12 +693,12 @@ class chine_helper:
 					new_longitudal=longitudal_element(z_offset=adjusted_z_offset-0.2,width=-0.13,thickness=segment_thickness)
 					new_longitudal.set_limit_x_length(current_eval_location,station_end)
 					new_longitudal.set_curve(radius,angle)
-					self.add_longitudal_element(new_longitudal)
+					self.add_longitudal_definition(new_longitudal)
 				
 				new_longitudal=longitudal_element(z_offset=adjusted_z_offset,width=-0.13,thickness=segment_thickness)
 				new_longitudal.set_limit_x_length(current_eval_location,station_end)
 				new_longitudal.set_curve(radius,angle)
-				self.add_longitudal_element(new_longitudal)
+				self.add_longitudal_definition(new_longitudal)
 
 				current_eval_location=station_end
 
@@ -766,26 +715,15 @@ class chine_helper:
 				#if current_eval_location+end_segment_length>=finish_eval_location:
 					
 				#else:
-
-				
-					
-					
-			#else:
-				# fill the gap with whatever is left and finish
-			#	new_longitudal=chine_helper.longitudal_element(z_offset=z_offset,width=-0.13,thickness=segment_thickness)
-			#	new_longitudal.set_limit_x_length(current_eval_location,finish_eval_location)
-			#	new_chine.add_longitudal_element(new_longitudal)
-			#	current_eval_location=finish_eval_location
+	
 
 			segment_index+=1
 			print("currenteval: %f finishval: %f segindex: %d"%(current_eval_location,finish_eval_location,segment_index))
 
-
-
 	def make_screws(self):
 
 		scaleup_factor=1/self.the_hull.hull_output_scale
-		self.scaled_screw_size=self.target_screw_size*scaleup_factor/1000
+		self.scaled_screw_size=self.the_hull.target_screw_size*scaleup_factor/1000
 
 		#print("target screw: %f scaleup factor: %f scaled_screw size: %f hull output scale: %f"%(self.target_screw_size,scaleup_factor,self.scaled_screw_size,self.the_hull.hull_output_scale))
 

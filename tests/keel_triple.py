@@ -22,83 +22,53 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
+from bpyhullgen.hullgen import bpy_helper
+
+performance_timer = bpy_helper.ElapsedTimer()
 
 the_hull=hull_maker.hull_maker(width=3,length=7,height=3)
 
 the_hull.make_hull_object()
 
-def make_chines():
 
-    new_chine=chine_helper.chine_helper(the_hull)
+new_chine=chine_helper.chine_helper(the_hull,
+    name="side",
+    length=the_hull.hull_length*1.2,
+    width=1,
+    rotation=[180,0,0],
+    offset=[0,-0.35,-0.5])
 
-    new_chine.curve_width=1
-#    new_chine.curve_height=0.5
-    new_chine.curve_length=the_hull.hull_length*1.2
-    new_chine.rotation=[-180,0,0]
-    new_chine.offset=[0,-0.35,-0.5]
-    new_chine.name="side"
-    new_chine.make_chine()
-
-    new_chine.rotation=[-82,0,0]
-    new_chine.offset=[0,0,0]
-    new_chine.name="low"
-    new_chine.curve_length=the_hull.hull_length*1.4
-    new_chine.asymmetry[1]=0
-    new_chine.make_chine()
-
-    new_chine.asymmetry[1]=0
-    new_chine.rotation=[90,0,0]
-    new_chine.offset=[0,0,-0.5]
-    new_chine.name="roof"
-    new_chine.curve_width=0.8
-    new_chine.symmetrical=False
-
-    new_chine.make_chine()
-
-make_chines()
-
-floor_height=-0.45
-
-bulkhead_definitions=[]
-
-thickness=0.05
-
-bulkhead_definitions.append([-1,floor_height,False,thickness])
-bulkhead_definitions.append([1,floor_height,False,thickness])
-bulkhead_definitions.append([-2,floor_height,False,thickness])
-bulkhead_definitions.append([2,floor_height,False,thickness])
+the_hull.add_chine(new_chine)
 
 
-station_start=-2-thickness/2-0.1
-station_end=3
+new_chine=chine_helper.chine_helper(the_hull,
+    name="low",
+    length=the_hull.hull_length*1.4,
+    width=1,
+    rotation=[82,0,0])
 
-the_hull.make_bulkheads(bulkhead_definitions)
-the_hull.make_longitudal_booleans()
-
-def make_keels():
-
-    the_keel = keel_helper.keel(the_hull,lateral_offset=0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
-    the_keel.make_keel()
-    the_hull.integrate_keel(the_keel)	
-
-    the_keel = keel_helper.keel(the_hull,lateral_offset=-0.2,top_height=floor_height,station_start=station_start,station_end=station_end)
-    the_keel.make_keel()
-    the_hull.integrate_keel(the_keel)
-
-    the_keel = keel_helper.keel(the_hull,lateral_offset=0,top_height=floor_height,station_start=station_start,station_end=station_end)
-    the_keel.make_keel()
-    the_hull.integrate_keel(the_keel)
+the_hull.add_chine(new_chine)
 
 
-make_keels()
+new_chine=chine_helper.chine_helper(the_hull,
+    name="roof",
+    length=the_hull.hull_length*1.2,
+    width=0.8,
+    rotation=[-90,0,0],
+    offset=[0,0,-0.5],
+    symmetrical=False)
 
-def disabled():
-    print("d")
+the_hull.add_chine(new_chine)
 
-    
 
-    
-    
+the_hull.default_floor_height=-0.45
+
+the_keel_builder = keel_helper.keel_builder(the_hull,keel_middle_space=0.3)
+
+the_keel_builder.make_solid_double_keel(top_height=the_hull.default_floor_height,start_bulkhead=1,end_bulkhead=6)
+the_keel_builder.make_solid_single_keel(top_height=the_hull.default_floor_height,start_bulkhead=1,end_bulkhead=6)
+
+the_hull.integrate_components()
 
 the_hull.hull_object.hide_viewport=True
 
@@ -111,3 +81,5 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
+
+performance_timer.get_elapsed_string()
