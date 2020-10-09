@@ -38,3 +38,15 @@ add circle - bool subtract rathole
 
 perpendicular cuts instead of angle 
 
+==========================================
+Auto separate plates
+==========================================
+if input curve length all same length - bool output mesh all aligned vertices - all nicely arranged
+if curves different length - oddly matching vertices because of scaling
+plates - after import UV unwrapped
+
+    - selection into segments
+    - separate by selection
+    - add shape for cutout
+    - apply bool to both sides of plate (union / difference)
+
