@@ -35,7 +35,8 @@ def dump_hull(the_hull):
         the_hull.bulkhead_thickness))
 
     for chine in the_hull.chine_list:
-        print("chine '%s': curve(%f %f %f) extrude_width: %f offset(%f %f %f) rotation(%f %f %f)"%(chine.name,
+        print("chine '%s': curve(%f %f %f) extrude_width: %f offset(%f %f %f) rotation(%f %f %f) symmetrical %d"%(
+            chine.name,
             chine.curve_length,
             chine.curve_width,
             chine.curve_height,
@@ -45,9 +46,14 @@ def dump_hull(the_hull):
             chine.offset[2],
             chine.rotation[0],
             chine.rotation[1],
-            chine.rotation[2]))
+            chine.rotation[2],
+            chine.symmetrical))
 
-
+def parse_int_val(elem,name,default=0):
+    val=default
+    if elem.attrib[name]!=None:
+        val = int(elem.attrib[name])
+    return val
 
 def parse_float_val(elem,name,default=0):
     val=default
@@ -105,6 +111,7 @@ def read_hull(filename):
             for chine_elem in elem:
 
                 name=parse_str_val(chine_elem,"name")
+                symmetrical=parse_int_val(chine_elem,"symmetrical")
                 length=0
                 width=0
                 height=0
@@ -133,15 +140,19 @@ def read_hull(filename):
 
 
                 new_chine=chine_helper.chine_helper(newhull,
-                    name=name,length=length,width=width)
+                    name=name,length=length,width=width,
+                    symmetrical=symmetrical)
+
                 new_chine.curve_height=height
                 new_chine.offset=offset
                 new_chine.rotation=rotation
                 new_chine.extrude_width=extrude_width
+
                 newhull.add_chine(new_chine)
 
     
     return newhull
+
 
 def write_xml(the_hull,filename):
     # create the file structure
@@ -185,12 +196,14 @@ def write_xml(the_hull,filename):
         node_chine=ET.SubElement(node_chines, 'chine')
 
         node_chine.set("name",chine.name)
+        node_chine.set("symmetrical", str(int(chine.symmetrical)))
 
         node_curve = ET.SubElement(node_chine, "curve")
         node_curve.set('length',str(chine.curve_length))
         node_curve.set("width", str(chine.curve_width))
         node_curve.set("height", str(chine.curve_height))
         node_curve.set("extrude_width", str(chine.extrude_width))
+
 
 
         node_offset = ET.SubElement(node_chine, "offset")

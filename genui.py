@@ -157,6 +157,12 @@ class hullgendef_chine_Properties(PropertyGroup):
 		max = 200
 		)
 
+	symmetrical : BoolProperty(
+		name = "Symmetrical",
+		default = True,
+		description = "If true make two Symmetrical chines (L + R)"
+	)
+
 	length : FloatProperty(
 		name = "length",
 		description = "Length of Curve (m)",
@@ -189,7 +195,7 @@ class hullgendef_hull_Properties(PropertyGroup):
 	hull_length : FloatProperty(
 		name = "HullLength",
 		description = "Length of Hull (m)",
-		default = 11,
+		default = 10,
 		min = 1,
 		max = 500.0
 		)
@@ -246,6 +252,12 @@ class MY_UL_NameList(UIList):
 			layout.label(text="", icon = custom_icon) 
 
 
+def ensure_dir(f):
+	d = os.path.dirname(f)
+	if not os.path.exists(d):
+		print("Directory %s not found - Creating"%(d))
+		os.makedirs(d)
+
 
 
 defaults_path="bpyhullgen_defaults"
@@ -274,8 +286,11 @@ class LIST_OT_SaveConfig(Operator):
 		the_hull = context.scene.the_hull
 		#update_hull_from_properties(the_hull,context)
 
+
+
 		selected_filepath=get_selected_file_path(context)
 
+		ensure_dir(selected_filepath)
 		xml_helper.write_xml(the_hull,selected_filepath)
 
 		bpy.context.workspace.status_text_set("Saved %s"%get_selected_file_path(context))	
@@ -533,7 +548,6 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.hull_length=the_hull.hull_length
 	hull_properties.curve_resolution=the_hull.curve_resolution
 
-
 	hull_properties.chines.clear()
 	hull_properties.active_chine_index=-1
 
@@ -548,6 +562,8 @@ def update_properties_from_hull(the_hull,context):
 				math.radians(chine.rotation[2])]
 
 		chine_prop.pos=chine.offset
+
+		chine_prop.symmetrical=chine.symmetrical
 
 
 		for longitudal_definition in chine.longitudal_definitions:
@@ -609,6 +625,7 @@ def update_hull_from_properties(the_hull,context):
 			width=width,
 			rotation=rot,
 			offset=chineprop.pos,
+			symmetrical=chineprop.symmetrical
 		)
 
 		the_hull.add_chine(new_chine)
@@ -782,6 +799,9 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 				row = layout.row() 
 				row.prop(chine_item, "rot") 
+
+				row = layout.row()
+				row.prop(chine_item,"symmetrical")
 
 				if len(chine_item.longitudals)>0:
 
