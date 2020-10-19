@@ -220,6 +220,23 @@ class hullgendef_hull_Properties(PropertyGroup):
 		name = "keels",
 		type = hullgendef_keel_Properties)
 
+	make_bulkheads : BoolProperty(
+		name = "Make Bulkheads",
+		default = True,
+		description = "Generate Bulkheads"
+	)
+
+	make_keels : BoolProperty(
+		name = "Make Keels",
+		default = True,
+		description = "Generate Keels"
+	)
+
+	make_longitudals : BoolProperty(
+		name = "Make Longitudals",
+		default = True,
+		description = "Generate Longitudals"
+	)
 
 
 class FILE_UL_List(UIList): 
@@ -548,6 +565,10 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.hull_length=the_hull.hull_length
 	hull_properties.curve_resolution=the_hull.curve_resolution
 
+	hull_properties.make_keels=the_hull.make_keels
+	hull_properties.make_bulkheads=the_hull.make_bulkheads
+	hull_properties.make_longitudals=the_hull.make_longitudals
+		
 	hull_properties.chines.clear()
 	hull_properties.active_chine_index=-1
 
@@ -610,6 +631,10 @@ def update_hull_from_properties(the_hull,context):
 
 	the_hull.curve_resolution=hull_properties.curve_resolution
 
+	the_hull.make_keels=hull_properties.make_keels
+	the_hull.make_bulkheads=hull_properties.make_bulkheads
+	the_hull.make_longitudals=hull_properties.make_longitudals
+		
 	for chineprop in hull_properties.chines:
 
 		rot = [ math.degrees(chineprop.rot[0]),
@@ -761,6 +786,11 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 		row = layout.row()
 		layout.prop( hull_props, "curve_resolution")
+
+		row = layout.row()
+		layout.prop( hull_props, "make_bulkheads")
+		layout.prop( hull_props, "make_keels")		
+		layout.prop( hull_props, "make_longitudals")	
 
 		row = layout.row()
 		row.operator('genui.genhull') 

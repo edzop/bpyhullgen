@@ -36,6 +36,10 @@ class hull_maker:
 	hull_width=3.9
 	hull_height=3.6
 
+	make_bulkheads=True
+	make_keels=True
+	make_longitudals=True
+		
 	default_floor_height=-0.7
 
 	hull_name="hull_object"
@@ -168,7 +172,7 @@ class hull_maker:
 			#print("add bulkhead %d station: %f watertight: %d floor: %f"%(bulkhead_index,current_bulkhead_location,watertight,floor_height))
 
 
-	def make_bulkheads(self,bulkhead_definitions):
+	def make_bulkhead_objects(self,bulkhead_definitions):
 
 		for bulkhead_definition in self.bulkhead_definitions:
 
@@ -257,51 +261,44 @@ class hull_maker:
 
 		performance_timer = bpy_helper.ElapsedTimer()
 
-		
 
-		make_bulkheads=False
-		make_keel_list=False
 		hide_hull=False
-		make_longitudals=False
 		use_subtractive_objects=False
 		use_props=False
 
 		#======================================
-		# Single configuration area for generation
+		# Single configuration area for generation overrides
 		#======================================
-		make_bulkheads=True
-		make_keel_list=True
-		#hide_hull=True
-		make_longitudals=True
 		use_subtractive_objects=True
 		use_props=True
 		#======================================
 		
 		# Longitudal stringers created at same time as chines so as to reuse the curve
 		for chine_object in self.chine_list:
+				chine_object.longitudal_elements_enabled=self.make_longitudals
 				chine_object.make_chine()
 
 
 		self.make_chine_hull_booleans()				
 
-		if make_keel_list:
+		if self.make_keels:
 			for keel in self.keel_list:
 				keel.make_keel()
 
-		if make_bulkheads:
+		if self.make_bulkheads:
 			self.add_auto_bulkheads()
-			self.make_bulkheads(self.bulkhead_definitions)			
+			self.make_bulkhead_objects(self.bulkhead_definitions)			
 
 		if use_props:
 			self.integrate_props()	
 
-		if make_keel_list:
+		if self.make_keels:
 			self.make_keel_booleans()
 
-		if make_bulkheads:
+		if self.make_bulkheads:
 			self.make_bulkhead_booleans()
 
-		if make_longitudals:
+		if self.make_longitudals:
 			self.make_longitudal_booleans()
 
 		if use_subtractive_objects:
