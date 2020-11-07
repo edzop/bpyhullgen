@@ -51,20 +51,23 @@ def dump_hull(the_hull):
 
 def parse_int_val(elem,name,default=0):
     val=default
-    if elem.attrib[name]!=None:
-        val = int(elem.attrib[name])
+    if name in elem.attrib:
+        if elem.attrib[name]!=None:
+            val = int(elem.attrib[name])
     return val
 
 def parse_float_val(elem,name,default=0):
     val=default
-    if elem.attrib[name]!=None:
-        val = float(elem.attrib[name])
+    if name in elem.attrib:
+        if elem.attrib[name]!=None:
+            val = float(elem.attrib[name])
     return val
 
 def parse_str_val(elem,name,default="?"):
     val=default
-    if elem.attrib[name]!=None:
-        val = elem.attrib[name]
+    if name in elem.attrib:
+        if elem.attrib[name]!=None:
+            val = elem.attrib[name]
     return val    
 
 def read_hull(filename):
@@ -111,7 +114,7 @@ def read_hull(filename):
             for chine_elem in elem:
 
                 name=parse_str_val(chine_elem,"name")
-                symmetrical=parse_int_val(chine_elem,"symmetrical")
+                symmetrical=parse_int_val(chine_elem,"symmetrical",default=True)
                 length=0
                 width=0
                 height=0
