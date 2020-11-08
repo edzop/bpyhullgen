@@ -280,6 +280,14 @@ class hullgendef_hull_Properties(PropertyGroup):
 		description = "Generate Longitudals"
 	)
 
+	hide_hull : BoolProperty(
+		name = "Hide Hull",
+		default = True,
+		description = "Hide Hull from view after generation (to see structure more clearly)"
+	)
+
+	
+
 
 class STATION_UL_List(UIList): 
 	"""Station UIList.""" 
@@ -639,7 +647,6 @@ class WM_OT_auto_bulkheads(bpy.types.Operator):
 		bulkhead_props=context.scene.hull_properties.bulkheads
 
 
-
 		current_bulkhead_location=self.station_start
 
 		while current_bulkhead_location<=self.station_end:
@@ -728,6 +735,7 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
 	hull_properties.make_longitudals=the_hull.make_longitudals
+	hull_properties.hide_hull=the_hull.hide_hull
 
 
 	hull_properties.bulkheads.clear()
@@ -803,6 +811,7 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
 	the_hull.make_longitudals=hull_properties.make_longitudals
+	the_hull.hide_hull=hull_properties.hide_hull
 
 	for bulkheadprop in hull_properties.bulkheads:
 		new_bulkhead_definition=bulkhead.bulkhead_definition(
@@ -969,7 +978,8 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row = layout.row()
 		layout.prop( hull_props, "make_bulkheads")
 		layout.prop( hull_props, "make_keels")		
-		layout.prop( hull_props, "make_longitudals")	
+		layout.prop( hull_props, "make_longitudals")
+		layout.prop( hull_props, "hide_hull")	
 
 		row = layout.row()
 		row.operator('genui.genhull') 

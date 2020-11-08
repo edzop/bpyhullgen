@@ -39,6 +39,7 @@ class hull_maker:
 	make_bulkheads=True
 	make_keels=True
 	make_longitudals=True
+	hide_hull=True
 		
 	default_floor_height=-0.7
 
@@ -312,7 +313,7 @@ class hull_maker:
 		if use_subtractive_objects:
 			self.apply_subtractive_objects()
 
-		if hide_hull:
+		if self.hide_hull:
 			self.hull_object.hide_viewport=True
 
 		performance_timer.get_elapsed_string()
