@@ -229,30 +229,11 @@ levels=[ -1.1,-0.5 ]
 
 thickness=0.05
 
-bulkhead_definitions = [
-
-						(5,False,False,thickness),
-						(4,levels[1],True,thickness),						
-						(3,levels[1],False,thickness),
-						(2,levels[0],False,thickness), 
-						(1,levels[0],False,thickness),
+x_locations=[ 5,-5 ]
 	
-						(0,levels[0],False,thickness),
-						
-						(-1,levels[0],False,thickness),
-						(-2,levels[0],False,thickness),
-						(-3,levels[1],False,thickness),
-						(-4,levels[1],True,thickness),					
-						(-5,False,False,thickness)
-]
+station_start=-5
+station_end=5
 
-x_locations=[	
-				bulkhead_definitions[0][0]+thickness/2,
-				bulkhead_definitions[len(bulkhead_definitions)-1][0]-thickness/2
-			]
-	
-station_start=bulkhead_definitions[len(bulkhead_definitions)-1][0]+thickness/2
-station_end=bulkhead_definitions[0][0]-thickness/2
 
 def make_keels():
 	keel_middle_space=0.3
