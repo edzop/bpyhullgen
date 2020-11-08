@@ -5,6 +5,7 @@ import os
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import keel_helper
+from bpyhullgen.hullgen import bulkhead
 
 
 def pretty_print_xml_given_root(root, output_xml):
@@ -89,9 +90,20 @@ def read_hull(filename):
 
         #================================================================
         if elem.tag=="bulkheads":
-            newhull.start_bulkhead_location=parse_float_val(elem,"start_location",0)
-            newhull.bulkhead_count=parse_float_val(elem,"count",0)
-            newhull.bulkhead_thickness=parse_float_val(elem,"thickness",0)
+
+            for bulkhead_elem in elem:
+                floor_height=parse_float_val(bulkhead_elem,"floor_height",0)
+                watertight=parse_int_val(bulkhead_elem,"watertight",default=True)
+                station=parse_float_val(bulkhead_elem,"station",0)
+                thickness=parse_float_val(bulkhead_elem,"thickness",0)
+
+                bulkhead_definition=bulkhead.bulkhead_definition(
+                    station=station,
+                    watertight=watertight,
+                    floor_height=floor_height,
+                    thickness=thickness)
+
+                newhull.add_bulkhead_definition(bulkhead_definition)
 
         #================================================================
         if elem.tag=="keels":
@@ -174,9 +186,14 @@ def write_xml(the_hull,filename):
 
     #================================================================
     node_bulkheads = ET.SubElement(hull, "bulkheads")
-    node_bulkheads.set('start_location',str(the_hull.start_bulkhead_location))
-    node_bulkheads.set("count", str(the_hull.bulkhead_count))
-    node_bulkheads.set("thickness", str(the_hull.bulkhead_thickness))
+
+    for bulkhead_definition in the_hull.bulkhead_definitions:
+        node_bulkhead=ET.SubElement(node_bulkheads, 'bulkhead')
+
+        node_bulkhead.set("station", str(bulkhead_definition.station))
+        node_bulkhead.set("floor_height", str(bulkhead_definition.floor_height))
+        node_bulkhead.set("watertight", str(int(bulkhead_definition.watertight)))
+        node_bulkhead.set("thickness", str(bulkhead_definition.thickness))
 
 
     #================================================================

@@ -47,7 +47,7 @@ class hull_maker:
 
 	hull_object=None
 
-	curve_resolution=12
+	curve_resolution=24
 	
 	chine_list=None
 
@@ -160,6 +160,9 @@ class hull_maker:
 
 		return self.hull_object
 
+	def add_bulkhead_definition(self,bulkhead_definition):
+		self.bulkhead_definitions.append(bulkhead_definition)
+
 
 	def add_auto_bulkheads(self):
 
@@ -167,7 +170,15 @@ class hull_maker:
 		for bulkhead_index in range(0,self.bulkhead_count):
 			watertight=False
 			floor_height=self.default_floor_height
-			self.bulkhead_definitions.append([current_bulkhead_location,floor_height,watertight,self.bulkhead_thickness])
+
+			new_bulkhead_definition=bulkhead.bulkhead_definition(
+				station=current_bulkhead_location,
+				watertight=watertight,
+				floor_height=floor_height,
+				thickness=self.bulkhead_thickness
+			)
+
+			self.add_bulkhead_definition(new_bulkhead_definition)
 			current_bulkhead_location+=self.bulkhead_spacing
 			#print("add bulkhead %d station: %f watertight: %d floor: %f"%(bulkhead_index,current_bulkhead_location,watertight,floor_height))
 
@@ -176,18 +187,15 @@ class hull_maker:
 
 		for bulkhead_definition in self.bulkhead_definitions:
 
-			bh=bulkhead.bulkhead(self,
-								station=bulkhead_definition[0],
-								watertight=bulkhead_definition[2],
-								thickness=bulkhead_definition[3])
+			bh=bulkhead.bulkhead(self,bulkhead_definition)
 								
 			bh.make_bulkhead()
 
 			# If it's not watertight - there is a void in middle
-			if bulkhead_definition[2]==False:
+			if bulkhead_definition.watertight==False:
 				material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
 				
-				floor_height_z=bulkhead_definition[1]
+				floor_height_z=bulkhead_definition.floor_height
 
 				# floor height
 				if floor_height_z!=False:
@@ -286,7 +294,7 @@ class hull_maker:
 				keel.make_keel()
 
 		if self.make_bulkheads:
-			self.add_auto_bulkheads()
+			#self.add_auto_bulkheads()
 			self.make_bulkhead_objects(self.bulkhead_definitions)			
 
 		if use_props:
@@ -337,7 +345,7 @@ class hull_maker:
 	def make_bulkhead_booleans(self):
 	
 		for bh in self.bulkhead_instances:
-			bool_void = bh.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center_%d"%bh.station)
+			bool_void = bh.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center_%d"%bh.bulkhead_definition.station)
 			bool_void.object = bh.bulkhead_void_object
 			bool_void.operation = 'DIFFERENCE'
 

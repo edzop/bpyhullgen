@@ -21,20 +21,31 @@ import bpy
 from ..hullgen import curve_helper
 from ..hullgen import bpy_helper
 
-class bulkhead:
+class bulkhead_definition:
     station=0
+    watertight=False
+    floor_height=0
+    thickness=0.1
+
+    def __init__(self,station,watertight,floor_height,thickness):
+        self.station=station
+        self.watertight=watertight
+        self.floor_height=floor_height
+        self.thickness=thickness
+
+class bulkhead:
+
     the_hull_definition=None
-    thickness=0.05
+
     bulkhead_object=None
     bulkhead_void_object=None
     bulkhead_collection=None
     bulkhead_void_collection=None
-    watertight=False
+    bulkhead_definition=None
 
-    def __init__(self,the_hull_definition,station,watertight=False,thickness=0.05):
-        self.station=station
-        self.thickness=thickness
-        self.watertight=watertight
+
+    def __init__(self,the_hull_definition,bulkhead_definition):
+        self.bulkhead_definition=bulkhead_definition
 
         self.the_hull_definition=the_hull_definition
         self.bulkhead_collection=bpy_helper.make_collection("bulkheads",bpy.context.scene.collection.children)
@@ -74,13 +85,13 @@ class bulkhead:
     def make_bulkhead(self):
         bpy.ops.mesh.primitive_cube_add(size=2.0, 
             enter_editmode=False, 
-            location=(  self.station, 0, 0))
+            location=(  self.bulkhead_definition.station, 0, 0))
 
-        bpy.ops.transform.resize(value=(self.thickness/2, self.the_hull_definition.hull_width, self.the_hull_definition.hull_height))
+        bpy.ops.transform.resize(value=(self.bulkhead_definition.thickness/2, self.the_hull_definition.hull_width, self.the_hull_definition.hull_height))
         bpy.ops.object.transform_apply(scale=True)
         
         self.bulkhead_object=bpy.context.view_layer.objects.active
-        self.bulkhead_object.name="Bulkhead.s%06.2f"%(self.station)
+        self.bulkhead_object.name="Bulkhead.s%06.2f"%(self.bulkhead_definition.station)
 
         bpy_helper.select_object(self.bulkhead_object,True)
 
@@ -95,7 +106,7 @@ class bulkhead:
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
 
 
-        if self.watertight==False:
+        if self.bulkhead_definition.watertight==False:
 
             bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
                                             TRANSFORM_OT_translate={"value":(0, 0, 0)})
@@ -104,7 +115,7 @@ class bulkhead:
 
             bpy_helper.select_object(self.bulkhead_void_object,True)
 
-            self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.station)
+            self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.bulkhead_definition.station)
 
             # get truple of current size
             bulkhead_size=self.bulkhead_void_object.dimensions.xyz
@@ -127,7 +138,7 @@ class bulkhead:
                 bpy_helper.select_object(self.bulkhead_void_object,True)
 
                 
-                bpy_helper.parent_objects_keep_transform(parent=self.bulkhead_object,child=self.bulkhead_void_object)               
+                bpy_helper.parent_objects_keep_transform(parent=self.bulkhead_object,child=self.bulkhead_void_object)
 
                 bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_void_object)
   
