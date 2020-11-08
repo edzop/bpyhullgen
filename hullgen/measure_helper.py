@@ -736,7 +736,7 @@ def export_plates(filename):
 	#bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
 	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
 
-	bpy.ops.uv.smart_project(stretch_to_bounds=False,island_margin=0.3)
+	bpy.ops.uv.smart_project(scale_to_bounds=False,island_margin=0.3)
 	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(2400, 2400),opacity=1)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
