@@ -59,7 +59,11 @@ classes = (
     genui.hullgendef_keel_Properties,
     genui.hullgendef_longitudal_Properties,
     genui.hullgendef_chine_Properties,
+    genui.hullgendef_bulkhead_Properties,
     genui.hullgendef_hull_Properties,
+
+    genui.WM_OT_auto_bulkheads,
+    
     
     
     
@@ -74,8 +78,13 @@ classes = (
     genui.LIST_OT_NewKeelItem,
     genui.LIST_OT_DeleteKeelItem,
 
+    genui.LIST_OT_NewBulkheadItem,
+    genui.LIST_OT_DeleteBulkheadItem,
+
+
     genui.MY_UL_NameList,
     genui.FILE_UL_List,
+    genui.STATION_UL_List,
     genui.OBJECT_PT_bpyhullgendef_panel,
     genui.OBJECT_PT_bpyhullgendef_load_save_panel,
     genui.LIST_OT_GenHull,

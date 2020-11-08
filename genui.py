@@ -27,6 +27,7 @@ from .hullgen import geometry_helper as geometry_helper
 from .hullgen import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .hullgen import measure_helper as measure_helper
+from .hullgen import bulkhead as bulkhead
 from .hullgen import curve_helper as curve_helper
 from .hullgen import keel_helper as keel_helper
 from .hullgen import xml_helper as xml_helper
@@ -64,6 +65,32 @@ class hullgendef_file_Properties(PropertyGroup):
 
 
 
+class hullgendef_bulkhead_Properties(PropertyGroup):
+
+	station : FloatProperty(
+		name = "station",
+		description = "Station X Position",
+		default = -2
+		)
+
+	thickness : FloatProperty(
+		name = "thickness",
+		description = "Bulkhead Thickness",
+		default = 0.1
+		)
+
+	floor_height : FloatProperty(
+		name = "floor_height",
+		description = "Floor Height",
+		default = 0.1
+		)
+
+
+	watertight : BoolProperty(
+		name = "Watertight",
+		default = False,
+		description = "If true bulkhead is watertight"
+	)
 
 
 
@@ -209,16 +236,31 @@ class hullgendef_hull_Properties(PropertyGroup):
 		max = 250.0
 		)
 
+	# ========= Chines ==========
+
 	active_chine_index: IntProperty(default=-1)
 
 	chines: CollectionProperty(
 		name = "chines",
 		type = hullgendef_chine_Properties)
 
+
+	# ========= Bulkheads ==========
+
+	active_bulkhead_index: IntProperty(default=-1)
+
+	bulkheads: CollectionProperty(
+		name = "bulkheads",
+		type = hullgendef_bulkhead_Properties)
+
+	# ========= Keels =============
+
 	active_keel_index: IntProperty(default=-1)
 	keels: CollectionProperty(
 		name = "keels",
 		type = hullgendef_keel_Properties)
+
+	# ========= Generate Toggles =============
 
 	make_bulkheads : BoolProperty(
 		name = "Make Bulkheads",
@@ -238,6 +280,20 @@ class hullgendef_hull_Properties(PropertyGroup):
 		description = "Generate Longitudals"
 	)
 
+
+class STATION_UL_List(UIList): 
+	"""Station UIList.""" 
+	
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index): 
+		# We could write some code to decide which icon to use here... 
+		custom_icon = 'OBJECT_DATAMODE' 
+		
+		# Make sure your code supports all 3 layout types 
+		if self.layout_type in {'DEFAULT', 'COMPACT'}: 
+			layout.label(text=str(item.station), icon = custom_icon) 
+		elif self.layout_type in {'GRID'}: 
+			layout.alignment = 'CENTER' 
+			layout.label(text="", icon = custom_icon) 
 
 class FILE_UL_List(UIList): 
 	"""File UIList.""" 
@@ -558,6 +614,110 @@ class LIST_OT_DeleteChineItem(Operator):
 #===============================================================================
 
 
+
+class WM_OT_auto_bulkheads(bpy.types.Operator):
+	"""Auto populate bulkheads"""
+	bl_label = "Auto Bulkheads"
+	bl_idname = "wm.auto_bulkheads"
+	
+	station_start: bpy.props.FloatProperty(name="station_start", default=(-3))
+
+	station_end: bpy.props.FloatProperty(name="station_end", 
+		description="Station End",default=(3))
+
+	spacing: bpy.props.FloatProperty(name="spacing", default=(0.6))
+	floor_height: bpy.props.FloatProperty(name="floor_height", default=(-0.5))
+	watertight: bpy.props.BoolProperty(name="watertight", default=False)
+
+		   
+	def execute(self, context):
+		
+		start=self.station_start
+		end=self.station_end
+		watertight=self.watertight
+		
+		bulkhead_props=context.scene.hull_properties.bulkheads
+
+
+
+		current_bulkhead_location=self.station_start
+
+		while current_bulkhead_location<=self.station_end:
+
+			bulkhead_props.add()
+			prop_count=len(bulkhead_props)
+			newprop=bulkhead_props[prop_count-1]
+
+			newprop.station=current_bulkhead_location
+			newprop.watertight=self.watertight
+			newprop.floor_height=self.floor_height
+
+			current_bulkhead_location+=self.spacing
+
+
+		context.scene.hull_properties.active_bulkhead_index=len(bulkhead_props)-1
+		
+		return {'FINISHED'}
+	
+	def invoke(self, context, event):
+		
+		return context.window_manager.invoke_props_dialog(self)
+
+
+
+class LIST_OT_NewBulkheadItem(Operator): 
+	"""Add a new bulkhead to the list.""" 
+	bl_idname = "genui.new_bulkhead" 
+	bl_label = "Add Bulkhead" 
+	
+	def execute(self, context):
+
+		bulkhead_props=context.scene.hull_properties.bulkheads
+		bulkhead_props.add()
+
+		prop_count=len(bulkhead_props)
+		#bulkhead_props[prop_count-1].name="Chine_%d"%prop_count
+
+
+		context.scene.hull_properties.active_bulkhead_index=len(bulkhead_props)-1
+		#print(context.scene.the_hull.hull_length)
+		return{'FINISHED'} 
+
+
+class LIST_OT_DeleteBulkheadItem(Operator): 
+	"""Delete the selected bulkhead from the list.""" 
+	bl_idname = "genui.delete_bulkhead" 
+	bl_label = "Delete Bulkhead" 
+	
+	@classmethod 
+	def poll(cls, context): 
+		active_bulkhead_index=context.scene.hull_properties.active_bulkhead_index
+		if active_bulkhead_index>=0:
+			if context.scene.hull_properties.bulkheads[active_bulkhead_index]!=None:
+				return True
+
+		return False
+		
+	def execute(self, context):
+		hull_properties = context.scene.hull_properties 
+		active_bulkhead_index = hull_properties.active_bulkhead_index
+		hull_properties.bulkheads.remove(active_bulkhead_index) 
+		hull_properties.active_bulkhead_index = min(max(0, active_bulkhead_index - 1), len(hull_properties.bulkheads) - 1) 
+
+
+		#for idx,longitudal_prop in enumerate(context.scene.longitudal_properties):
+		#	if longitudal_prop.chine_index>chine_index:
+		#		longitudal_prop.chine_index=longitudal_prop.chine_index-1
+		#	elif longitudal_prop.chine_index==chine_index:
+		#		context.scene.longitudal_properties.remove(idx)
+
+
+		return{'FINISHED'}
+
+
+#===============================================================================
+
+
 def update_properties_from_hull(the_hull,context):
 	hull_properties = context.scene.hull_properties 
 	
@@ -568,6 +728,18 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
 	hull_properties.make_longitudals=the_hull.make_longitudals
+
+
+	hull_properties.bulkheads.clear()
+	hull_properties.active_bulkhead_index=-1
+
+	for bulkhead_definition in the_hull.bulkhead_definitions:
+		bulkhead_prop=hull_properties.bulkheads.add()
+
+		bulkhead_prop.station=bulkhead_definition.station
+		bulkhead_prop.watertight=bulkhead_definition.watertight
+		bulkhead_prop.floor_height=bulkhead_definition.floor_height
+		
 		
 	hull_properties.chines.clear()
 	hull_properties.active_chine_index=-1
@@ -617,9 +789,6 @@ def update_properties_from_hull(the_hull,context):
 		
 
 
-
-
-
 def update_hull_from_properties(the_hull,context):
 
 	the_hull.clear_all()
@@ -634,6 +803,17 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
 	the_hull.make_longitudals=hull_properties.make_longitudals
+
+	for bulkheadprop in hull_properties.bulkheads:
+		new_bulkhead_definition=bulkhead.bulkhead_definition(
+			station=bulkheadprop.station,
+			watertight=bulkheadprop.watertight,
+			floor_height=bulkheadprop.floor_height,
+			thickness=bulkheadprop.thickness
+		)
+
+		the_hull.add_bulkhead_definition(new_bulkhead_definition)
+
 		
 	for chineprop in hull_properties.chines:
 
@@ -779,7 +959,6 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		hull_props=context.scene.hull_properties
 
 
-
 		row = layout.row()
 		layout.prop( hull_props, "hull_length")
 		layout.prop( hull_props, "hull_width")
@@ -795,6 +974,42 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row = layout.row()
 		row.operator('genui.genhull') 
 		row.operator('genui.deletehull') 
+
+
+		# ======== Bulkheads ==============
+
+		if len(hull_props.bulkheads)>0:
+			row = layout.row() 
+			layout.label(text="Bulkheads") 
+			row = layout.row() 
+			row.template_list(listtype_name="STATION_UL_List", 
+				list_id="Bulkhead_List", 
+				dataptr=hull_props, 
+				propname="bulkheads", 
+				active_dataptr=hull_props, 
+				active_propname="active_bulkhead_index",
+				rows=min_rows) #,type='COMPACT') 
+
+		row = layout.row() 
+		row.operator('genui.new_bulkhead') 
+		row.operator('genui.delete_bulkhead')
+		row.operator('wm.auto_bulkheads')
+
+
+		if hull_props.active_bulkhead_index >= 0:
+			if hull_props.bulkheads[hull_props.active_bulkhead_index]: 
+				bulkhead_item = hull_props.bulkheads[hull_props.active_bulkhead_index] 
+				row = layout.row() 
+				row.prop(bulkhead_item, "station")
+
+				row = layout.row() 
+				row.prop(bulkhead_item, "watertight")
+
+				row = layout.row() 
+				row.prop(bulkhead_item, "floor_height")
+
+
+		# ======== Chines ==============
 
 		if len(hull_props.chines)>0:
 			row = layout.row() 
