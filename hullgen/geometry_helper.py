@@ -268,6 +268,10 @@ def GoingSide( normal, limit = 0.5 ):
 def select_going_left(ob):
 	old_mode=bpy.context.active_object.mode
 
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='DESELECT')
+
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
 		face.select = GoingLeft( face.normal)
@@ -278,6 +282,10 @@ def select_going_left(ob):
 
 def select_going_right(ob):
 	old_mode=bpy.context.active_object.mode
+
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='DESELECT')
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
@@ -289,6 +297,10 @@ def select_going_right(ob):
 def select_going_up(ob):
 	old_mode=bpy.context.active_object.mode
 
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='DESELECT')
+
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
 		face.select = GoingUp( face.normal)
@@ -299,6 +311,10 @@ def select_going_up(ob):
 
 def select_going_front(ob):
 	old_mode=bpy.context.active_object.mode
+
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='DESELECT')
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
@@ -309,6 +325,10 @@ def select_going_front(ob):
 
 def select_going_back(ob):
 	old_mode=bpy.context.active_object.mode
+
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type="FACE")
+	bpy.ops.mesh.select_all(action='DESELECT')
 	
 	bpy.ops.object.mode_set(mode='OBJECT')
 	for face in ob.data.polygons:
@@ -319,21 +339,21 @@ def select_going_back(ob):
 
 
 def delete_non_aligned_faces(ob,func):
-	
-	bpy.ops.object.select_all(action='DESELECT')
-	bpy_helper.select_object(ob,True)
 
 	old_mode=bpy.context.active_object.mode
+	
+	#bpy.ops.object.select_all(action='DESELECT')
+	bpy_helper.select_object(ob,True)
 
+	
 	func(ob)
 
 	bpy.ops.object.mode_set(mode='EDIT')
-	bpy.ops.mesh.select_mode(type="FACE")
+	#bpy.ops.mesh.select_mode(type="FACE")
 	bpy.ops.mesh.select_all(action='INVERT')
 
 	bpy.ops.mesh.delete(type='FACE')
 	
-
 	if bpy.context.active_object.mode!=old_mode:
 		bpy.ops.object.mode_set(mode=old_mode)
 
@@ -549,7 +569,6 @@ def make_cube(name,location=[0,0,0],size=[1,1,1],rotation=[0,0,0]):
 	bpy.ops.object.transform_apply(scale=True,location=False)
 
 	if rotation!=[0,0,0]:
-		print("doing rotation")
 		new_object.rotation_euler.x=radians(rotation[0])
 		new_object.rotation_euler.y=radians(rotation[1])
 		new_object.rotation_euler.z=radians(rotation[2])
