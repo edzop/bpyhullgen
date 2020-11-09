@@ -28,6 +28,7 @@ from .hullgen import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .hullgen import measure_helper as measure_helper
 from .hullgen import bulkhead as bulkhead
+from .hullgen import modshape_helper as modshape_helper
 from .hullgen import curve_helper as curve_helper
 from .hullgen import keel_helper as keel_helper
 from .hullgen import xml_helper as xml_helper
@@ -94,6 +95,55 @@ class hullgendef_bulkhead_Properties(PropertyGroup):
 
 
 
+
+class hullgendef_modshape_Properties(PropertyGroup): 
+	"""Group of properties representing a Modifier Shape.""" 
+
+	name: StringProperty( 
+		name="Name", 
+		description="A name for this item", 
+		default="modshape")
+
+	type: StringProperty( 
+		name="Type", 
+		description="type", 
+		default="cube")
+
+	rotation : FloatVectorProperty(
+		name = "Rot",
+		description = "Rotation",
+		subtype = "EULER"
+		)
+
+	location : FloatVectorProperty(
+		name = "Loc",
+		description = "Location",
+		subtype = "XYZ"
+		)
+
+	size : FloatVectorProperty(
+		name = "Size",
+		description = "Size",
+		default = [1,1,1],
+		subtype = "XYZ"
+		)
+
+	mod_mode: EnumProperty(
+		name="Mode:",
+		description="Mode",
+		items=[ ('add', "Add", ""),
+				('subtract', "Subtract", ""),
+			   ]
+		)
+
+	deform : FloatVectorProperty(
+		name = "Def",
+		description = "Rotation",
+		default= [1,1,1]
+		)
+
+
+
 class hullgendef_keel_Properties(PropertyGroup): 
 	"""Group of properties representing a Keel.""" 
 
@@ -139,6 +189,12 @@ class hullgendef_longitudal_Properties(PropertyGroup):
 		name = "z_offset",
 		description = "Z Offset",
 		default = 0
+		)
+
+	width : FloatProperty(
+		name = "width",
+		description = "width",
+		default = 0.2
 		)
 
 	x_min : FloatProperty(
@@ -253,6 +309,15 @@ class hullgendef_hull_Properties(PropertyGroup):
 		name = "bulkheads",
 		type = hullgendef_bulkhead_Properties)
 
+	# ========= ModShapes ==========
+
+	active_modshape_index: IntProperty(default=-1)
+
+	modshapes: CollectionProperty(
+		name = "modshapes",
+		type = hullgendef_modshape_Properties)
+
+
 	# ========= Keels =============
 
 	active_keel_index: IntProperty(default=-1)
@@ -282,7 +347,7 @@ class hullgendef_hull_Properties(PropertyGroup):
 
 	hide_hull : BoolProperty(
 		name = "Hide Hull",
-		default = True,
+		default = False,
 		description = "Hide Hull from view after generation (to see structure more clearly)"
 	)
 
@@ -724,6 +789,59 @@ class LIST_OT_DeleteBulkheadItem(Operator):
 
 #===============================================================================
 
+class LIST_OT_NewModshapeItem(Operator): 
+	"""Add a new modshape to the list.""" 
+	bl_idname = "genui.new_modshape" 
+	bl_label = "Add Modshape" 
+	
+	def execute(self, context):
+
+		modshape_props=context.scene.hull_properties.modshapes
+		modshape_props.add()
+
+		prop_count=len(modshape_props)
+		#bulkhead_props[prop_count-1].name="Chine_%d"%prop_count
+
+
+		context.scene.hull_properties.active_modshape_index=len(modshape_props)-1
+		#print(context.scene.the_hull.hull_length)
+		return{'FINISHED'} 
+
+
+class LIST_OT_DeleteModshapeItem(Operator): 
+	"""Delete the selected modshape from the list.""" 
+	bl_idname = "genui.delete_modshape" 
+	bl_label = "Delete Modshape" 
+	
+	@classmethod 
+	def poll(cls, context): 
+		active_modshape_index=context.scene.hull_properties.active_modshape_index
+		if active_modshape_index>=0:
+			if context.scene.hull_properties.modshapes[active_modshape_index]!=None:
+				return True
+
+		return False
+		
+	def execute(self, context):
+		hull_properties = context.scene.hull_properties 
+		active_modshape_index = hull_properties.active_modshape_index
+		hull_properties.modshapes.remove(active_modshape_index) 
+		hull_properties.active_modshape_index = min(max(0, active_modshape_index - 1), len(hull_properties.modshapes) - 1) 
+
+
+		#for idx,longitudal_prop in enumerate(context.scene.longitudal_properties):
+		#	if longitudal_prop.chine_index>chine_index:
+		#		longitudal_prop.chine_index=longitudal_prop.chine_index-1
+		#	elif longitudal_prop.chine_index==chine_index:
+		#		context.scene.longitudal_properties.remove(idx)
+
+
+		return{'FINISHED'}
+
+
+
+#===============================================================================
+
 
 def update_properties_from_hull(the_hull,context):
 	hull_properties = context.scene.hull_properties 
@@ -737,7 +855,6 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.make_longitudals=the_hull.make_longitudals
 	hull_properties.hide_hull=the_hull.hide_hull
 
-
 	hull_properties.bulkheads.clear()
 	hull_properties.active_bulkhead_index=-1
 
@@ -747,7 +864,26 @@ def update_properties_from_hull(the_hull,context):
 		bulkhead_prop.station=bulkhead_definition.station
 		bulkhead_prop.watertight=bulkhead_definition.watertight
 		bulkhead_prop.floor_height=bulkhead_definition.floor_height
-		
+
+
+	hull_properties.modshapes.clear()
+	hull_properties.active_modshape_index=-1
+
+	for modshape in the_hull.modshapes:
+		modshape_prop=hull_properties.modshapes.add()
+
+		modshape_prop.name=modshape.name
+		modshape_prop.location=modshape.location
+
+		modshape_prop.rotation=[math.radians(modshape.rotation[0]),
+				math.radians(modshape.rotation[1]),
+				math.radians(modshape.rotation[2])]
+
+		#modshape_prop.rotation=modshape.rotation
+		modshape_prop.size=modshape.size
+		modshape_prop.mod_mode=modshape.mod_mode
+		modshape_prop.deform=modshape.deform
+
 		
 	hull_properties.chines.clear()
 	hull_properties.active_chine_index=-1
@@ -768,14 +904,16 @@ def update_properties_from_hull(the_hull,context):
 
 
 		for longitudal_definition in chine.longitudal_definitions:
-			longitudal_prop=chine_prop.add()
+			longitudal_prop=chine_prop.longitudals.add()
 
 			#longitudal_prop=longitudal_properties[len(longitudal_properties) - 1]
 
-			longitudal_prop.limit_x_min=longitudal_definition.limit_x_min
-			longitudal_prop.limit_x_max=longitudal_definition.limit_x_max
+			longitudal_prop.x_min=longitudal_definition.limit_x_min
+			longitudal_prop.x_max=longitudal_definition.limit_x_max
 
 			longitudal_prop.z_offset=longitudal_definition.z_offset
+
+			longitudal_prop.width=longitudal_definition.width
 
 	#keel_properties.clear()
 
@@ -813,6 +951,28 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.make_longitudals=hull_properties.make_longitudals
 	the_hull.hide_hull=hull_properties.hide_hull
 
+	for modshapeprop in hull_properties.modshapes:
+
+		rot = [ math.degrees(modshapeprop.rotation[0]),
+			math.degrees(modshapeprop.rotation[1]),
+			math.degrees(modshapeprop.rotation[2]) ]
+
+		deform = [ 	modshapeprop.deform[0], 
+					modshapeprop.deform[1], 
+					modshapeprop.deform[2]
+		]
+
+		new_modshape=modshape_helper.modshape(
+			name=modshapeprop.name,
+			location=modshapeprop.location,
+			rotation=rot,
+			size=modshapeprop.size,
+			mod_mode=modshapeprop.mod_mode,
+			deform=deform
+		)
+
+		the_hull.add_modshape(new_modshape)
+
 	for bulkheadprop in hull_properties.bulkheads:
 		new_bulkhead_definition=bulkhead.bulkhead_definition(
 			station=bulkheadprop.station,
@@ -846,7 +1006,8 @@ def update_hull_from_properties(the_hull,context):
 
 		for longitudal_prop in chineprop.longitudals:
 			
-			new_longitudal=chine_helper.longitudal_definition(z_offset=longitudal_prop.z_offset)
+			new_longitudal=chine_helper.longitudal_definition(z_offset=longitudal_prop.z_offset,
+				width=longitudal_prop.width)
 
 			new_longitudal.set_limit_x_length(
 						longitudal_prop.x_min,
@@ -986,6 +1147,55 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row.operator('genui.deletehull') 
 
 
+
+		# ======== Modshapes ==============
+
+		if len(hull_props.modshapes)>0:
+			row = layout.row() 
+			layout.label(text="Modshapes") 
+			row = layout.row() 
+			row.template_list(listtype_name="MY_UL_NameList", 
+				list_id="Modshape_List", 
+				dataptr=hull_props, 
+				propname="modshapes", 
+				active_dataptr=hull_props, 
+				active_propname="active_modshape_index",
+				rows=min_rows) #,type='COMPACT') 
+
+		row = layout.row() 
+		row.operator('genui.new_modshape') 
+		row.operator('genui.delete_modshape')
+
+		if hull_props.active_modshape_index >= 0:
+			if hull_props.modshapes[hull_props.active_modshape_index]: 
+				modshape_item = hull_props.modshapes[hull_props.active_modshape_index] 
+				row = layout.row() 
+				row.prop(modshape_item, "name") 
+
+				row = layout.row() 
+			
+				row = layout.row() 
+				row.prop(modshape_item, "location") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "size") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "rotation") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "mod_mode") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "deform") 
+
+
+
+
+
+				
+
+
 		# ======== Bulkheads ==============
 
 		if len(hull_props.bulkheads)>0:
@@ -1004,7 +1214,6 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row.operator('genui.new_bulkhead') 
 		row.operator('genui.delete_bulkhead')
 		row.operator('wm.auto_bulkheads')
-
 
 		if hull_props.active_bulkhead_index >= 0:
 			if hull_props.bulkheads[hull_props.active_bulkhead_index]: 
@@ -1091,6 +1300,7 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 					
 					row = layout.row() 
 					row.prop(longitudal_item, "z_offset") 
+					row.prop(longitudal_item, "width") 
 
 		if len(hull_props.keels)>0:
 			row = layout.row() 
