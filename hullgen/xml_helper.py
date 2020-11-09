@@ -6,6 +6,7 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import bulkhead
+from bpyhullgen.hullgen import modshape_helper
 
 
 def pretty_print_xml_given_root(root, output_xml):
@@ -87,6 +88,13 @@ def read_hull(filename):
             newhull.hull_length=parse_float_val(elem,"length",0)
             newhull.hull_height=parse_float_val(elem,"height",0)
 
+        #================================================================
+        if elem.tag=="generate":
+            newhull.make_bulkheads=parse_int_val(elem,"bulkheads",default=True)
+            newhull.make_keels=parse_int_val(elem,"keels",default=True)
+            newhull.make_longitudals=parse_int_val(elem,"longitudals",default=True)
+            newhull.hide_hull=parse_int_val(elem,"hide_hull",default=False)
+
 
         #================================================================
         if elem.tag=="bulkheads":
@@ -104,6 +112,52 @@ def read_hull(filename):
                     thickness=thickness)
 
                 newhull.add_bulkhead_definition(bulkhead_definition)
+
+        #================================================================
+        if elem.tag=="modshapes":
+
+            for modshape_elem in elem:
+
+                name=parse_str_val(modshape_elem,"name",0)
+                mod_type=parse_str_val(modshape_elem,"mod_type","add")
+                mod_mode=parse_str_val(modshape_elem,"mod_mode","cube")
+
+                size=[0,0,0]
+                rotation=[0,0,0]
+                location=[0,0,0]
+                deform=[0,0,0]
+
+                for subelem in modshape_elem:
+
+                    if subelem.tag=="rotation":
+                        rotation[0]=parse_float_val(subelem,"x",0)
+                        rotation[1]=parse_float_val(subelem,"y",0)
+                        rotation[2]=parse_float_val(subelem,"z",0)
+
+                    if subelem.tag=="location":
+                        location[0]=parse_float_val(subelem,"x",0)
+                        location[1]=parse_float_val(subelem,"y",0)
+                        location[2]=parse_float_val(subelem,"z",0)
+
+                    if subelem.tag=="size":
+                        size[0]=parse_float_val(subelem,"x",0)
+                        size[1]=parse_float_val(subelem,"y",0)
+                        size[2]=parse_float_val(subelem,"z",0)
+
+                    if subelem.tag=="deform":
+                        deform[0]=parse_float_val(subelem,"p1",0)
+                        deform[1]=parse_float_val(subelem,"p2",0)
+                        deform[2]=parse_float_val(subelem,"p3",0)
+
+                modshape=modshape_helper.modshape(
+                    name=name,
+                    rotation=rotation,
+                    location=location,
+                    size=size,
+                    mod_mode=mod_mode,
+                    deform=deform)
+
+                newhull.add_modshape(modshape)
 
         #================================================================
         if elem.tag=="keels":
@@ -183,6 +237,12 @@ def write_xml(the_hull,filename):
     size.set("height", str(the_hull.hull_height))
 
 
+    #================================================================
+    size = ET.SubElement(hull, "generate")
+    size.set('bulkheads',str(int(the_hull.make_bulkheads)))
+    size.set("keels", str(int(the_hull.make_keels)))
+    size.set("longitudals", str(int(the_hull.make_longitudals)))
+    size.set("hide_hull", str(int(the_hull.hide_hull)))
 
     #================================================================
     node_bulkheads = ET.SubElement(hull, "bulkheads")
@@ -207,6 +267,37 @@ def write_xml(the_hull,filename):
 
         node_keel.set('station_start',str(keel.station_start))
         node_keel.set('station_end',str(keel.station_end))
+
+
+    #================================================================
+    node_modshapes = ET.SubElement(hull, 'modshapes')
+
+    for modshape in the_hull.modshapes:
+        node_modshape=ET.SubElement(node_modshapes, 'modshape')
+
+        node_modshape.set("name",modshape.name)
+        node_modshape.set("mod_mode",modshape.mod_mode)
+        node_modshape.set("mod_type",modshape.mod_type)
+
+        node_location = ET.SubElement(node_modshape, "location")
+        node_location.set('x',str(modshape.location[0]))
+        node_location.set("y", str(modshape.location[1]))
+        node_location.set("z", str(modshape.location[2]))
+
+        node_rotation = ET.SubElement(node_modshape, "rotation")
+        node_rotation.set('x',str(modshape.rotation[0]))
+        node_rotation.set("y", str(modshape.rotation[1]))
+        node_rotation.set("z", str(modshape.rotation[2]))
+
+        node_size = ET.SubElement(node_modshape, "size")
+        node_size.set('x',str(modshape.size[0]))
+        node_size.set("y", str(modshape.size[1]))
+        node_size.set("z", str(modshape.size[2]))
+
+        node_deform = ET.SubElement(node_modshape, "deform")
+        node_deform.set('p1',str(modshape.deform[0]))
+        node_deform.set("p2", str(modshape.deform[1]))
+        node_deform.set("p3", str(modshape.deform[2]))
 
 
     #================================================================

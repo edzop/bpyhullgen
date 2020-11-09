@@ -45,6 +45,7 @@ class hull_maker:
 
 	hull_name="hull_object"
 	cleaner_collection_name="cleaner"
+	modshape_collection_name="modshapes"
 
 	hull_object=None
 
@@ -60,6 +61,8 @@ class hull_maker:
 	props=None
 
 	bulkhead_definitions=None
+
+	modshapes=None
 
 	# Objects that are subtracted from hull to modify final shape
 	subtractive_objects=None
@@ -86,6 +89,10 @@ class hull_maker:
 
 		if self.hull_object != None:
 			delete_list.append(self.hull_object)
+
+		for modshape in self.modshapes:
+			if modshape.mod_object!=None:
+				delete_list.append(modshape.mod_object)
 
 
 		for bh in self.bulkhead_instances:
@@ -126,8 +133,9 @@ class hull_maker:
 		self.props.clear()
 		self.bulkhead_instances.clear()
 		self.subtractive_objects.clear()
-	
 
+		self.modshapes.clear()
+	
 
 	def __init__(self,length=11.4,width=3.9,height=3.6):
 
@@ -137,6 +145,8 @@ class hull_maker:
 		self.props=[]
 		self.bulkhead_instances=[]
 		self.subtractive_objects=[]
+
+		self.modshapes=[]
 
 
 		self.hull_height=height
@@ -160,6 +170,19 @@ class hull_maker:
 
 
 		return self.hull_object
+
+	def add_modshape(self,modshape):
+		self.modshapes.append(modshape)
+
+	def make_modshapes(self):
+		for modshape in self.modshapes:
+			modshape.generate_modshape(self)
+
+			view_collection_modshape=bpy_helper.make_collection(self.modshape_collection_name,bpy.context.scene.collection.children)
+			bpy_helper.move_object_to_collection(view_collection_modshape,modshape.mod_object)
+
+
+
 
 	def add_bulkhead_definition(self,bulkhead_definition):
 		self.bulkhead_definitions.append(bulkhead_definition)
@@ -288,7 +311,9 @@ class hull_maker:
 				chine_object.make_chine()
 
 
-		self.make_chine_hull_booleans()				
+		self.make_chine_hull_booleans()
+
+		self.make_modshapes()			
 
 		if self.make_keels:
 			for keel in self.keel_list:
