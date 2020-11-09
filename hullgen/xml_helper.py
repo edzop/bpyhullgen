@@ -189,6 +189,8 @@ def read_hull(filename):
                 offset=[0,0,0]
                 rotation=[0,0,0]
 
+                longitudal_defs=[]
+
                 for subelem in chine_elem:
 
                     if subelem.tag=="curve":
@@ -207,6 +209,29 @@ def read_hull(filename):
                         rotation[1]=parse_float_val(subelem,"y",0)
                         rotation[2]=parse_float_val(subelem,"z",0)
 
+                    if subelem.tag=="longitudals":
+
+                        for longitudal_elem in subelem:
+                            z_offset=0
+                            width=0.1
+                            x_min=0
+                            x_max=0
+
+                            z_offset=parse_float_val(longitudal_elem,"z_offset",0)
+                            width=parse_float_val(longitudal_elem,"width",0)
+                            x_min=parse_float_val(longitudal_elem,"x_min",0)
+                            x_max=parse_float_val(longitudal_elem,"x_max",0)
+
+                            longitudal_definition=chine_helper.longitudal_definition(
+                                width=width
+                            )
+
+                            longitudal_definition.set_limit_x_length(x_min,x_max)
+
+                            longitudal_defs.append(longitudal_definition)
+
+
+
 
                 new_chine=chine_helper.chine_helper(newhull,
                     name=name,length=length,width=width,
@@ -216,6 +241,9 @@ def read_hull(filename):
                 new_chine.offset=offset
                 new_chine.rotation=rotation
                 new_chine.extrude_width=extrude_width
+
+                for ld in longitudal_defs:
+                    new_chine.add_longitudal_definition(ld)
 
                 newhull.add_chine(new_chine)
 
@@ -315,8 +343,6 @@ def write_xml(the_hull,filename):
         node_curve.set("height", str(chine.curve_height))
         node_curve.set("extrude_width", str(chine.extrude_width))
 
-
-
         node_offset = ET.SubElement(node_chine, "offset")
         node_offset.set('x',str(chine.offset[0]))
         node_offset.set("y", str(chine.offset[1]))
@@ -330,6 +356,18 @@ def write_xml(the_hull,filename):
         node_asymmetry = ET.SubElement(node_chine, "asymmetry")
         node_asymmetry.set('a0',str(chine.asymmetry[0]))
         node_asymmetry.set("a1", str(chine.asymmetry[1]))
+
+        node_longitudals = ET.SubElement(node_chine, 'longitudals')
+
+        for longitudal_definition in chine.longitudal_definitions:
+            node_longitudal=ET.SubElement(node_longitudals, 'longitudal')
+
+            node_longitudal.set("z_offset", str(longitudal_definition.z_offset))
+            node_longitudal.set("width", str(longitudal_definition.width))
+            node_longitudal.set("x_min", str(longitudal_definition.limit_x_min))
+            node_longitudal.set("x_max", str(longitudal_definition.limit_x_max))
+
+
 
     pretty_print_xml_given_root(hull,filename)
 
