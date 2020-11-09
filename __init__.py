@@ -60,13 +60,14 @@ classes = (
     genui.hullgendef_longitudal_Properties,
     genui.hullgendef_chine_Properties,
     genui.hullgendef_bulkhead_Properties,
+    genui.hullgendef_modshape_Properties,
     genui.hullgendef_hull_Properties,
 
     genui.WM_OT_auto_bulkheads,
     
-    
-    
-    
+    genui.LIST_OT_NewModshapeItem,
+    genui.LIST_OT_DeleteModshapeItem,
+
     genui.hullgendef_file_Properties,
 
     genui.LIST_OT_NewChineItem,
@@ -81,7 +82,6 @@ classes = (
     genui.LIST_OT_NewBulkheadItem,
     genui.LIST_OT_DeleteBulkheadItem,
 
-
     genui.MY_UL_NameList,
     genui.FILE_UL_List,
     genui.STATION_UL_List,
@@ -93,7 +93,6 @@ classes = (
     genui.LIST_OT_LoadConfig,
     genui.LIST_OT_Newconfig,
     genui.LIST_OT_RefreshConfig,
-
 
     ui.OBJECT_PT_bpyhullgen_panel,
     ui.SolidifySelectedObjectsOperator,
