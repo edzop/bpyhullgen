@@ -89,6 +89,10 @@ def read_hull(filename):
             newhull.hull_height=parse_float_val(elem,"height",0)
 
         #================================================================
+        if elem.tag=="materials":
+            newhull.structural_thickness=parse_float_val(elem,"structural_thickness",0.1)
+
+        #================================================================
         if elem.tag=="generate":
             newhull.make_bulkheads=parse_int_val(elem,"bulkheads",default=True)
             newhull.make_keels=parse_int_val(elem,"keels",default=True)
@@ -263,6 +267,10 @@ def write_xml(the_hull,filename):
     size.set('length',str(the_hull.hull_length))
     size.set("width", str(the_hull.hull_width))
     size.set("height", str(the_hull.hull_height))
+
+    #================================================================
+    size = ET.SubElement(hull, "materials")
+    size.set('structural_thickness',str(the_hull.structural_thickness))
 
 
     #================================================================

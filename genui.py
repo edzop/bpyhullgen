@@ -275,6 +275,15 @@ class hullgendef_hull_Properties(PropertyGroup):
 		)
 
 
+	thickness : FloatProperty(
+		name = "thickness",
+		description = "Material thickness",
+		default = 0.1,
+		min = 0.0001,
+		max = 256
+		)
+
+
 	hull_length : FloatProperty(
 		name = "HullLength",
 		description = "Length of Hull (m)",
@@ -849,6 +858,7 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.hull_width=the_hull.hull_width
 	hull_properties.hull_length=the_hull.hull_length
 	hull_properties.curve_resolution=the_hull.curve_resolution
+	hull_properties.thickness=the_hull.structural_thickness
 
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
@@ -945,6 +955,7 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.hull_length=hull_properties.hull_length
 
 	the_hull.curve_resolution=hull_properties.curve_resolution
+	the_hull.structural_thickness=hull_properties.thickness
 
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
@@ -978,7 +989,7 @@ def update_hull_from_properties(the_hull,context):
 			station=bulkheadprop.station,
 			watertight=bulkheadprop.watertight,
 			floor_height=bulkheadprop.floor_height,
-			thickness=bulkheadprop.thickness
+			thickness=hull_properties.thickness
 		)
 
 		the_hull.add_bulkhead_definition(new_bulkhead_definition)
@@ -1007,7 +1018,8 @@ def update_hull_from_properties(the_hull,context):
 		for longitudal_prop in chineprop.longitudals:
 			
 			new_longitudal=chine_helper.longitudal_definition(z_offset=longitudal_prop.z_offset,
-				width=longitudal_prop.width)
+				width=longitudal_prop.width,
+				thickness=hull_properties.thickness)
 
 			new_longitudal.set_limit_x_length(
 						longitudal_prop.x_min,
@@ -1023,8 +1035,9 @@ def update_hull_from_properties(the_hull,context):
 			lateral_offset=keelprop.lateral_offset,
 			top_height=keelprop.top_height,
 			station_start=keelprop.station_start,
-			station_end=keelprop.station_end
-			)
+			station_end=keelprop.station_end,
+			thickness=hull_properties.thickness
+		)
 
 		the_hull.add_keel(new_keel)
 
@@ -1135,6 +1148,7 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 		row = layout.row()
 		layout.prop( hull_props, "curve_resolution")
+		layout.prop( hull_props, "thickness")
 
 		row = layout.row()
 		layout.prop( hull_props, "make_bulkheads")

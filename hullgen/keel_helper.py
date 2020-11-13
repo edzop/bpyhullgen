@@ -46,13 +46,14 @@ class keel:
 	keel_slicer_object=None
 	keel_slicer_collection=None
 
-	def __init__(self,the_hull,lateral_offset,top_height,station_start,station_end):
+	def __init__(self,the_hull,lateral_offset,top_height,station_start,station_end,thickness=0.1):
 		self.lateral_offset=lateral_offset
 		self.top_height=top_height
 		self.the_hull=the_hull
 		self.view_keel_collection=bpy_helper.make_collection("keels",bpy.context.scene.collection.children)
 		self.station_start=station_start
 		self.station_end=station_end
+		self.thickness=thickness
 
 
 	def make_keel_object(self,name,top_height_offset,cut_to_hull):
