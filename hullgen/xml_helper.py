@@ -187,10 +187,10 @@ def read_hull(filename):
 
                 name=parse_str_val(chine_elem,"name")
                 symmetrical=parse_int_val(chine_elem,"symmetrical",default=True)
-                length=0
-                width=0
-                height=0
-                extrude_width=0
+                length=11
+                width=1.2
+                height=1.2
+                extrude_width=1.2
                 
                 offset=[0,0,0]
                 rotation=[0,0,0]
@@ -200,10 +200,10 @@ def read_hull(filename):
                 for subelem in chine_elem:
 
                     if subelem.tag=="curve":
-                        length=parse_float_val(subelem,"length",0)
-                        width=parse_float_val(subelem,"width",0)
-                        height=parse_float_val(subelem,"height",0)
-                        extrude_width=parse_float_val(subelem,"extrude_width",0)
+                        length=parse_float_val(subelem,"length",length)
+                        width=parse_float_val(subelem,"width",width)
+                        height=parse_float_val(subelem,"height",height)
+                        extrude_width=parse_float_val(subelem,"extrude_width",extrude_width)
 
                     if subelem.tag=="offset":
                         offset[0]=parse_float_val(subelem,"x",0)
@@ -219,17 +219,17 @@ def read_hull(filename):
 
                         for longitudal_elem in subelem:
                             z_offset=0
-                            width=0.1
-                            x_min=0
-                            x_max=0
+                            longitudal_width=1
+                            x_min=-3
+                            x_max=3
 
-                            z_offset=parse_float_val(longitudal_elem,"z_offset",0)
-                            width=parse_float_val(longitudal_elem,"width",0)
-                            x_min=parse_float_val(longitudal_elem,"x_min",0)
-                            x_max=parse_float_val(longitudal_elem,"x_max",0)
+                            z_offset=parse_float_val(longitudal_elem,"z_offset",z_offset)
+                            longitudal_width=parse_float_val(longitudal_elem,"width",width)
+                            x_min=parse_float_val(longitudal_elem,"x_min",x_min)
+                            x_max=parse_float_val(longitudal_elem,"x_max",x_max)
 
                             longitudal_definition=chine_helper.longitudal_definition(
-                                width=width
+                                width=longitudal_width
                             )
 
                             longitudal_definition.set_limit_x_length(x_min,x_max)
