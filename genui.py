@@ -922,6 +922,9 @@ def update_properties_from_hull(the_hull,context):
 				math.radians(chine.rotation[1]),
 				math.radians(chine.rotation[2])]
 
+		chine_prop.width=chine.curve_width
+		chine_prop.length=chine.curve_length
+
 		chine_prop.pos=chine.offset
 
 		chine_prop.symmetrical=chine.symmetrical
