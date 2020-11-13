@@ -91,6 +91,8 @@ def read_hull(filename):
         #================================================================
         if elem.tag=="materials":
             newhull.structural_thickness=parse_float_val(elem,"structural_thickness",0.1)
+            newhull.slicer_overcut_ratio=parse_float_val(elem,"slicer_overcut_ratio",1.1)
+            newhull.slot_gap=parse_float_val(elem,"slot_gap",0.1)
 
         #================================================================
         if elem.tag=="generate":
@@ -235,8 +237,6 @@ def read_hull(filename):
                             longitudal_defs.append(longitudal_definition)
 
 
-
-
                 new_chine=chine_helper.chine_helper(newhull,
                     name=name,length=length,width=width,
                     symmetrical=symmetrical)
@@ -250,8 +250,7 @@ def read_hull(filename):
                     new_chine.add_longitudal_definition(ld)
 
                 newhull.add_chine(new_chine)
-
-    
+  
     return newhull
 
 
@@ -271,6 +270,8 @@ def write_xml(the_hull,filename):
     #================================================================
     size = ET.SubElement(hull, "materials")
     size.set('structural_thickness',str(the_hull.structural_thickness))
+    size.set('slicer_overcut_ratio',str(the_hull.slicer_overcut_ratio))
+    size.set('slot_gap',str(the_hull.slot_gap))
 
 
     #================================================================
