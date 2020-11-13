@@ -123,7 +123,11 @@ class hull_maker:
 			objs = bpy.data.objects
 
 			for ob in delete_list:
-				objs.remove(ob, do_unlink=True)
+
+				try: 
+					objs.remove(ob, do_unlink=True)
+				except:
+					print("Object already removed!")
 
 		self.hull_object=None
 
