@@ -159,7 +159,7 @@ class hullgendef_keel_Properties(PropertyGroup):
 		)
 
 	station_end : FloatProperty(
-		name = "start",
+		name = "end",
 		description = "Station End",
 		default = 3
 		)
@@ -1047,8 +1047,6 @@ def update_hull_from_properties(the_hull,context):
 			new_chine.add_longitudal_definition(new_longitudal)
 
 	for keelprop in hull_properties.keels:
-
-		print("keel")
 
 		new_keel=keel_helper.keel(the_hull,
 			lateral_offset=keelprop.lateral_offset,
