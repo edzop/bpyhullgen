@@ -484,7 +484,7 @@ class chine_helper:
 			adjusted_max_location+=block_width/2
 
 			end_clean_min_name="end_clean_min_%f"%(adjusted_min_location)
-			end_clean_max_name="end_clean_max_%f"%(adjusted_min_location)
+			end_clean_max_name="end_clean_max_%f"%(adjusted_max_location)
 
 			object_end_clean_min = bpy.data.objects.get(end_clean_min_name)
 			object_end_clean_max = bpy.data.objects.get(end_clean_max_name)
@@ -536,8 +536,6 @@ class chine_helper:
 			slicer_stop_gap_object.location.y=y_offset
 			
 			chine_instance.longitudal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
-			
-
 			
 			chine_instance.longitudal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
 			bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_stop_gap_object)
