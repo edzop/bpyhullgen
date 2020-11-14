@@ -354,6 +354,7 @@ class hull_maker:
 
 		if self.make_keels:
 			self.make_keel_booleans()
+			self.merge_keels()
 
 		if self.make_bulkheads:
 			self.make_bulkhead_booleans()
@@ -490,6 +491,36 @@ class hull_maker:
 				bool_new = self.hull_object.modifiers.new(type="BOOLEAN", name=slicename)
 				bool_new.object = chine_instance.curve_object
 				bool_new.operation = 'DIFFERENCE'
+
+
+	def merge_keels(self):
+
+		base_keel_list=[]
+
+		for base_keel in self.keel_list:
+			for compare_keel in self.keel_list:
+
+				# Don't merge if you already used base in merge
+				if compare_keel not in base_keel_list:
+
+					# Prevent self merging
+					if compare_keel != base_keel: 
+						if base_keel.lateral_offset==compare_keel.lateral_offset:
+
+							# Merge keels with same lateral_offset
+							keel_modifier_name="merge_keel"
+							keel_modifier=base_keel.keel_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
+							keel_modifier.object=compare_keel.keel_object
+							keel_modifier.operation="UNION"
+
+							bpy_helper.hide_object(compare_keel.keel_object)
+
+							# Add base keel to list so we don't use it twice
+							base_keel_list.append(base_keel)
+
+
+
+
 
 
 	def make_keel_booleans(self):
