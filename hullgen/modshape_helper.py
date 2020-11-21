@@ -21,9 +21,13 @@ import bpy
 from ..hullgen import curve_helper
 from ..hullgen import bpy_helper
 from ..hullgen import geometry_helper  
+from ..hullgen import window_helper  
 
 class modshape:
 	mod_objects=None
+
+	# inert objects are created but do not affect hull (non boolean participating)
+	inert_objects=None
 
 	name=None
 	rotation=[0,0,0]
@@ -32,8 +36,9 @@ class modshape:
 	size=[1,1,1]
 	mod_mode="add"
 	mod_type="cube"
+	symmetrical=False
 
-	def __init__(self,name,location,rotation,size,mod_mode="add",deform=[0,0,0],mod_shape="trapezoid"):
+	def __init__(self,name,location,rotation,size,mod_mode="add",deform=[0,0,0],mod_shape="trapezoid",symmetrical=False):
 		self.name=name
 		self.rotation=rotation
 		self.location=location
@@ -42,6 +47,24 @@ class modshape:
 		self.mod_shape=mod_shape
 		self.deform=deform
 		self.mod_objects=[]
+		self.inert_objects=[]
+		self.symmetrical=symmetrical
+
+	def make_window(self,the_hull):
+
+		new_window=window_helper.window()
+
+		new_window.make_window_on_object(obj=the_hull.hull_object,
+			position=self.location,
+			angle=self.rotation,
+			symmetrical=True)
+
+		for obj in new_window.windows:
+			self.mod_objects.append(obj)
+
+		for obj in new_window.bolts:
+			self.mod_objects.append(obj)
+
 
 	def make_wallbox(self,the_hull):
 
@@ -148,7 +171,6 @@ class modshape:
 
 	def make_trapezoid(self,the_hull):
 
-		
 
 		mod_object=geometry_helper.make_cube(
 			name=self.name,
@@ -191,6 +213,8 @@ class modshape:
 			self.make_trapezoid(the_hull)
 		elif self.mod_shape=="wallbox":
 			self.make_wallbox(the_hull)
+		elif self.mod_shape=="window_o":
+			self.make_window(the_hull)
 
 
 

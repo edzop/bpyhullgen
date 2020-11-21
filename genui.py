@@ -95,7 +95,6 @@ class hullgendef_bulkhead_Properties(PropertyGroup):
 
 
 
-
 class hullgendef_modshape_Properties(PropertyGroup): 
 	"""Group of properties representing a Modifier Shape.""" 
 
@@ -136,11 +135,26 @@ class hullgendef_modshape_Properties(PropertyGroup):
 			   ]
 		)
 
+	mod_shape: EnumProperty(
+		name="Shape:",
+		description="Shape",
+		items=[ ('trapezoid', "Trapezoid", ""),
+				('wallbox', "Wall Box", ""),
+				('window_o', "Oval Window", ""),
+			   ]
+		)
+
 	deform : FloatVectorProperty(
 		name = "Def",
 		description = "Rotation",
 		default= [1,1,1]
 		)
+
+	symmetrical : BoolProperty(
+		name = "Symmetrical",
+		default = True,
+		description = "If true make two Symmetrical chines (L + R)"
+	)
 
 
 
@@ -905,8 +919,10 @@ def update_properties_from_hull(the_hull,context):
 
 		#modshape_prop.rotation=modshape.rotation
 		modshape_prop.size=modshape.size
+		modshape_prop.mod_shape=modshape.mod_shape
 		modshape_prop.mod_mode=modshape.mod_mode
 		modshape_prop.deform=modshape.deform
+		modshape_prop.symmetrical=modshape.symmetrical
 
 		
 	hull_properties.chines.clear()
@@ -998,7 +1014,9 @@ def update_hull_from_properties(the_hull,context):
 			rotation=rot,
 			size=modshapeprop.size,
 			mod_mode=modshapeprop.mod_mode,
-			deform=deform
+			deform=deform,
+			mod_shape=modshapeprop.mod_shape,
+			symmetrical=modshapeprop.symmetrical
 		)
 
 		the_hull.add_modshape(new_modshape)
@@ -1181,6 +1199,8 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 
 
+
+
 		# ======== Modshapes ==============
 
 		if len(hull_props.modshapes)>0:
@@ -1217,10 +1237,16 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 				row.prop(modshape_item, "rotation") 
 
 				row = layout.row() 
-				row.prop(modshape_item, "mod_mode") 
+				row.prop(modshape_item, "mod_mode")
+
+				row = layout.row() 
+				row.prop(modshape_item, "mod_shape") 
 
 				row = layout.row() 
 				row.prop(modshape_item, "deform") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "symmetrical") 
 
 
 

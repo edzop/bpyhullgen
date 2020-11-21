@@ -207,8 +207,6 @@ class hull_maker:
 				bpy_helper.move_object_to_collection(view_collection_modshape,mod_object)
 
 
-
-
 	def add_bulkhead_definition(self,bulkhead_definition):
 		self.bulkhead_definitions.append(bulkhead_definition)
 
