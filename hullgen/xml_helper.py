@@ -127,6 +127,7 @@ def read_hull(filename):
                 name=parse_str_val(modshape_elem,"name",0)
                 mod_type=parse_str_val(modshape_elem,"mod_type","add")
                 mod_mode=parse_str_val(modshape_elem,"mod_mode","cube")
+                mod_shape=parse_str_val(modshape_elem,"mod_mode","trapezoid")
 
                 size=[0,0,0]
                 rotation=[0,0,0]
@@ -161,7 +162,8 @@ def read_hull(filename):
                     location=location,
                     size=size,
                     mod_mode=mod_mode,
-                    deform=deform)
+                    deform=deform,
+                    mod_shape=mod_shape)
 
                 newhull.add_modshape(modshape)
 
@@ -315,6 +317,7 @@ def write_xml(the_hull,filename):
         node_modshape.set("name",modshape.name)
         node_modshape.set("mod_mode",modshape.mod_mode)
         node_modshape.set("mod_type",modshape.mod_type)
+        node_modshape.set("mod_shape",modshape.mod_shape)
 
         node_location = ET.SubElement(node_modshape, "location")
         node_location.set('x',str(modshape.location[0]))
