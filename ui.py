@@ -53,6 +53,7 @@ class hullgen_Properties (PropertyGroup):
 	cleanup_options=[ 
 				('auto', 'Auto', ""),
 				('front', 'Front', ""),
+				('back', 'Back', ""),
 				('left', "Left", ""),
 				('up', "Up", ""),
 				('down', "Down", "")
@@ -279,6 +280,8 @@ class DeleteFacesOperator (bpy.types.Operator):
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 				elif cleanup_choice=="front":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
+				elif cleanup_choice=="back":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_back)
 				elif cleanup_choice=="auto":
 					if obj.name.startswith("Keel."):
 						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
