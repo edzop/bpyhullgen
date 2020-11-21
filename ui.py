@@ -353,6 +353,23 @@ class MeasureDistanceBetweenVerticesOperator (bpy.types.Operator):
 
 		return {'FINISHED'}
 
+class MeasureEdgesOperator (bpy.types.Operator):
+	"""Measure edges for all selected objects"""
+	bl_idname = "wm.measureedges"
+	bl_label = "MeasureEdges"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
+
+	def execute(self, context):
+
+		length = measure_helper.measure_selected_edges()
+
+		self.report({'INFO'}, "Length %f: "%(length))
+
+		return {'FINISHED'}
+
 class ScaleToSizeOperator (bpy.types.Operator):
 	"""Scale all mesh objects so distance between 2 selected points is specific size"""
 	bl_idname = "wm.scale_to_size"
@@ -404,6 +421,7 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.importplates")
+		rowsub.operator( "wm.measureedges")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_two_vertice_distance")
 		layout.prop( mytool, "scale_to_distance")
