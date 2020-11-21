@@ -63,6 +63,7 @@ classes = (
     genui.hullgendef_modshape_Properties,
     genui.hullgendef_hull_Properties,
 
+
     genui.WM_OT_auto_bulkheads,
     
     genui.LIST_OT_NewModshapeItem,
@@ -111,7 +112,8 @@ classes = (
     ui.ShrinkOutlinerOperator,
     ui.MeasureDistanceBetweenVerticesOperator,
     ui.ScaleToSizeOperator,
-    ui.CleanupMeshesOperator
+    ui.CleanupMeshesOperator,
+    ui.MeasureEdgesOperator
 )
 
 from .hullgen import geometry_helper as geometry_helper
