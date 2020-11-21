@@ -187,7 +187,7 @@ class chine_helper:
 		
 		bpy_helper.deselect_all_objects()
 
-		theCurveHelper = curve_helper.Curve_Helper()
+		theCurveHelper = curve_helper.Curve_Helper(curve_resolution=self.the_hull.curve_resolution)
 
 		curve_angle=longitudal_element.curve_angle
 		bend_radius=longitudal_element.bend_radius
