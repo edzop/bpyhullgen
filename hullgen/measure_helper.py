@@ -680,6 +680,8 @@ def import_plates(filename):
 		#bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
 		bpy.ops.mesh.select_similar(type='FACE', threshold=1)
 		
+		# sometime models need to invert this sometimes not - not sure why...
+		# Should create toggle?
 		bpy.ops.mesh.select_all(action='INVERT')
 		bpy.ops.mesh.delete(type='EDGE')
 		
@@ -736,8 +738,8 @@ def export_plates(filename):
 	#bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
 	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
 
-	bpy.ops.uv.smart_project(scale_to_bounds=False,island_margin=0.3)
-	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(2400, 2400),opacity=1)
+	bpy.ops.uv.smart_project(scale_to_bounds=False,island_margin=0.03)
+	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(4800, 4800),opacity=1)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
