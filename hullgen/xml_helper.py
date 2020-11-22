@@ -233,7 +233,7 @@ def read_hull(filename):
                             x_max=parse_float_val(longitudal_elem,"x_max",x_max)
 
                             longitudal_definition=chine_helper.longitudal_definition(
-                                width=longitudal_width
+                                width=longitudal_width,z_offset=z_offset
                             )
 
                             longitudal_definition.set_limit_x_length(x_min,x_max)
