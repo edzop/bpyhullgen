@@ -345,6 +345,8 @@ class hull_maker:
 			for keel in self.keel_list:
 				keel.make_keel()
 
+			self.merge_keels()
+
 		if self.make_bulkheads:
 			#self.add_auto_bulkheads()
 			self.make_bulkhead_objects(self.bulkhead_definitions)			
@@ -353,7 +355,7 @@ class hull_maker:
 			self.integrate_props()	
 
 		if self.make_keels:
-			self.merge_keels()
+			
 			self.make_keel_booleans()
 
 		if self.make_bulkheads:
@@ -413,7 +415,7 @@ class hull_maker:
 					for bh in self.bulkhead_instances:
 						#print("bh: %s"%bh.bulkhead_object.name,end=" ")
 						# TODO for some reason interection code not returning correct result
-						if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_slicer):
+						if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_slicer) or True:
 							modifier_name=longitudal_slicer.name
 							bulkhead_modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
 							bulkhead_modifier.object=longitudal_slicer
@@ -436,7 +438,7 @@ class hull_maker:
 				for longitudal_object in chine_instance.longitudal_objects:
 						for bh in self.bulkhead_instances:
 							# TODO for some reason interection code not returning correct result
-							if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_object):
+							if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_object) or True:
 								modifier_name=bh.bulkhead_object.name
 								chine_modifier=longitudal_object.modifiers.new(name=modifier_name, type='BOOLEAN')
 
@@ -508,6 +510,8 @@ class hull_maker:
 
 		for lateral_offset in keel_lateral_offsets:
 
+			print("Lateral Offset: %f"%lateral_offset)
+
 			base_keel=None
 
 			for keel in self.keel_list:
@@ -533,23 +537,18 @@ class hull_maker:
 						keel_modifier.operation="UNION"
 
 						# Keel Slicer Object
-						base_keel.keel_slicer_object.hide_viewport=False
+						keel.keel_slicer_object.hide_viewport=False
 						keel_modifier=base_keel.keel_slicer_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
 						keel_modifier.object=keel.keel_slicer_object
 						keel_modifier.operation="UNION"
 
-						keel.keel_slicer_object.hide_viewport=False
-
 						# Keel Slicer Gap Object
 						if base_keel.keel_slicer_slot_gap_object!=None:
 							if keel.keel_slicer_slot_gap_object!=None:
+								keel.keel_slicer_slot_gap_object.hide_viewport=False
 								keel_modifier=base_keel.keel_slicer_slot_gap_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
 								keel_modifier.object=keel.keel_slicer_slot_gap_object
 								keel_modifier.operation="UNION"
-
-								keel.keel_slicer_slot_gap_object.hide_viewport=False
-
-
 
 
 						#bpy.ops.object.modifier_apply(modifier=keel_modifier_name)
@@ -567,18 +566,19 @@ class hull_maker:
 				if base_keel.keel_slicer_slot_gap_object!=None:
 					geometry_helper.apply_object_bools(base_keel.keel_slicer_slot_gap_object)
 				
-				for keel in self.keel_list:
-					if keel!=base_keel:
+				for keel_delete in self.keel_list:
+					if keel_delete.lateral_offset==lateral_offset:
+						if keel_delete!=base_keel:
 
-						bpy.data.objects.remove(keel.keel_object)
-						keel.keel_object=None
+							bpy.data.objects.remove(keel_delete.keel_object)
+							keel_delete.keel_object=None
 
-						bpy.data.objects.remove(keel.keel_slicer_object)
-						keel.keel_slicer_object=None
+							bpy.data.objects.remove(keel_delete.keel_slicer_object)
+							keel_delete.keel_slicer_object=None
 						
-						if keel.keel_slicer_slot_gap_object!=None:
-							bpy.data.objects.remove(keel.keel_slicer_slot_gap_object)
-							keel.keel_slicer_slot_gap_object=None
+							if keel_delete.keel_slicer_slot_gap_object!=None:
+								bpy.data.objects.remove(keel_delete.keel_slicer_slot_gap_object)
+								keel_delete.keel_slicer_slot_gap_object=None
 
 				base_keel.keel_slicer_object.hide_viewport=True
 
