@@ -55,6 +55,7 @@ class hullgen_Properties (PropertyGroup):
 				('front', 'Front', ""),
 				('back', 'Back', ""),
 				('left', "Left", ""),
+				('right', "Right", ""),
 				('up', "Up", ""),
 				('down', "Down", "")
 			   ]
@@ -276,6 +277,8 @@ class DeleteFacesOperator (bpy.types.Operator):
 
 				if cleanup_choice=="left":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
+				if cleanup_choice=="right":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_right)
 				elif cleanup_choice=="up":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 				elif cleanup_choice=="front":
