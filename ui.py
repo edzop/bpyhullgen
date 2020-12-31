@@ -24,6 +24,7 @@ from .hullgen import geometry_helper as geometry_helper
 from .hullgen import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .hullgen import measure_helper as measure_helper
+from .hullgen import flatten_helper as flatten_helper
 from .hullgen import curve_helper as curve_helper
 
 from bpy.props import (StringProperty,
@@ -53,7 +54,9 @@ class hullgen_Properties (PropertyGroup):
 	cleanup_options=[ 
 				('auto', 'Auto', ""),
 				('front', 'Front', ""),
+				('back', 'Back', ""),
 				('left', "Left", ""),
+				('right', "Right", ""),
 				('up', "Up", ""),
 				('down', "Down", "")
 			   ]
@@ -246,6 +249,29 @@ class ExportPlatesOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class FlattenPlatesOperator (bpy.types.Operator):
+
+	"""Flatten plate for fabrication (laser cut or CNC router)"""
+	bl_idname = "wm.flattenplates"
+	bl_label = "Flatten"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
+
+	def execute(self, context):
+
+		flatten = flatten_helper.flatten_helper()
+
+		summary = flatten.flatten_plates()
+
+		self.report({'INFO'}, "-  %s"%(summary))
+
+		return {'FINISHED'}
+
+
+
+
 class ExportHulldxfOperator (bpy.types.Operator):
 	"""Export plate geometry to DXF file"""
 	bl_idname = "wm.exporthulldxf"
@@ -275,10 +301,14 @@ class DeleteFacesOperator (bpy.types.Operator):
 
 				if cleanup_choice=="left":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
+				if cleanup_choice=="right":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_right)
 				elif cleanup_choice=="up":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 				elif cleanup_choice=="front":
 					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_front)
+				elif cleanup_choice=="back":
+					geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_back)
 				elif cleanup_choice=="auto":
 					if obj.name.startswith("Keel."):
 						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_left)
@@ -350,6 +380,23 @@ class MeasureDistanceBetweenVerticesOperator (bpy.types.Operator):
 
 		return {'FINISHED'}
 
+class MeasureEdgesOperator (bpy.types.Operator):
+	"""Measure edges for all selected objects"""
+	bl_idname = "wm.measureedges"
+	bl_label = "MeasureEdges"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
+
+	def execute(self, context):
+
+		length = measure_helper.measure_selected_edges()
+
+		self.report({'INFO'}, "Length %f: "%(length))
+
+		return {'FINISHED'}
+
 class ScaleToSizeOperator (bpy.types.Operator):
 	"""Scale all mesh objects so distance between 2 selected points is specific size"""
 	bl_idname = "wm.scale_to_size"
@@ -401,6 +448,7 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.importplates")
+		rowsub.operator( "wm.measureedges")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_two_vertice_distance")
 		layout.prop( mytool, "scale_to_distance")
@@ -420,6 +468,7 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
+		rowsub.operator("wm.flattenplates")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cleanupmeshes")
 
