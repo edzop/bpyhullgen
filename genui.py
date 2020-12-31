@@ -95,7 +95,6 @@ class hullgendef_bulkhead_Properties(PropertyGroup):
 
 
 
-
 class hullgendef_modshape_Properties(PropertyGroup): 
 	"""Group of properties representing a Modifier Shape.""" 
 
@@ -136,11 +135,26 @@ class hullgendef_modshape_Properties(PropertyGroup):
 			   ]
 		)
 
+	mod_shape: EnumProperty(
+		name="Shape:",
+		description="Shape",
+		items=[ ('trapezoid', "Trapezoid", ""),
+				('wallbox', "Wall Box", ""),
+				('window_o', "Oval Window", ""),
+			   ]
+		)
+
 	deform : FloatVectorProperty(
 		name = "Def",
 		description = "Rotation",
 		default= [1,1,1]
 		)
+
+	symmetrical : BoolProperty(
+		name = "Symmetrical",
+		default = True,
+		description = "If true make two Symmetrical chines (L + R)"
+	)
 
 
 
@@ -155,13 +169,13 @@ class hullgendef_keel_Properties(PropertyGroup):
 	station_start : FloatProperty(
 		name = "start",
 		description = "Station Start",
-		default = -2
+		default = -3
 		)
 
 	station_end : FloatProperty(
-		name = "start",
+		name = "end",
 		description = "Station End",
-		default = 2
+		default = 3
 		)
 
 	lateral_offset : FloatProperty(
@@ -194,19 +208,19 @@ class hullgendef_longitudal_Properties(PropertyGroup):
 	width : FloatProperty(
 		name = "width",
 		description = "width",
-		default = 0.2
+		default = -0.2
 		)
 
 	x_min : FloatProperty(
 		name = "x_min",
 		description = "X Min",
-		default = -2
+		default = -3
 		)
 
 	x_max : FloatProperty(
 		name = "x_max",
 		description = "X Max",
-		default = 2
+		default = 3
 		)
 
 
@@ -272,6 +286,27 @@ class hullgendef_hull_Properties(PropertyGroup):
 		default = 5,
 		min = 1,
 		max = 256
+		)
+
+
+	thickness : FloatProperty(
+		name = "thickness",
+		description = "Material thickness",
+		default = 0.1,
+		min = 0.0001,
+		max = 256
+		)
+
+	overcut : FloatProperty(
+		name = "overcut",
+		description = "Slicer Overcut",
+		default = 1.1
+		)
+
+	slot_gap : FloatProperty(
+		name = "slotgap",
+		description = "Slot Gap",
+		default = 0.05
 		)
 
 
@@ -347,7 +382,7 @@ class hullgendef_hull_Properties(PropertyGroup):
 
 	hide_hull : BoolProperty(
 		name = "Hide Hull",
-		default = False,
+		default = True,
 		description = "Hide Hull from view after generation (to see structure more clearly)"
 	)
 
@@ -849,6 +884,9 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.hull_width=the_hull.hull_width
 	hull_properties.hull_length=the_hull.hull_length
 	hull_properties.curve_resolution=the_hull.curve_resolution
+	hull_properties.thickness=the_hull.structural_thickness
+	hull_properties.overcut=the_hull.slicer_overcut_ratio
+	hull_properties.slot_gap=the_hull.slot_gap
 
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
@@ -881,8 +919,10 @@ def update_properties_from_hull(the_hull,context):
 
 		#modshape_prop.rotation=modshape.rotation
 		modshape_prop.size=modshape.size
+		modshape_prop.mod_shape=modshape.mod_shape
 		modshape_prop.mod_mode=modshape.mod_mode
 		modshape_prop.deform=modshape.deform
+		modshape_prop.symmetrical=modshape.symmetrical
 
 		
 	hull_properties.chines.clear()
@@ -897,6 +937,9 @@ def update_properties_from_hull(the_hull,context):
 		chine_prop.rot=[math.radians(chine.rotation[0]),
 				math.radians(chine.rotation[1]),
 				math.radians(chine.rotation[2])]
+
+		chine_prop.width=chine.curve_width
+		chine_prop.length=chine.curve_length
 
 		chine_prop.pos=chine.offset
 
@@ -945,6 +988,9 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.hull_length=hull_properties.hull_length
 
 	the_hull.curve_resolution=hull_properties.curve_resolution
+	the_hull.structural_thickness=hull_properties.thickness
+	the_hull.slicer_overcut_ratio=hull_properties.overcut
+	the_hull.slot_gap=hull_properties.slot_gap
 
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
@@ -968,7 +1014,9 @@ def update_hull_from_properties(the_hull,context):
 			rotation=rot,
 			size=modshapeprop.size,
 			mod_mode=modshapeprop.mod_mode,
-			deform=deform
+			deform=deform,
+			mod_shape=modshapeprop.mod_shape,
+			symmetrical=modshapeprop.symmetrical
 		)
 
 		the_hull.add_modshape(new_modshape)
@@ -978,7 +1026,7 @@ def update_hull_from_properties(the_hull,context):
 			station=bulkheadprop.station,
 			watertight=bulkheadprop.watertight,
 			floor_height=bulkheadprop.floor_height,
-			thickness=bulkheadprop.thickness
+			thickness=hull_properties.thickness
 		)
 
 		the_hull.add_bulkhead_definition(new_bulkhead_definition)
@@ -1007,7 +1055,8 @@ def update_hull_from_properties(the_hull,context):
 		for longitudal_prop in chineprop.longitudals:
 			
 			new_longitudal=chine_helper.longitudal_definition(z_offset=longitudal_prop.z_offset,
-				width=longitudal_prop.width)
+				width=longitudal_prop.width,
+				thickness=hull_properties.thickness)
 
 			new_longitudal.set_limit_x_length(
 						longitudal_prop.x_min,
@@ -1017,14 +1066,13 @@ def update_hull_from_properties(the_hull,context):
 
 	for keelprop in hull_properties.keels:
 
-		print("keel")
-
 		new_keel=keel_helper.keel(the_hull,
 			lateral_offset=keelprop.lateral_offset,
 			top_height=keelprop.top_height,
 			station_start=keelprop.station_start,
-			station_end=keelprop.station_end
-			)
+			station_end=keelprop.station_end,
+			thickness=hull_properties.thickness
+		)
 
 		the_hull.add_keel(new_keel)
 
@@ -1135,6 +1183,9 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 		row = layout.row()
 		layout.prop( hull_props, "curve_resolution")
+		layout.prop( hull_props, "thickness")
+		layout.prop( hull_props, "overcut")
+		layout.prop( hull_props, "slot_gap")
 
 		row = layout.row()
 		layout.prop( hull_props, "make_bulkheads")
@@ -1145,6 +1196,8 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row = layout.row()
 		row.operator('genui.genhull') 
 		row.operator('genui.deletehull') 
+
+
 
 
 
@@ -1184,10 +1237,16 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 				row.prop(modshape_item, "rotation") 
 
 				row = layout.row() 
-				row.prop(modshape_item, "mod_mode") 
+				row.prop(modshape_item, "mod_mode")
+
+				row = layout.row() 
+				row.prop(modshape_item, "mod_shape") 
 
 				row = layout.row() 
 				row.prop(modshape_item, "deform") 
+
+				row = layout.row() 
+				row.prop(modshape_item, "symmetrical") 
 
 
 

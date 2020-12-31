@@ -680,6 +680,8 @@ def import_plates(filename):
 		#bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
 		bpy.ops.mesh.select_similar(type='FACE', threshold=1)
 		
+		# sometime models need to invert this sometimes not - not sure why...
+		# Should create toggle?
 		bpy.ops.mesh.select_all(action='INVERT')
 		bpy.ops.mesh.delete(type='EDGE')
 		
@@ -736,8 +738,8 @@ def export_plates(filename):
 	#bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
 	#bpy.ops.uv.export_layout(filepath="plates1.svg", mode='SVG', size=(1024, 1024))
 
-	bpy.ops.uv.smart_project(scale_to_bounds=False,island_margin=0.3)
-	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(2400, 2400),opacity=1)
+	bpy.ops.uv.smart_project(scale_to_bounds=False,island_margin=0.03)
+	bpy.ops.uv.export_layout(filepath=filename, mode='SVG', size=(4800, 4800),opacity=1)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -892,5 +894,54 @@ def get_distance_between_two_selected_points():
 
 	return distance
 		
+
+def measure_selected_edges():
+
+	total_length=0
+	objects_counted=0
+
+	# Code borrowed from Measure Tools - Credit to: Chris Kohl
+
+	# Must apply scale transform otherwise the measurement will be wrong.
+	# However, you could probably calculate the scale delta(?) and adjust the numbers as needed
+	# without forcibly applying scale (If you were smarter than me)
+	#bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
+
+	sel = bpy.context.selected_objects
+
+	if len(sel)<1:
+		return 0
+
+	# Measurement has to be done in edit mode.
+	bpy.ops.object.mode_set(mode='EDIT')
+
+	for obj in sel:
+		if obj.type=="MESH":
+			me = obj.data
+			bm = bmesh.from_edit_mesh(me)
+			
+			object_edges = [e for e in bm.edges]
+			
+			perimeter_length = 0.0
+			for e in object_edges:
+				if len(e.link_faces) < 2:
+					# Measure length of e with calc_length
+					perimeter_length = perimeter_length + e.calc_length()
+				elif len(e.link_faces) > 1:
+					bpy.ops.object.mode_set(mode='OBJECT')
+					print("%s: Connected faces detected in selection.  Only works with stand-alone loops of edges or single unconnected faces and n-gons."%obj.name)
+
+
+			print("%03d: '%s' length: %f"%(objects_counted,obj.name,perimeter_length) )
+
+			total_length+=perimeter_length
+			objects_counted+=1
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	return total_length
+	
+
 
 

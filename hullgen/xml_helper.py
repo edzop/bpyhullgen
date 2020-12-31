@@ -89,6 +89,12 @@ def read_hull(filename):
             newhull.hull_height=parse_float_val(elem,"height",0)
 
         #================================================================
+        if elem.tag=="materials":
+            newhull.structural_thickness=parse_float_val(elem,"structural_thickness",0.1)
+            newhull.slicer_overcut_ratio=parse_float_val(elem,"slicer_overcut_ratio",1.1)
+            newhull.slot_gap=parse_float_val(elem,"slot_gap",0.1)
+
+        #================================================================
         if elem.tag=="generate":
             newhull.make_bulkheads=parse_int_val(elem,"bulkheads",default=True)
             newhull.make_keels=parse_int_val(elem,"keels",default=True)
@@ -121,6 +127,8 @@ def read_hull(filename):
                 name=parse_str_val(modshape_elem,"name",0)
                 mod_type=parse_str_val(modshape_elem,"mod_type","add")
                 mod_mode=parse_str_val(modshape_elem,"mod_mode","cube")
+                mod_shape=parse_str_val(modshape_elem,"mod_shape","trapezoid")
+                symmetrical=parse_int_val(modshape_elem,"symmetrical",default=True)
 
                 size=[0,0,0]
                 rotation=[0,0,0]
@@ -155,7 +163,9 @@ def read_hull(filename):
                     location=location,
                     size=size,
                     mod_mode=mod_mode,
-                    deform=deform)
+                    deform=deform,
+                    mod_shape=mod_shape,
+                    symmetrical=symmetrical)
 
                 newhull.add_modshape(modshape)
 
@@ -181,10 +191,10 @@ def read_hull(filename):
 
                 name=parse_str_val(chine_elem,"name")
                 symmetrical=parse_int_val(chine_elem,"symmetrical",default=True)
-                length=0
-                width=0
-                height=0
-                extrude_width=0
+                length=11
+                width=1.2
+                height=1.2
+                extrude_width=1.2
                 
                 offset=[0,0,0]
                 rotation=[0,0,0]
@@ -194,10 +204,10 @@ def read_hull(filename):
                 for subelem in chine_elem:
 
                     if subelem.tag=="curve":
-                        length=parse_float_val(subelem,"length",0)
-                        width=parse_float_val(subelem,"width",0)
-                        height=parse_float_val(subelem,"height",0)
-                        extrude_width=parse_float_val(subelem,"extrude_width",0)
+                        length=parse_float_val(subelem,"length",length)
+                        width=parse_float_val(subelem,"width",width)
+                        height=parse_float_val(subelem,"height",height)
+                        extrude_width=parse_float_val(subelem,"extrude_width",extrude_width)
 
                     if subelem.tag=="offset":
                         offset[0]=parse_float_val(subelem,"x",0)
@@ -213,24 +223,22 @@ def read_hull(filename):
 
                         for longitudal_elem in subelem:
                             z_offset=0
-                            width=0.1
-                            x_min=0
-                            x_max=0
+                            longitudal_width=1
+                            x_min=-3
+                            x_max=3
 
-                            z_offset=parse_float_val(longitudal_elem,"z_offset",0)
-                            width=parse_float_val(longitudal_elem,"width",0)
-                            x_min=parse_float_val(longitudal_elem,"x_min",0)
-                            x_max=parse_float_val(longitudal_elem,"x_max",0)
+                            z_offset=parse_float_val(longitudal_elem,"z_offset",z_offset)
+                            longitudal_width=parse_float_val(longitudal_elem,"width",width)
+                            x_min=parse_float_val(longitudal_elem,"x_min",x_min)
+                            x_max=parse_float_val(longitudal_elem,"x_max",x_max)
 
                             longitudal_definition=chine_helper.longitudal_definition(
-                                width=width
+                                width=longitudal_width,z_offset=z_offset
                             )
 
                             longitudal_definition.set_limit_x_length(x_min,x_max)
 
                             longitudal_defs.append(longitudal_definition)
-
-
 
 
                 new_chine=chine_helper.chine_helper(newhull,
@@ -246,8 +254,7 @@ def read_hull(filename):
                     new_chine.add_longitudal_definition(ld)
 
                 newhull.add_chine(new_chine)
-
-    
+  
     return newhull
 
 
@@ -263,6 +270,12 @@ def write_xml(the_hull,filename):
     size.set('length',str(the_hull.hull_length))
     size.set("width", str(the_hull.hull_width))
     size.set("height", str(the_hull.hull_height))
+
+    #================================================================
+    size = ET.SubElement(hull, "materials")
+    size.set('structural_thickness',str(the_hull.structural_thickness))
+    size.set('slicer_overcut_ratio',str(the_hull.slicer_overcut_ratio))
+    size.set('slot_gap',str(the_hull.slot_gap))
 
 
     #================================================================
@@ -306,6 +319,8 @@ def write_xml(the_hull,filename):
         node_modshape.set("name",modshape.name)
         node_modshape.set("mod_mode",modshape.mod_mode)
         node_modshape.set("mod_type",modshape.mod_type)
+        node_modshape.set("mod_shape",modshape.mod_shape)
+        node_modshape.set("symmetrical",str(int(modshape.symmetrical)))
 
         node_location = ET.SubElement(node_modshape, "location")
         node_location.set('x',str(modshape.location[0]))

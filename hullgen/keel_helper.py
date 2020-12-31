@@ -29,10 +29,6 @@ class keel:
 	the_hull=None
 	thickness=0.1
 
-	# oversize the slicer width slightly so it's not such a tight fit in real life
-	# or else you need a hammer to assemble it. 
-	slicer_overcut_thickness=1.01
-
 	keel_object=None
 	view_keel_collection=None
 
@@ -41,18 +37,22 @@ class keel:
 	station_end=1
 
 	# How much keel slicer will cut off the top of the keel for notching into bulkheads
-	slicer_cut_height=0.1
+	slicer_cut_height=0.2
 
 	keel_slicer_object=None
+	keel_slicer_slot_gap_object=None
+
+
 	keel_slicer_collection=None
 
-	def __init__(self,the_hull,lateral_offset,top_height,station_start,station_end):
+	def __init__(self,the_hull,lateral_offset,top_height,station_start,station_end,thickness=0.1):
 		self.lateral_offset=lateral_offset
 		self.top_height=top_height
 		self.the_hull=the_hull
 		self.view_keel_collection=bpy_helper.make_collection("keels",bpy.context.scene.collection.children)
 		self.station_start=station_start
 		self.station_end=station_end
+		self.thickness=thickness
 
 
 	def make_keel_object(self,name,top_height_offset,cut_to_hull):
@@ -75,7 +75,7 @@ class keel:
 
 		if cut_to_hull==False:
 			# If not cutting to hull - it must be a slicer object in which case we make it slightly wider
-			this_object_thickness=this_object_thickness*self.slicer_overcut_thickness
+			this_object_thickness=this_object_thickness*self.the_hull.slicer_overcut_ratio
 
 
 		bpy.ops.transform.resize(value=(keel_length, 
@@ -107,9 +107,25 @@ class keel:
 
 	def make_keel(self):
 
-		self.keel_slicer_object=self.make_keel_object(name="Keel_Slicer",top_height_offset=self.slicer_cut_height,cut_to_hull=False)
+		self.keel_slicer_object=self.make_keel_object(name="Keel_Slicer",
+			top_height_offset=self.slicer_cut_height,
+			cut_to_hull=False)
 
-		self.keel_object=self.make_keel_object(name="Keel",top_height_offset=0,cut_to_hull=True)
+		self.keel_object=self.make_keel_object(name="Keel",
+			top_height_offset=0,
+			cut_to_hull=True)
+
+		if self.the_hull.slot_gap>0:
+
+			self.keel_slicer_slot_gap_object=self.make_keel_object(name="Keel_Slicer_stop_gap",
+				top_height_offset=self.slicer_cut_height-self.the_hull.slot_gap,
+				cut_to_hull=False)
+
+			self.keel_slicer_slot_gap_object.display_type="WIRE"
+			self.keel_slicer_slot_gap_object.hide_render = True
+			self.keel_slicer_slot_gap_object.hide_viewport = True
+
+			bpy_helper.parent_objects_keep_transform(parent=self.keel_object,child=self.keel_slicer_slot_gap_object)
 
 		bpy_helper.parent_objects_keep_transform(parent=self.keel_object,child=self.keel_slicer_object)
 		

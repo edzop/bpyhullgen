@@ -38,6 +38,9 @@ class bulkhead:
     the_hull_definition=None
 
     bulkhead_object=None
+
+    bulkhead_overcut_object=None
+
     bulkhead_void_object=None
     bulkhead_collection=None
     bulkhead_void_collection=None
@@ -100,10 +103,25 @@ class bulkhead:
         bool_new.operation = 'INTERSECT'
         bool_new.name="bool.hull_shape"
 
-
         bpy.ops.object.modifier_apply(modifier="bool.hull_shape")
-
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+
+        if self.the_hull_definition.slicer_overcut_ratio>0:
+            
+            bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
+				TRANSFORM_OT_translate={"value":(0, 0, 0)})
+
+            self.bulkhead_overcut_object=bpy.context.view_layer.objects.active
+            self.bulkhead_overcut_object.name="Bulkhead.s%06.2f_overcut"%(self.bulkhead_definition.station)
+
+            #bpy_helper.parent_objects_keep_transform(self.bulkhead_object,self.bulkhead_overcut_object)
+
+            bpy_helper.select_object(self.bulkhead_overcut_object,True)
+
+            #self.bulkhead_overcut_object.parent=self.bulkhead_object
+            bpy.ops.transform.resize(value=[self.the_hull_definition.slicer_overcut_ratio,1,1])
+
+        bpy_helper.select_object(self.bulkhead_object,True)
 
 
         if self.bulkhead_definition.watertight==False:
@@ -137,7 +155,6 @@ class bulkhead:
 
                 bpy_helper.select_object(self.bulkhead_void_object,True)
 
-                
                 bpy_helper.parent_objects_keep_transform(parent=self.bulkhead_object,child=self.bulkhead_void_object)
 
                 bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_void_object)

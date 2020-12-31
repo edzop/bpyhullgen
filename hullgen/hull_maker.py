@@ -56,6 +56,12 @@ class hull_maker:
 	# this will be inherited by members
 	structural_thickness=0.06
 
+	# oversize the slicer width slightly so it's not such a tight fit in real life
+	# or else you need a hammer to assemble it. 
+	slicer_overcut_ratio=1.1
+
+	slot_gap=0
+
 	bulkhead_instances=None
 	keel_list=None
 	props=None
@@ -91,13 +97,17 @@ class hull_maker:
 			delete_list.append(self.hull_object)
 
 		for modshape in self.modshapes:
-			if modshape.mod_object!=None:
-				delete_list.append(modshape.mod_object)
+			for mod_object in modshape.mod_objects:
+				delete_list.append(mod_object)
 
 
 		for bh in self.bulkhead_instances:
 			delete_list.append(bh.bulkhead_void_object)
 			delete_list.append(bh.bulkhead_object)
+
+			if bh.bulkhead_overcut_object!=None:
+				delete_list.append(bh.bulkhead_overcut_object)
+
 
 		for chine in self.chine_list:
 			for chine_instance in chine.chine_instances:
@@ -108,12 +118,21 @@ class hull_maker:
 				for lg in chine_instance.longitudal_slicers:
 					delete_list.append(lg)
 
+				for lg in chine_instance.longitudal_slicers:
+					delete_list.append(lg)
+
+				for lg in chine_instance.longitudal_slicers_slot_gap_objects:
+					delete_list.append(lg)
+
 				for lg in chine_instance.longitudal_objects:
 					delete_list.append(lg)
 
 		for keel in self.keel_list:
 			delete_list.append(keel.keel_slicer_object)
 			delete_list.append(keel.keel_object)
+
+			if keel.keel_slicer_slot_gap_object!=None:
+				delete_list.append(keel.keel_slicer_slot_gap_object)
 
 		
 		if len(delete_list) > 0:
@@ -123,7 +142,11 @@ class hull_maker:
 			objs = bpy.data.objects
 
 			for ob in delete_list:
-				objs.remove(ob, do_unlink=True)
+
+				try: 
+					objs.remove(ob, do_unlink=True)
+				except:
+					print("Object already removed!")
 
 		self.hull_object=None
 
@@ -179,9 +202,9 @@ class hull_maker:
 			modshape.generate_modshape(self)
 
 			view_collection_modshape=bpy_helper.make_collection(self.modshape_collection_name,bpy.context.scene.collection.children)
-			bpy_helper.move_object_to_collection(view_collection_modshape,modshape.mod_object)
 
-
+			for mod_object in modshape.mod_objects:
+				bpy_helper.move_object_to_collection(view_collection_modshape,mod_object)
 
 
 	def add_bulkhead_definition(self,bulkhead_definition):
@@ -256,6 +279,9 @@ class hull_maker:
 				bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
 				
 				bpy_helper.hide_object(bh.bulkhead_void_object)
+
+			if bh.bulkhead_overcut_object!=None:
+				bpy_helper.hide_object(bh.bulkhead_overcut_object)
 			
 			bpy_helper.parent_objects_keep_transform(parent=self.hull_object,child=bh.bulkhead_object)
 
@@ -319,6 +345,8 @@ class hull_maker:
 			for keel in self.keel_list:
 				keel.make_keel()
 
+			self.merge_keels()
+
 		if self.make_bulkheads:
 			#self.add_auto_bulkheads()
 			self.make_bulkhead_objects(self.bulkhead_definitions)			
@@ -327,6 +355,7 @@ class hull_maker:
 			self.integrate_props()	
 
 		if self.make_keels:
+			
 			self.make_keel_booleans()
 
 		if self.make_bulkheads:
@@ -381,25 +410,73 @@ class hull_maker:
 		for chine in self.chine_list:
 			for chine_instance in chine.chine_instances:
 
-				
-				
-				for lg in chine_instance.longitudal_slicers:
+				for longitudal_slicer in chine_instance.longitudal_slicers:
 
 					for bh in self.bulkhead_instances:
 						#print("bh: %s"%bh.bulkhead_object.name,end=" ")
 						# TODO for some reason interection code not returning correct result
-						if geometry_helper.check_intersect(bh.bulkhead_object,lg) or True:
-							modifier=bh.bulkhead_object.modifiers.new(name=lg.name, type='BOOLEAN')
-							modifier.object=lg
-							modifier.operation="DIFFERENCE"
+						if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_slicer) or True:
+							modifier_name=longitudal_slicer.name
+							bulkhead_modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+							bulkhead_modifier.object=longitudal_slicer
+							bulkhead_modifier.operation="DIFFERENCE"
 
-				for lg in chine_instance.longitudal_objects:
+							if self.slicer_overcut_ratio>1:
+								if bh.bulkhead_overcut_object!=None:
+									bulkhead_overcut_modifier=bh.bulkhead_overcut_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+									bulkhead_overcut_modifier.object=longitudal_slicer
+									bulkhead_overcut_modifier.operation="DIFFERENCE"
+
+
+							# If we have a slot gap for CNC operations
+							if self.slot_gap>0:
+
+								# Apply modifier to keel object because we are going to further modify bulkhead...
+								bpy_helper.select_object(bh.bulkhead_object,True)
+								bpy.ops.object.modifier_apply(modifier=modifier_name)
+
+				for longitudal_object in chine_instance.longitudal_objects:
 						for bh in self.bulkhead_instances:
 							# TODO for some reason interection code not returning correct result
+							if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_object) or True:
+								modifier_name=bh.bulkhead_object.name
+								chine_modifier=longitudal_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+
+								mod_obj = bh.bulkhead_object
+
+								if self.slicer_overcut_ratio>1:
+									if bh.bulkhead_overcut_object!=None:
+										mod_obj=bh.bulkhead_overcut_object
+
+								chine_modifier.object=mod_obj
+								chine_modifier.operation="DIFFERENCE"
+
+								# If we have a slot gap for CNC operations
+								if self.slot_gap>0:
+
+									# Apply modifier to longitudal object because we are going to further modify bulkhead...
+									bpy_helper.select_object(longitudal_object,True)
+									bpy.ops.object.modifier_apply(modifier=modifier_name)
+
+									# Now use stop gap object to create a larger gap
+									#bulkhead_modifier.object=keel.keel_slicer_slot_gap_object
+
+				# If we have a slot gap for CNC operations
+				if self.slot_gap>0:
+					for lg in chine_instance.longitudal_slicers_slot_gap_objects:
+
+						for bh in self.bulkhead_instances:
+							#print("bh: %s"%bh.bulkhead_object.name,end=" ")
+							# TODO for some reason interection code not returning correct result
 							if geometry_helper.check_intersect(bh.bulkhead_object,lg) or True:
-								modifier=lg.modifiers.new(name=bh.bulkhead_object.name, type='BOOLEAN')
-								modifier.object=bh.bulkhead_object
-								modifier.operation="DIFFERENCE"
+								modifier_name=lg.name
+								bulkhead_modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+								bulkhead_modifier.object=lg
+								bulkhead_modifier.operation="DIFFERENCE"
+
+
+
+
 
 
 
@@ -418,34 +495,159 @@ class hull_maker:
 				bool_new.operation = 'DIFFERENCE'
 
 
+	def merge_keels(self):
+
+
+		# Iterate through keels to make groupings
+		keel_lateral_offsets=[]
+
+		for keel in self.keel_list:
+			if keel.lateral_offset not in keel_lateral_offsets:
+				keel_lateral_offsets.append(keel.lateral_offset)
+
+		# Bool Apply does not work as expected if object is hidden...
+		# unhide objects before applying boolean modifier
+
+		for lateral_offset in keel_lateral_offsets:
+
+			print("Lateral Offset: %f"%lateral_offset)
+
+			base_keel=None
+
+			for keel in self.keel_list:
+
+				if keel.lateral_offset==lateral_offset:
+					
+					if base_keel is None:
+						base_keel=keel
+
+						base_keel.keel_slicer_object.hide_viewport=False
+
+						if base_keel.keel_slicer_slot_gap_object!=None:
+							base_keel.keel_slicer_slot_gap_object.hide_viewport=False
+						
+					else:
+
+						# Merge keels with same lateral_offset
+						keel_modifier_name="merge_keel"
+
+						# Keel Object
+						keel_modifier=base_keel.keel_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
+						keel_modifier.object=keel.keel_object
+						keel_modifier.operation="UNION"
+
+						# Keel Slicer Object
+						keel.keel_slicer_object.hide_viewport=False
+						keel_modifier=base_keel.keel_slicer_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
+						keel_modifier.object=keel.keel_slicer_object
+						keel_modifier.operation="UNION"
+
+						# Keel Slicer Gap Object
+						if base_keel.keel_slicer_slot_gap_object!=None:
+							if keel.keel_slicer_slot_gap_object!=None:
+								keel.keel_slicer_slot_gap_object.hide_viewport=False
+								keel_modifier=base_keel.keel_slicer_slot_gap_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
+								keel_modifier.object=keel.keel_slicer_slot_gap_object
+								keel_modifier.operation="UNION"
+
+
+						#bpy.ops.object.modifier_apply(modifier=keel_modifier_name)
+
+					#bpy_helper.hide_object(keel.keel_object)
+
+						# Add base keel to list so we don't use it twice
+					#	base_keel_list.append(base_keel)
+
+			if base_keel!=None:
+
+				geometry_helper.apply_object_bools(base_keel.keel_object)
+				geometry_helper.apply_object_bools(base_keel.keel_slicer_object)
+
+				if base_keel.keel_slicer_slot_gap_object!=None:
+					geometry_helper.apply_object_bools(base_keel.keel_slicer_slot_gap_object)
+				
+				for keel_delete in self.keel_list:
+					if keel_delete.lateral_offset==lateral_offset:
+						if keel_delete!=base_keel:
+
+							bpy.data.objects.remove(keel_delete.keel_object)
+							keel_delete.keel_object=None
+
+							bpy.data.objects.remove(keel_delete.keel_slicer_object)
+							keel_delete.keel_slicer_object=None
+						
+							if keel_delete.keel_slicer_slot_gap_object!=None:
+								bpy.data.objects.remove(keel_delete.keel_slicer_slot_gap_object)
+								keel_delete.keel_slicer_slot_gap_object=None
+
+				base_keel.keel_slicer_object.hide_viewport=True
+
+				if base_keel.keel_slicer_slot_gap_object!=None:
+					base_keel.keel_slicer_slot_gap_object.hide_viewport=True
+
+							
+
+
 	def make_keel_booleans(self):
 
 		for keel in self.keel_list:
 
-			for bh in self.bulkhead_instances:
+			if keel.keel_slicer_object!=None:
 
-				if geometry_helper.check_intersect(bh.bulkhead_object,keel.keel_slicer_object):
+				for bh in self.bulkhead_instances:
 
-					# notch the bulkhead with keel_slicer_object
-					modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
-					modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-					modifier.object=keel.keel_slicer_object
-					modifier.operation="DIFFERENCE"
+					# TODO for some reason interection code not returning correct result
+					if geometry_helper.check_intersect(bh.bulkhead_object,keel.keel_slicer_object) or True:
 
-					bpy_helper.select_object(bh.bulkhead_object,True)
-  
+						# notch the bulkhead with keel_slicer_object
+						bulkhead_modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_slicer_object.name)
+						bulkhead_modifier=bh.bulkhead_object.modifiers.new(name=bulkhead_modifier_name, type='BOOLEAN')
+						bulkhead_modifier.object=keel.keel_slicer_object
+						bulkhead_modifier.operation="DIFFERENCE"
 
-					# notch the keel with modified bulkhead 
-					modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
-					modifier=keel.keel_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-					modifier.object=bh.bulkhead_object
-					modifier.operation="DIFFERENCE"
+						if self.slicer_overcut_ratio>0:
+							if bh.bulkhead_overcut_object!=None:
 
-			bpy_helper.select_object(keel.keel_object,True)
+								bulkhead_overcut_modifier=bh.bulkhead_overcut_object.modifiers.new(name=bulkhead_modifier_name, type='BOOLEAN')
+								bulkhead_overcut_modifier.object=keel.keel_slicer_object
+								bulkhead_overcut_modifier.operation="DIFFERENCE"
 
-			material_helper.assign_material(keel.keel_object,material_helper.get_material_keel())
 
-			keel.keel_object.parent=self.hull_object
+						#bpy_helper.select_object(bh.bulkhead_object,True)
+	
+
+						# notch the keel with modified bulkhead 
+						
+						keel_modifier_name="%s_%s"%(bh.bulkhead_object.name,keel.keel_object.name)
+						keel_modifier=keel.keel_object.modifiers.new(name=keel_modifier_name, type='BOOLEAN')
+
+						mod_target=bh.bulkhead_object
+		
+						if self.slicer_overcut_ratio>1:
+							if bh.bulkhead_overcut_object!=None:
+								mod_target=bh.bulkhead_overcut_object
+
+						keel_modifier.object=mod_target
+
+						keel_modifier.operation="DIFFERENCE"
+
+						# If we have a slot gap for CNC operations
+						if self.slot_gap>0:
+
+							# Apply modifier to keel object because we are going to further modify bulkhead...
+							bpy_helper.select_object(keel.keel_object,True)
+							bpy.ops.object.modifier_apply(modifier=keel_modifier_name)
+
+							# Now use stop gap object to create a larger gap
+							bulkhead_modifier.object=keel.keel_slicer_slot_gap_object
+
+
+
+				bpy_helper.select_object(keel.keel_object,True)
+
+				material_helper.assign_material(keel.keel_object,material_helper.get_material_keel())
+
+				keel.keel_object.parent=self.hull_object
 
 
 	# Cleans up longitudal framing in center of hull for access to entrance / pilothouse 

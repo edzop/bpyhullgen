@@ -31,9 +31,6 @@ class longitudal_definition:
 	width=0.1
 	thickness=0.1
 
-	# how much wider the slicers will be than the longitudals - value of 1.1 means notches will be 110 percent of longitudal width
-	slicer_overcut=1.1
-
 	# ratio of longitudal to slicer means how high the slicers are in relation to longitudals
 	# If it's 0.5 it will be half - it affects the notches height for bulkheads 
 	slicer_ratio=0.5
@@ -67,12 +64,15 @@ class chine_instance_definition:
 	longitudal_objects=None
 	longitudal_slicers=None
 
+	longitudal_slicers_slot_gap_objects=None
+
 	def __init__(self,curve_object,curve_backup,inverted):
 		self.curve_object=curve_object
 		self.curve_backup=curve_backup
 		self.inverted=inverted
 		self.longitudal_objects=[]
 		self.longitudal_slicers=[]
+		self.longitudal_slicers_slot_gap_objects=[]
 
 	def add_longitudal_instance(self,longitudal_object,longitudal_slicer):
 		self.longitudal_objects.append(longitudal_object)
@@ -187,7 +187,7 @@ class chine_helper:
 		
 		bpy_helper.deselect_all_objects()
 
-		theCurveHelper = curve_helper.Curve_Helper()
+		theCurveHelper = curve_helper.Curve_Helper(curve_resolution=self.the_hull.curve_resolution)
 
 		curve_angle=longitudal_element.curve_angle
 		bend_radius=longitudal_element.bend_radius
@@ -404,7 +404,9 @@ class chine_helper:
 
 		longitudal_name="%s.longitudal.%02d"%(chine_instance.curve_object.name,index)
 		slicer_name="%s.slicer.%02d"%(chine_instance.curve_object.name,index)
+		slicer_stop_gap_name="%s.slicer_stop_gap.%02d"%(chine_instance.curve_object.name,index)
 
+		# Longitudal Plane
 
 		longitudal_plane=self.make_slicer_plane(
 			wall_curve=chine_instance.curve_object,
@@ -424,14 +426,18 @@ class chine_helper:
 			slicer_extrude_amount=longitudal_element.width*longitudal_element.slicer_ratio
 							
 		self.select_and_extrude_slicer(longitudal_plane,extrude_amount)
+
+		# Slicer Plane
 			
 		slicer_plane=None
-		
+
+		slicer_thickness=longitudal_element.thickness*self.the_hull.slicer_overcut_ratio
+	
 		slicer_plane=self.make_slicer_plane(
 			wall_curve=chine_instance.curve_object,
 			name=slicer_name,
 			longitudal_element=longitudal_element,
-			thickness=longitudal_element.thickness*longitudal_element.slicer_overcut,
+			thickness=slicer_thickness,
 			inverted_curves=chine_instance.inverted)
 
 		
@@ -442,7 +448,7 @@ class chine_helper:
 		
 		slicer_plane.parent=longitudal_plane
 
-		slicer_plane.location.z=0
+		slicer_plane.location.z=0-((slicer_thickness-longitudal_element.thickness)/2)
 
 		longitudal_plane.parent=chine_instance.curve_object
 		longitudal_plane.matrix_parent_inverse = chine_instance.curve_object.matrix_world.inverted()
@@ -461,10 +467,7 @@ class chine_helper:
 			else:
 				slicer_plane.location.y=-self.skin_pokethrough
 
-		bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_plane)
-		bpy_helper.hide_object(slicer_plane)
-		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
-
+		
 		chine_instance.add_longitudal_instance(longitudal_plane,slicer_plane)
 
 
@@ -481,7 +484,7 @@ class chine_helper:
 			adjusted_max_location+=block_width/2
 
 			end_clean_min_name="end_clean_min_%f"%(adjusted_min_location)
-			end_clean_max_name="end_clean_max_%f"%(adjusted_min_location)
+			end_clean_max_name="end_clean_max_%f"%(adjusted_max_location)
 
 			object_end_clean_min = bpy.data.objects.get(end_clean_min_name)
 			object_end_clean_max = bpy.data.objects.get(end_clean_max_name)
@@ -513,6 +516,37 @@ class chine_helper:
 			bool_new = slicer_plane.modifiers.new(type="BOOLEAN", name="Sx")
 			bool_new.object = object_end_clean_max
 			bool_new.operation = 'DIFFERENCE'
+
+		if self.the_hull.slot_gap>0:
+			
+			bpy_helper.select_object(slicer_plane,True)
+
+			y_offset=self.the_hull.slot_gap
+
+			if chine_instance.inverted:
+				y_offset=-y_offset
+
+			bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
+				TRANSFORM_OT_translate={"value":(0, 0, 0)})
+
+			slicer_stop_gap_object=bpy.context.view_layer.objects.active
+
+			slicer_stop_gap_object.parent=longitudal_plane
+
+			slicer_stop_gap_object.location.y=y_offset
+			
+			chine_instance.longitudal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
+			
+			chine_instance.longitudal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
+			bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_stop_gap_object)
+			bpy_helper.hide_object(slicer_stop_gap_object)
+			
+
+		bpy_helper.move_object_to_collection(self.view_collection_longitudals,slicer_plane)
+		bpy_helper.hide_object(slicer_plane)
+
+		bpy_helper.move_object_to_collection(self.view_collection_longitudals,longitudal_plane)
+
 
 	
 

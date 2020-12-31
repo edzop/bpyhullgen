@@ -162,6 +162,15 @@ def cleanup():
 	
 
 
+def apply_object_bools(obj):
+	bpy_helper.select_object(obj,True)
+
+	for modifier in obj.modifiers:
+		if modifier.type=='BOOLEAN':
+			#print("%s Apply: %s - %s"%(obj.name,modifier.name,modifier.object.name))
+			bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
 def apply_all_bool_modifiers():
 
 	# faster implementation maybe in future instead of bpy.ops operations?
@@ -187,40 +196,41 @@ def apply_all_bool_modifiers():
 			for modifier in obj.modifiers:
 				if modifier.type=='BOOLEAN':
 					boolean_target_object=modifier.object
-					color_value_list=get_color_from_hash_string(boolean_target_object.name)
-					new_material_name="slicer_%s"%boolean_target_object.name
+					if boolean_target_object!=None:
+						color_value_list=get_color_from_hash_string(boolean_target_object.name)
+						new_material_name="slicer_%s"%boolean_target_object.name
 
-					slicer_material=None
+						slicer_material=None
 
-					if new_material_name in bpy.data.materials:
-						slicer_material=bpy.data.materials[new_material_name]
-					else:
-						slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
+						if new_material_name in bpy.data.materials:
+							slicer_material=bpy.data.materials[new_material_name]
+						else:
+							slicer_material=material_helper.make_subsurf_material(new_material_name,color_value_list)
 
-					obj.data.materials.append(slicer_material)
+						obj.data.materials.append(slicer_material)
 
-					# Material index of new material should be last in list
-					new_material_index=len(obj.data.materials)-1
+						# Material index of new material should be last in list
+						new_material_index=len(obj.data.materials)-1
 
-					bpy.context.view_layer.objects.active = boolean_target_object
+						bpy.context.view_layer.objects.active = boolean_target_object
 
-					# select all faces for material assignment to occur
-					for face in obj.data.polygons:
-						face.select=True
+						# select all faces for material assignment to occur
+						for face in obj.data.polygons:
+							face.select=True
 
-					bpy.context.view_layer.objects.active = obj
-					print("Applying object: %s"%obj.name)
+						bpy.context.view_layer.objects.active = obj
+						print("Applying object: %s"%obj.name)
 
-					for face in obj.data.polygons:
-						face.select=False
+						for face in obj.data.polygons:
+							face.select=False
 
-					bpy.ops.object.modifier_apply(modifier=modifier.name)
+						bpy.ops.object.modifier_apply(modifier=modifier.name)
 
-					for f in obj.data.polygons:
-						if f.select:
-							f.material_index=new_material_index
+						for f in obj.data.polygons:
+							if f.select:
+								f.material_index=new_material_index
 
-					has_boolean=True
+						has_boolean=True
 
 	# rehide previously hidden objects
 	for obj in hidden_objects:
