@@ -50,3 +50,7 @@ plates - after import UV unwrapped
     - add shape for cutout
     - apply bool to both sides of plate (union / difference)
 
+
+=============================================
+
+

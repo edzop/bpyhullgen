@@ -6,6 +6,63 @@ def get_bmvert_coords_text(bmvert):
 	text="%f,%f,%f"%(bmvert.co[0],bmvert.co[1],bmvert.co[2])
 	return text
 
+# expects an array of 2 verts (x,y) [ v1[x,y], v2[x,y] ]
+# returns angle in radians between verts and reference in zero (3 o clock position)
+def measure_angle_between_verts(verts):
+
+	diffX = verts[0][0]-verts[1][0]
+	diffY = verts[0][1]-verts[1][1]
+
+	flipped=False
+
+	if verts[1][0]<verts[0][0]:
+		flipped=True
+
+	# TODO
+	# find min X
+
+	third_vert=[ verts[1][0], verts[0][1] ]
+
+	verts.append(third_vert)
+
+	#opp_length=verts[1][1]-verts[0][1]
+	#adj_length=verts[1][0]-verts[0][0]
+
+	angle=0
+	angle_degrees=0
+	base_angle=0
+
+	if diffX==0:
+		# 90 degrees
+
+		if verts[0][1]<verts[1][1]:
+			base_angle=math.pi/2
+			angle_degrees=90
+		else:
+			base_angle=math.pi+math.pi/2
+			angle_degrees=270
+	else:
+		base_angle = math.atan(diffY/diffX)
+		angle=base_angle
+
+		if flipped==True:
+			# add 180 degrees
+			angle=angle+math.pi
+
+		angle_degrees=math.degrees(angle)
+
+	status="(%0.2f,%0.2f) - (%0.2f,%0.2f) Angle: %f (base %f) Diff(%0.2f,%0.2f) Flipped: %s"%(
+		verts[0][0],verts[0][1],
+		verts[1][0],verts[1][1],
+		angle_degrees,
+		math.degrees(base_angle),
+		diffX,diffY,
+		flipped)
+
+	print(status)
+
+	return angle
+
 
 #Compute the third point of a triangle when two points and all edge lengths are given
 def getThirdPoint(v0, v1, l01, l12, l20):
@@ -65,19 +122,19 @@ class triface:
 
 
 # calculates new position from X,Y + distance in direction angle (radians)
-def get_vector_position(x,y,angle2,distance,reciprocal=False,flipped=False):
+def get_vector_position(x,y,angle,distance,reciprocal=False,flipped=False):
 
-	angle=angle2
+	angle_used=angle
 
 	if flipped:
-		angle=-angle
+		angle_used=-angle_used
 
 	if reciprocal==True:
-		angle+=math.pi
+		angle_used+=math.pi
 	
 	#angle=math.radians(270)+angle2
-	xx = x+( distance*math.cos(angle) )
-	yy = y+( distance*math.sin(angle) )
+	xx = x+( distance*math.cos(angle_used) )
+	yy = y+( distance*math.sin(angle_used) )
 
 	return [ xx,yy ]
 
@@ -108,12 +165,20 @@ class mapped_face:
 
 	flipped=False
 
+	reused_verts=0
+	created_verts=0
+
 	def __init__(self,flipped=False):
 		self.mapped_verts=[]
 		self.flipped=flipped
 
-	def add_vert(self,new_vert):
+	def add_vert(self,new_vert,is_reused_vert=False):
 		self.mapped_verts.append(new_vert)
+
+		if is_reused_vert:
+			self.reused_verts+=1
+		else:
+			self.created_verts+=1
 
 
 	def get_vert_count(self):
@@ -123,13 +188,17 @@ class mapped_face:
 		#self.total_angle=self.total_angle-(angle)
 		self.total_angle=self.total_angle+(angle)
 
-	# returns new BMvert
+	def find_reusable_pair(self):
+		print("find reusable pair")
+
+	# mapped_face.generate_remapped_bmvert - returns new BMvert
 	def generate_remapped_bmvert(self,bm_new,angle,distance):
 
 		new_vert=None
 
 
-		vert_count=len(self.mapped_verts)
+		#vert_count=len(self.mapped_verts)
+		vert_count=self.reused_verts+self.created_verts
 
 		if vert_count==0:
 			# New Face
@@ -148,7 +217,7 @@ class mapped_face:
 				newpos=[-self.last_distance,0]
 				#angle_used=math.radians(angle)
 			else:
-				print("Vert Count: %d"%vert_count,end=" ")
+				print("generate_remapped_bmvert - vert count: %d"%vert_count,end=" ")
 
 
 				# TODO - increment actual angle 
@@ -156,14 +225,32 @@ class mapped_face:
 
 				use_reciprocal=False
 
-				if vert_count%2!=0:
-					use_reciprocal=True
-					#self.increment_angle(self.last_angle)
-					self.increment_angle(self.last_angle)
-					print("+180")
+				if self.reused_verts==0:
+					if vert_count%2!=0:
+						use_reciprocal=True
 				else:
-					self.increment_angle(self.last_angle)
-					print(" - ")
+					if vert_count%2==0:
+						use_reciprocal=True
+				
+
+				#if self.reused_verts>0:
+				#	use_reciprocal=True
+
+				reciprocal_text="+0"
+
+				if use_reciprocal:
+					reciprocal_text="+180"
+				
+					#self.increment_angle(self.last_angle)
+				self.increment_angle(self.last_angle)
+
+				print("last angle: %d %s ld: %f"%(
+					round(math.degrees(self.last_angle)),
+					reciprocal_text,
+					self.last_distance),
+					end=" ")
+
+				print("total angle: %d"%(round(math.degrees(self.total_angle))))
 
 				newpos=get_vector_position(x,y,
 					self.total_angle,
@@ -206,29 +293,85 @@ class mapped_mesh:
 			newface = mapped_face(flipped=flipped)
 			center_median=f.calc_center_median()
 
+			print("=============================================================")
 			print("New Face starting: %d Normal: %s center_median: %s"%(f.index,f.normal,center_median))
 
 			self.mapped_faces.append(newface)
 
-			if len(f.loops)>0:
-				first_loop = f.loops[0]
+			loopcount=len(f.loops)
 
-				next_loop=first_loop
+			
+			# We must not make any assumption on which order loops are given to us...
 
-				
+			# We need to search to find a pair of subsequental loops that have already been mapped in 
+			# order to determine start reference angle
+			subsequent_mapped_loop_start=None
 
-			for loop in f.loops:
+			if loopcount>1:
+				start_loop=f.loops[0]
+				eval_loop = start_loop
 
-				angle=loop.calc_angle()
-				angle_degrees=math.degrees(loop.calc_angle())
-				length=loop.edge.calc_length()
+				continue_search=True
 
-				is_convex=loop.is_convex
-				tangent=loop.calc_tangent()
-				normal=loop.calc_normal()
+				print("Searching for subsequent mapped loop pairs...",end="")
 
-				next_loop=loop.link_loop_next
-				prev_loop=loop.link_loop_prev
+				while continue_search:
+
+					next_loop=eval_loop.link_loop_next
+
+					first_mapping=self.lookup_vert(eval_loop.vert)
+					second_mapping=self.lookup_vert(next_loop.vert)
+
+					if first_mapping==None or second_mapping==None:
+
+						# increment to next loop
+						eval_loop=next_loop
+
+						if eval_loop==start_loop:
+							print("No pairs found!")
+							continue_search=False
+
+					else:
+						# We found a match - two subsequental loops that have already been mapped
+						subsequent_mapped_loop_start=eval_loop
+						continue_search=False
+
+						verts=[]
+
+						print("Found pair")
+
+						verts.append( [ first_mapping.mapped_vert.co[0],  first_mapping.mapped_vert.co[1]  ] )
+						verts.append( [ second_mapping.mapped_vert.co[0], second_mapping.mapped_vert.co[1] ] )
+
+						angle_diff=measure_angle_between_verts(verts)
+
+						print(" diff angle: %d"%round(math.degrees(angle_diff)))
+
+						newface.increment_angle(angle_diff)
+
+
+
+			continue_search=True
+
+			eval_loop=subsequent_mapped_loop_start
+			
+			if eval_loop==None:
+				eval_loop=f.loops[0]
+
+			start_loop=eval_loop
+
+			while continue_search:
+
+				angle=eval_loop.calc_angle()
+				angle_degrees=math.degrees(eval_loop.calc_angle())
+				length=eval_loop.edge.calc_length()
+
+				is_convex=eval_loop.is_convex
+				tangent=eval_loop.calc_tangent()
+				normal=eval_loop.calc_normal()
+
+				next_loop=eval_loop.link_loop_next
+				prev_loop=eval_loop.link_loop_prev
 
 				next_angle=next_loop.calc_angle()
 				next_angle_degrees=math.degrees(next_angle)
@@ -241,11 +384,11 @@ class mapped_mesh:
 
 				status="?"
 
-				mapped_vert=self.lookup_vert(loop.vert)
+				mapped_vert=self.lookup_vert(eval_loop.vert)
 
 				#mapped_vert=None # Force reuse of all verts - for debugging
 
-				angle_used=angle
+				#angle_used=angle
 
 				#if normal[2]>0:
 				#	angle_used=next_angle
@@ -253,25 +396,31 @@ class mapped_mesh:
 				#if normal[2]<0:
 				#	angle_used=angle
 
+				is_reused_vert=False
+
 				if mapped_vert==None:
-					mapped_bm_vert=newface.generate_remapped_bmvert(self.bm_new,angle_used,length)
+					mapped_bm_vert=newface.generate_remapped_bmvert(self.bm_new,angle,length)
 
 					status="created"
 
-					mapped_vert=self.add_mapped_bmvert(loop.vert,mapped_bm_vert)
+					mapped_vert=self.add_mapped_bmvert(eval_loop.vert,mapped_bm_vert)
 				else:
 					status="reused"
-					if newface.get_vert_count()>1:
-						newface.increment_angle(angle_used)
+					is_reused_vert=True
+					#if newface.get_vert_count()>1:
+					#newface.increment_angle(angle)
+
+					newface.last_angle=angle
+					newface.last_distance=length
 
 				#if newface.get_vert_count()>0:
 				#newface.increment_angle(angle_used)
 				#else:
 				#	print("skip increment")
 
-				newface.add_vert(mapped_vert)
+				newface.add_vert(mapped_vert,is_reused_vert)
 
-				vert_info="Original: (%f,%f,%f) Mapped: (%f,%f,%f) %s  total: %f"%(
+				vert_info="Original: (%f,%f,%f) Mapped: (%f,%f,%f) %s  total: %d"%(
 					
 					mapped_vert.original_vert.co[0],
 					mapped_vert.original_vert.co[1],
@@ -281,15 +430,20 @@ class mapped_mesh:
 					mapped_vert.mapped_vert.co[1],
 					mapped_vert.mapped_vert.co[2],
 					status,
-					math.degrees(newface.total_angle))
+					round(math.degrees(newface.total_angle)))
 				
-				print("loop angle: %f length: %f - %s"%(angle_degrees,length,vert_info))
+				print("loop angle: %d length: %f - %s"%(round(angle_degrees),length,vert_info))
 
-			flipped=not flipped
+				eval_loop=next_loop
+
+				# check to see if we have made a complete pass on all loops
+				if eval_loop==start_loop:
+					continue_search=False
+
+
+			#flipped=not flipped
 
 		# Add faces to new BMesh (bm_new)
-
-
 		faces_added=0
 					
 		for mf in self.mapped_faces:
@@ -337,14 +491,6 @@ class mapped_mesh:
 		new_mapped_vert=self.add_mapped_bmvert(original_vert,new_mapped_bmvert)
 
 		return new_mapped_vert
-
-
-		
-
-	
-
-
-
 
 
 
@@ -406,100 +552,12 @@ class flatten_helper():
 			mesh_obj.location.z=selected_object.location.z+1
 
 
-	def clone_object_faces_triangles(self):
-
-		scene = bpy.context.scene
-		selected_object = bpy.context.object
-
-		print("Active object = ",selected_object.name)
-
-		me = selected_object.data
-		bm_old = bmesh.new()         # Create a new bmesh container instance
-		bm_old.from_mesh(me)         # Pass your mesh into this container
-		
-		# bm_old.verts.ensure_lookup_table()
-
-		# New Mesh
-		bm_new = bmesh.new()         # Create a new bmesh container instance
-		mesh_data = bpy.data.meshes.new("cloned")
-
-		vert_list=[]
-		
-		triface_list=[]
-
-		for f in bm_old.faces:
-			
-			vertcount=len(f.verts)
-			#print("Face Index: %d verts: %d"%(f.index,vertcount))
-			
-			if vertcount==3:
-				verts=[ f.verts[0].co,
-						f.verts[1].co,
-						f.verts[2].co ]
-				
-				newface=triface(f.index,verts)
-				newface.store_lengths()
-				newface.make_flatverts()
-				triface_list.append(newface)
-				newface.print_summary()
-			else:
-				print("Error: Vertcount: %d (only trifaces supported)"%vertcount)
-		
-		faces_added=0
-				
-		for f in triface_list:
-					
-			flat=True
-					
-			if flat:                
-				new_vert0=bm_new.verts.new(f.flatverts[0])
-				new_vert1=bm_new.verts.new(f.flatverts[1])
-				new_vert2=bm_new.verts.new(f.flatverts[2])
-			else:
-				new_vert0=bm_new.verts.new(f.verts[0])
-				new_vert1=bm_new.verts.new(f.verts[1])
-				new_vert2=bm_new.verts.new(f.verts[2])
-					
-			newverts=[new_vert0,new_vert1,new_vert2]
-			
-			bm_new.faces.new(newverts)
-			faces_added+=1
-			
-			
-		print("Added %d trifaces"%faces_added)
-			
-			#for v in f.verts:
-			#    coord=v.co
-				#print(coord)
-			#    new_vert=bm_new.verts.new(coord)
-			#    vert_list.append(new_vert)
-				
-			#if len(vert_list)>2:
-			#    print("Vert 0: %s"%get_bmvert_coords_text(vert_list[0]))
-			#    print("Vert 1: %s"%get_bmvert_coords_text(vert_list[1]))
-			#    print("Vert 2: %s"%get_bmvert_coords_text(vert_list[2]))
-				
-				
-			#    bm_new.faces.new(vert_list)
-			#    vert_list=[]
-				
-		# mod new mesh
-		bm_new.to_mesh(mesh_data)
-		bm_new.free()
-
-		mesh_obj = bpy.data.objects.new(mesh_data.name, mesh_data)
-		bpy.context.collection.objects.link(mesh_obj)
-
-		mesh_obj.location.z=selected_object.location.z+1
-
-
 	def make_shape(self):
 
 		bm_new = bmesh.new()         # Create a new bmesh container instance
 		mesh_data = bpy.data.meshes.new("cloned")
 
 		newverts=[]
-
 
 		new_vert=bm_new.verts.new([0,0,0])
 
@@ -510,8 +568,6 @@ class flatten_helper():
 		for i in range(0,30):
 			angle=math.radians(3)
 			distance=0.3
-
-			
 
 			newpos=get_vector_position(new_vert.co[0],new_vert.co[1],total_distance,distance)
 			total_distance+=angle
@@ -528,6 +584,10 @@ class flatten_helper():
 
 
 
+
+
+
+	# returns degrees between first two verts in selected object
 	def measure_angle(self):
 		scene = bpy.context.scene
 		selected_object = bpy.context.object
@@ -547,60 +607,13 @@ class flatten_helper():
 			if v.index<2:
 				verts.append([v.co[0],v.co[1]])
 
-		diffX = verts[0][0]-verts[1][0]
-		diffY = verts[0][1]-verts[1][1]
 
-		flipped=False
-
-		if verts[1][0]<verts[0][0]:
-			flipped=True
-
-		# TODO
-		# find min X
-
-		third_vert=[ verts[1][0], verts[0][1] ]
-
-		verts.append(third_vert)
-
-		#opp_length=verts[1][1]-verts[0][1]
-		#adj_length=verts[1][0]-verts[0][0]
-
-		angle=0
-		angle_degrees=0
-		base_angle=0
-
-		if diffX==0:
-			# 90 degrees
-
-			if verts[0][1]<verts[1][1]:
-				base_angle=math.pi/2
-				angle_degrees=90
-			else:
-				base_angle=math.pi+math.pi/2
-				angle_degrees=270
+		if len(verts)==2:
+			return measure_angle_between_verts(verts)
 		else:
-			base_angle = math.atan(diffY/diffX)
-			angle=base_angle
+			return 0
 
-			if flipped==True:
-				# add 180 degrees
-				angle=angle+math.pi
-
-			angle_degrees=math.degrees(angle)
-
-		status="(%0.2f %0.2f - %0.2f %0.2f) Angle: %f (base %f) Diff(%0.2f,%0.2f) Flipped: %s"%(
-			verts[0][0],verts[0][1],
-			verts[1][0],verts[1][1],
-			angle_degrees,
-			math.degrees(base_angle),
-			diffX,diffY,
-			flipped)
-
-		print(status)
-
-		return status
-
-			
+				
 
 
 
@@ -608,7 +621,7 @@ class flatten_helper():
 
 		#self.make_shape()
 
-		return self.measure_angle()
+		#return self.measure_angle()
 
-		#self.clone_object_faces()
+		self.clone_object_faces()
 		#self.print_angles()
