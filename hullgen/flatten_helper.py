@@ -271,177 +271,207 @@ class mapped_mesh:
 
 	bm_new=None
 
+	# a list of new mapped faces that have been newly generated
 	mapped_faces=None
+
+	# a list of new mapped verts that have been newly generated
 	mapped_verts=None
+
+	# a list of faces from bm_old that have been process already
+	processed_faces=None
 
 	def __init__(self,bm_new):
 		self.mapped_faces=[]
 		self.mapped_verts=[]
+		self.processed_faces=[]
 
 		self.bm_new=bm_new
+
+	def process_face(self,f):
+
+		if f in self.processed_faces:
+			# already processed
+			return
+
+		flipped=False
+	
+		#vertcount=len(f.verts)
+
+		newface = mapped_face(flipped=flipped)
+		center_median=f.calc_center_median()
+
+		print("=============================================================")
+		print("New Face starting: %d Normal: %s center_median: %s"%(f.index,f.normal,center_median))
+
+		self.mapped_faces.append(newface)
+
+		loopcount=len(f.loops)
+
+		
+		# We must not make any assumption on which order loops are given to us...
+
+		# We need to search to find a pair of subsequental loops that have already been mapped in 
+		# order to determine start reference angle
+		subsequent_mapped_loop_start=None
+
+		if loopcount>1:
+			start_loop=f.loops[0]
+			eval_loop = start_loop
+
+			continue_search=True
+
+			print("Searching for subsequent mapped loop pairs...",end="")
+
+			while continue_search:
+
+				next_loop=eval_loop.link_loop_next
+
+				first_mapping=self.lookup_vert(eval_loop.vert)
+				second_mapping=self.lookup_vert(next_loop.vert)
+
+				if first_mapping==None or second_mapping==None:
+
+					# increment to next loop
+					eval_loop=next_loop
+
+					if eval_loop==start_loop:
+						print("No pairs found!")
+						continue_search=False
+
+				else:
+					# We found a match - two subsequental loops that have already been mapped
+					subsequent_mapped_loop_start=eval_loop
+					continue_search=False
+
+					verts=[]
+
+					print("Found pair")
+
+					verts.append( [ first_mapping.mapped_vert.co[0],  first_mapping.mapped_vert.co[1]  ] )
+					verts.append( [ second_mapping.mapped_vert.co[0], second_mapping.mapped_vert.co[1] ] )
+
+					angle_diff=measure_angle_between_verts(verts)
+
+					print(" diff angle: %d"%round(math.degrees(angle_diff)))
+
+					newface.increment_angle(angle_diff)
+
+
+
+		continue_search=True
+
+		eval_loop=subsequent_mapped_loop_start
+		
+		if eval_loop==None:
+			eval_loop=f.loops[0]
+
+		start_loop=eval_loop
+
+		while continue_search:
+
+			angle=eval_loop.calc_angle()
+			angle_degrees=math.degrees(eval_loop.calc_angle())
+			length=eval_loop.edge.calc_length()
+
+			is_convex=eval_loop.is_convex
+			tangent=eval_loop.calc_tangent()
+			normal=eval_loop.calc_normal()
+
+			next_loop=eval_loop.link_loop_next
+			prev_loop=eval_loop.link_loop_prev
+
+			next_angle=next_loop.calc_angle()
+			next_angle_degrees=math.degrees(next_angle)
+			
+			next_length=next_loop.edge.calc_length()
+
+			prev_angle=prev_loop.calc_angle()
+			prev_angle_degrees=math.degrees(prev_angle)
+			prev_length=prev_loop.edge.calc_length()
+
+			status="?"
+
+			mapped_vert=self.lookup_vert(eval_loop.vert)
+
+			#mapped_vert=None # Force reuse of all verts - for debugging
+
+			#angle_used=angle
+
+			#if normal[2]>0:
+			#	angle_used=next_angle
+				
+			#if normal[2]<0:
+			#	angle_used=angle
+
+			is_reused_vert=False
+
+			if mapped_vert==None:
+				mapped_bm_vert=newface.generate_remapped_bmvert(self.bm_new,angle,length)
+
+				status="created"
+
+				mapped_vert=self.add_mapped_bmvert(eval_loop.vert,mapped_bm_vert)
+			else:
+				status="reused"
+				is_reused_vert=True
+				#if newface.get_vert_count()>1:
+				#newface.increment_angle(angle)
+
+				newface.last_angle=angle
+				newface.last_distance=length
+
+			#if newface.get_vert_count()>0:
+			#newface.increment_angle(angle_used)
+			#else:
+			#	print("skip increment")
+
+			newface.add_vert(mapped_vert,is_reused_vert)
+
+			vert_info="Original: (%f,%f,%f) Mapped: (%f,%f,%f) %s  total: %d"%(
+				
+				mapped_vert.original_vert.co[0],
+				mapped_vert.original_vert.co[1],
+				mapped_vert.original_vert.co[2],
+
+				mapped_vert.mapped_vert.co[0],
+				mapped_vert.mapped_vert.co[1],
+				mapped_vert.mapped_vert.co[2],
+				status,
+				round(math.degrees(newface.total_angle)))
+			
+			print("loop angle: %d length: %f - %s"%(round(angle_degrees),length,vert_info))
+
+			eval_loop=next_loop
+
+			# check to see if we have made a complete pass on all loops
+			if eval_loop==start_loop:
+				continue_search=False
+
+		self.processed_faces.append(f)
+
+		# recursively process connected faces
+		for face_edge in f.edges:
+			for linked_face in face_edge.link_faces:
+				self.process_face(linked_face)
+
+
+
+		#flipped=not flipped
 
 	def remap_mesh(self,bm_old):
 
 		# First build faces in memory
 
-		flipped=False
+		bm_old.faces.ensure_lookup_table()
 
-		for f in bm_old.faces:
-				
-			#vertcount=len(f.verts)
+		if len(bm_old.faces)>0:
+			first_face=bm_old.faces[0]
 
-			newface = mapped_face(flipped=flipped)
-			center_median=f.calc_center_median()
-
-			print("=============================================================")
-			print("New Face starting: %d Normal: %s center_median: %s"%(f.index,f.normal,center_median))
-
-			self.mapped_faces.append(newface)
-
-			loopcount=len(f.loops)
-
+			# this function will recursively add other faces connected to original face
+			self.process_face(first_face)
 			
-			# We must not make any assumption on which order loops are given to us...
+		#for f in bm_old.faces:
 
-			# We need to search to find a pair of subsequental loops that have already been mapped in 
-			# order to determine start reference angle
-			subsequent_mapped_loop_start=None
-
-			if loopcount>1:
-				start_loop=f.loops[0]
-				eval_loop = start_loop
-
-				continue_search=True
-
-				print("Searching for subsequent mapped loop pairs...",end="")
-
-				while continue_search:
-
-					next_loop=eval_loop.link_loop_next
-
-					first_mapping=self.lookup_vert(eval_loop.vert)
-					second_mapping=self.lookup_vert(next_loop.vert)
-
-					if first_mapping==None or second_mapping==None:
-
-						# increment to next loop
-						eval_loop=next_loop
-
-						if eval_loop==start_loop:
-							print("No pairs found!")
-							continue_search=False
-
-					else:
-						# We found a match - two subsequental loops that have already been mapped
-						subsequent_mapped_loop_start=eval_loop
-						continue_search=False
-
-						verts=[]
-
-						print("Found pair")
-
-						verts.append( [ first_mapping.mapped_vert.co[0],  first_mapping.mapped_vert.co[1]  ] )
-						verts.append( [ second_mapping.mapped_vert.co[0], second_mapping.mapped_vert.co[1] ] )
-
-						angle_diff=measure_angle_between_verts(verts)
-
-						print(" diff angle: %d"%round(math.degrees(angle_diff)))
-
-						newface.increment_angle(angle_diff)
-
-
-
-			continue_search=True
-
-			eval_loop=subsequent_mapped_loop_start
-			
-			if eval_loop==None:
-				eval_loop=f.loops[0]
-
-			start_loop=eval_loop
-
-			while continue_search:
-
-				angle=eval_loop.calc_angle()
-				angle_degrees=math.degrees(eval_loop.calc_angle())
-				length=eval_loop.edge.calc_length()
-
-				is_convex=eval_loop.is_convex
-				tangent=eval_loop.calc_tangent()
-				normal=eval_loop.calc_normal()
-
-				next_loop=eval_loop.link_loop_next
-				prev_loop=eval_loop.link_loop_prev
-
-				next_angle=next_loop.calc_angle()
-				next_angle_degrees=math.degrees(next_angle)
-				
-				next_length=next_loop.edge.calc_length()
-
-				prev_angle=prev_loop.calc_angle()
-				prev_angle_degrees=math.degrees(prev_angle)
-				prev_length=prev_loop.edge.calc_length()
-
-				status="?"
-
-				mapped_vert=self.lookup_vert(eval_loop.vert)
-
-				#mapped_vert=None # Force reuse of all verts - for debugging
-
-				#angle_used=angle
-
-				#if normal[2]>0:
-				#	angle_used=next_angle
-					
-				#if normal[2]<0:
-				#	angle_used=angle
-
-				is_reused_vert=False
-
-				if mapped_vert==None:
-					mapped_bm_vert=newface.generate_remapped_bmvert(self.bm_new,angle,length)
-
-					status="created"
-
-					mapped_vert=self.add_mapped_bmvert(eval_loop.vert,mapped_bm_vert)
-				else:
-					status="reused"
-					is_reused_vert=True
-					#if newface.get_vert_count()>1:
-					#newface.increment_angle(angle)
-
-					newface.last_angle=angle
-					newface.last_distance=length
-
-				#if newface.get_vert_count()>0:
-				#newface.increment_angle(angle_used)
-				#else:
-				#	print("skip increment")
-
-				newface.add_vert(mapped_vert,is_reused_vert)
-
-				vert_info="Original: (%f,%f,%f) Mapped: (%f,%f,%f) %s  total: %d"%(
-					
-					mapped_vert.original_vert.co[0],
-					mapped_vert.original_vert.co[1],
-					mapped_vert.original_vert.co[2],
-
-					mapped_vert.mapped_vert.co[0],
-					mapped_vert.mapped_vert.co[1],
-					mapped_vert.mapped_vert.co[2],
-					status,
-					round(math.degrees(newface.total_angle)))
-				
-				print("loop angle: %d length: %f - %s"%(round(angle_degrees),length,vert_info))
-
-				eval_loop=next_loop
-
-				# check to see if we have made a complete pass on all loops
-				if eval_loop==start_loop:
-					continue_search=False
-
-
-			#flipped=not flipped
 
 		# Add faces to new BMesh (bm_new)
 		faces_added=0
