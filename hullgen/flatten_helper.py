@@ -6,6 +6,46 @@ def get_bmvert_coords_text(bmvert):
 	text="%f,%f,%f"%(bmvert.co[0],bmvert.co[1],bmvert.co[2])
 	return text
 
+
+from mathutils import Vector
+# project into XY plane, 
+up = Vector((0, 0, 1))
+
+def edge_angle_v3(e1,e2):
+	#v1 = obj.data.vertices[e1[0]].co - obj.data.vertices[e1[1]].co
+	#v2 = obj.data.vertices[e2[0]].co - obj.data.vertices[e2[1]].co
+
+	v1 = e1.verts[0].co - e1.verts[1].co
+	v2 = e2.verts[0].co - e2.verts[1].co
+
+	# edge is not directed
+	angle = min(v1.angle(v2),v1.angle(-v2))
+	return angle
+
+def edge_angle(e1, e2, face_normal):
+
+	#print("edge angle: %s %s"%(e1,e2))
+	
+	b = set(e1.verts).intersection(e2.verts).pop()
+	a = e1.other_vert(b).co - b.co
+	c = e2.other_vert(b).co - b.co
+	a.negate()    
+	axis = a.cross(c).normalized()
+	if axis.length < 1e-5:
+		return math.pi # inline vert
+	
+	if axis.dot(face_normal) < 0:
+		axis.negate()
+	M = axis.rotation_difference(up).to_matrix().to_4x4()  
+
+	a = (M @ a).xy.normalized()
+	c = (M @ c).xy.normalized()
+
+	angle=math.pi - math.atan2(a.cross(c), a.dot(c))
+	#print("Edge Corner", e1.index, e2.index, "Angle:", round(math.degrees(angle)))
+
+	return angle
+
 # expects an array of 2 verts (x,y) [ v1[x,y], v2[x,y] ]
 # returns angle in radians between verts and reference in zero (3 o clock position)
 def measure_angle_between_verts(verts):
@@ -287,6 +327,25 @@ class mapped_mesh:
 
 		self.bm_new=bm_new
 
+	def print_edge_angles(self,f,bm):
+
+		up = Vector((0, 0, 1))
+
+		#ob = bpy.context.object
+		#me = ob.data
+		#bm = bmesh.from_edit_mesh(me)
+
+		selected_faces = [f for f in bm.faces if f.select]
+		for f in selected_faces:
+			edges = f.edges[:]
+			print("Face", f.index, "Edges:", [e.index for e in edges])
+			edges.append(f.edges[0])
+			
+		for e1, e2 in zip(edges, edges[1:]):
+
+			angle = edge_angle(e1, e2, f.normal)
+			print("Edge Corner", e1.index, e2.index, "Angle:", round(math.degrees(angle)))
+
 	def process_face(self,f):
 
 		if f in self.processed_faces:
@@ -294,6 +353,8 @@ class mapped_mesh:
 			return
 
 		flipped=False
+
+		self.print_edge_angles(f)
 	
 		#vertcount=len(f.verts)
 
@@ -369,16 +430,26 @@ class mapped_mesh:
 
 		while continue_search:
 
-			angle=eval_loop.calc_angle()
-			angle_degrees=math.degrees(eval_loop.calc_angle())
+			next_loop=eval_loop.link_loop_next
+			prev_loop=eval_loop.link_loop_prev
+
+			normal=eval_loop.calc_normal()
+
+			#angle=eval_loop.calc_angle()
+			angle=edge_angle(eval_loop.edge,next_loop.edge,normal)
+
+			print("Edge Corner", eval_loop.edge.index, next_loop.edge.index, "Angle:", round(math.degrees(angle)))
+
+
+
+
+			angle_degrees=math.degrees(angle)
 			length=eval_loop.edge.calc_length()
 
 			is_convex=eval_loop.is_convex
 			tangent=eval_loop.calc_tangent()
-			normal=eval_loop.calc_normal()
+			
 
-			next_loop=eval_loop.link_loop_next
-			prev_loop=eval_loop.link_loop_prev
 
 			next_angle=next_loop.calc_angle()
 			next_angle_degrees=math.degrees(next_angle)
@@ -562,6 +633,7 @@ class flatten_helper():
 			me = selected_object.data
 			bm_old = bmesh.new()         # Create a new bmesh container instance
 			bm_old.from_mesh(me)         # Pass your mesh into this container
+
 			
 			# bm_old.verts.ensure_lookup_table()
 
@@ -570,6 +642,11 @@ class flatten_helper():
 			mesh_data = bpy.data.meshes.new("cloned")
 
 			new_mapped_mesh = mapped_mesh(bm_new)
+
+			bm_old.faces.ensure_lookup_table()
+			f=bm_old.faces[0]
+			
+			new_mapped_mesh.print_edge_angles(f,bm_old)
 
 			new_mapped_mesh.remap_mesh(bm_old)
 
