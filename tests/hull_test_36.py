@@ -162,7 +162,7 @@ def add_pilot_house():
 	bool_new.object = ob
 	bool_new.operation = 'UNION'
 
-	window_helper.make_window_on_object(ob,(-0.5,0.31,0.35),90-8)
+	window_helper.make_window_on_object(ob,(-0.5,0.31,0.35),[90-8,0,0])
 
 	bpy_helper.hide_object(ob)
 
