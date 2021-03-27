@@ -354,7 +354,7 @@ class mapped_mesh:
 
 		flipped=False
 
-		self.print_edge_angles(f)
+		#self.print_edge_angles(f)
 	
 		#vertcount=len(f.verts)
 
@@ -435,8 +435,8 @@ class mapped_mesh:
 
 			normal=eval_loop.calc_normal()
 
-			#angle=eval_loop.calc_angle()
-			angle=edge_angle(eval_loop.edge,next_loop.edge,normal)
+			angle=eval_loop.calc_angle()
+			#angle=edge_angle(eval_loop.edge,next_loop.edge,normal)
 
 			print("Edge Corner", eval_loop.edge.index, next_loop.edge.index, "Angle:", round(math.degrees(angle)))
 
@@ -646,7 +646,7 @@ class flatten_helper():
 			bm_old.faces.ensure_lookup_table()
 			f=bm_old.faces[0]
 			
-			new_mapped_mesh.print_edge_angles(f,bm_old)
+			#new_mapped_mesh.print_edge_angles(f,bm_old)
 
 			new_mapped_mesh.remap_mesh(bm_old)
 
