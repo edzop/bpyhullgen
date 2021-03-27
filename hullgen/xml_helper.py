@@ -37,7 +37,7 @@ def dump_hull(the_hull):
         the_hull.bulkhead_thickness))
 
     for chine in the_hull.chine_list:
-        print("chine '%s': curve(%f %f %f) extrude_width: %f offset(%f %f %f) rotation(%f %f %f) symmetrical %d"%(
+        print("chine '%s': curve(%f %f %f) extrude_width: %f offset(%f %f %f) rotation(%f %f %f) symmetrical %d A0 %f A1 %f"%(
             chine.name,
             chine.curve_length,
             chine.curve_width,
@@ -49,7 +49,9 @@ def dump_hull(the_hull):
             chine.rotation[0],
             chine.rotation[1],
             chine.rotation[2],
-            chine.symmetrical))
+            chine.symmetrical,
+            chine.asymmetry[0],
+            chine.asymmetry[1]))
 
 def parse_int_val(elem,name,default=0):
     val=default
@@ -198,6 +200,7 @@ def read_hull(filename):
                 
                 offset=[0,0,0]
                 rotation=[0,0,0]
+                asymmetry=[0,0]
 
                 longitudal_defs=[]
 
@@ -208,6 +211,11 @@ def read_hull(filename):
                         width=parse_float_val(subelem,"width",width)
                         height=parse_float_val(subelem,"height",height)
                         extrude_width=parse_float_val(subelem,"extrude_width",extrude_width)
+
+                    if subelem.tag=="asymmetry":
+                        asymmetry[0]=parse_float_val(subelem,"a0",0)
+                        asymmetry[1]=parse_float_val(subelem,"a1",0)
+
 
                     if subelem.tag=="offset":
                         offset[0]=parse_float_val(subelem,"x",0)
@@ -243,7 +251,8 @@ def read_hull(filename):
 
                 new_chine=chine_helper.chine_helper(newhull,
                     name=name,length=length,width=width,
-                    symmetrical=symmetrical)
+                    symmetrical=symmetrical,
+                    asymmetry=asymmetry)
 
                 new_chine.curve_height=height
                 new_chine.offset=offset

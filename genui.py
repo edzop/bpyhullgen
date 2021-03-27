@@ -268,6 +268,22 @@ class hullgendef_chine_Properties(PropertyGroup):
 		max = 200
 		)
 
+	a0 : FloatProperty(
+		name = "A0",
+		description = "Asymetry (0)",
+		default = 0,
+		min = 0,
+		max = 1
+		)
+
+	a1 : FloatProperty(
+		name = "A1",
+		description = "Asymetry (1)",
+		default = 0,
+		min = 0,
+		max = 1
+		)
+
 	active_longitudal_index: IntProperty(default=-1)
 
 	longitudals: CollectionProperty(
@@ -941,6 +957,9 @@ def update_properties_from_hull(the_hull,context):
 		chine_prop.width=chine.curve_width
 		chine_prop.length=chine.curve_length
 
+		chine_prop.a0=chine.asymmetry[0]
+		chine_prop.a1=chine.asymmetry[1]
+
 		chine_prop.pos=chine.offset
 
 		chine_prop.symmetrical=chine.symmetrical
@@ -1047,7 +1066,8 @@ def update_hull_from_properties(the_hull,context):
 			width=width,
 			rotation=rot,
 			offset=chineprop.pos,
-			symmetrical=chineprop.symmetrical
+			symmetrical=chineprop.symmetrical,
+			asymmetry=[chineprop.a0,chineprop.a1]
 		)
 
 		the_hull.add_chine(new_chine)
@@ -1325,6 +1345,10 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 
 				row = layout.row()
 				row.prop(chine_item,"symmetrical")
+
+				row = layout.row()
+				row.prop(chine_item,"a0")
+				row.prop(chine_item,"a1")
 
 				if len(chine_item.longitudals)>0:
 
