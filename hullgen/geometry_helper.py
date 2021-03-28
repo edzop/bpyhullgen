@@ -50,7 +50,7 @@ def separate_active_by_material():
 					obj.name="%s_%s"%(object_name,first_material_name)
 
 
-def solidify_selected_objects():
+def solidify_selected_objects(thickness=-0.003):
 	for obj in bpy.context.selected_objects:
 		if obj.type=="MESH":
 			has_solidify_modifier=False
@@ -61,7 +61,7 @@ def solidify_selected_objects():
 
 			if has_solidify_modifier==False:
 				modifier=obj.modifiers.new(name="solidify", type='SOLIDIFY')
-				modifier.thickness=-0.03
+				modifier.thickness=thickness
 
 				bpy.context.view_layer.objects.active = obj
 				bpy.ops.object.modifier_apply(modifier=modifier.name)
@@ -180,6 +180,8 @@ def apply_all_bool_modifiers():
 		if bpy.context.active_object.mode!="OBJECT":
 			bpy.ops.object.mode_set(mode='OBJECT')
 
+	
+
 	hidden_objects=[]
 
 	# unhide all objects
@@ -214,15 +216,26 @@ def apply_all_bool_modifiers():
 
 						bpy.context.view_layer.objects.active = boolean_target_object
 
+						bpy.ops.object.mode_set(mode='EDIT')
+						bpy.ops.mesh.select_mode(type="FACE")
+						bpy.ops.mesh.select_all(action='SELECT')
+						bpy.ops.object.mode_set(mode='OBJECT')
+
 						# select all faces for material assignment to occur
-						for face in obj.data.polygons:
-							face.select=True
+						#for face in obj.data.polygons:
+						#	face.select=True
 
 						bpy.context.view_layer.objects.active = obj
+						
 						print("Applying object: %s"%obj.name)
 
-						for face in obj.data.polygons:
-							face.select=False
+						bpy.ops.object.mode_set(mode='EDIT')
+						bpy.ops.mesh.select_mode(type="FACE")
+						bpy.ops.mesh.select_all(action='DESELECT')
+						bpy.ops.object.mode_set(mode='OBJECT')
+
+						#for face in obj.data.polygons:
+						#	face.select=False
 
 						bpy.ops.object.modifier_apply(modifier=modifier.name)
 

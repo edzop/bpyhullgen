@@ -84,6 +84,16 @@ class hullgen_Properties (PropertyGroup):
 		max = 50000.0
 		)
 
+	solidify_thickness : FloatProperty(
+		name = "Thickness",
+		description = "Solidify Thickness",
+		default = 0.003,
+		min = 0.001,
+		max = 10
+		)
+
+	
+
 	output_csv : BoolProperty(
 		name="Output CSV",
 		description="Output hydro.csv file containing simulation data",
@@ -215,13 +225,17 @@ class SeparateMaterialOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 class SolidifySelectedObjectsOperator (bpy.types.Operator):
-	"""Solidify each selected object"""
+	"""Solidify each selected object to hull material thickness"""
 	bl_idname = "wm.solidifyselections"
 	bl_label = "Solidify Selections"
 
 	def execute(self, context):
 
-		geometry_helper.solidify_selected_objects()
+		mytool = context.scene.hullgen_Props
+
+#		print("Weight:", mytool.scale_to_distance)
+
+		geometry_helper.solidify_selected_objects(thickness=mytool.solidify_thickness)
 
 		return {'FINISHED'}
 
@@ -465,6 +479,9 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		row.label(text="Modify:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.solidifyselections")
+		layout.prop( mytool, "solidify_thickness")
+
+		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
