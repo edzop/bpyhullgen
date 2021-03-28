@@ -370,7 +370,9 @@ class hull_maker:
 		if self.hide_hull:
 			self.hull_object.hide_viewport=True
 
-		performance_timer.get_elapsed_string()
+		time_string = performance_timer.get_elapsed_string()
+
+		return time_string
 
 	def add_keel(self,keel):
 		self.keel_list.append(keel)
