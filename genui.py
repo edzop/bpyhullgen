@@ -1117,7 +1117,9 @@ class LIST_OT_GenHull(Operator):
 
 		the_hull.make_hull_object()
 
-		the_hull.integrate_components()
+		time_string = the_hull.integrate_components()
+
+		bpy.context.workspace.status_text_set("Generate Hull - %s"%time_string)	
 		
 		return{'FINISHED'}
 
