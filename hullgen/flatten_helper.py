@@ -623,10 +623,10 @@ class flatten_helper():
 				print("loop angle: %f length: %f"%(angle,length))
 			
 
-	def clone_object_faces(self):
+	def clone_object_faces(self,selected_object):
 
 			scene = bpy.context.scene
-			selected_object = bpy.context.object
+			#selected_object = bpy.context.object
 
 			print("Active object = ",selected_object.name)
 
@@ -730,5 +730,7 @@ class flatten_helper():
 
 		#return self.measure_angle()
 
-		self.clone_object_faces()
+		for obj in bpy.context.selected_objects:
+			if obj.type=="MESH":
+				self.clone_object_faces(obj)
 		#self.print_angles()
