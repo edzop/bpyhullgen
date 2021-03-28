@@ -645,8 +645,43 @@ def calculate_cg(influence_objects):
 	
 	return cg_empty
 	
-
 def import_plates(filename):
+
+	for obj in bpy.context.selected_objects:
+		if obj.type=="MESH":
+			bpy_helper.select_object(obj,True)
+			
+			bpy.ops.object.mode_set(mode='EDIT')
+			bpy.ops.mesh.select_all(action='SELECT')
+			bpy.ops.mesh.remove_doubles()
+			bpy.ops.mesh.select_mode(type="EDGE")
+			bpy.ops.mesh.select_all(action='DESELECT')
+			bpy.ops.object.mode_set(mode='OBJECT')
+
+			obj.data.edges[0].select=True
+			bpy.ops.object.mode_set(mode='EDIT')
+			#bpy.ops.mesh.select_similar(type='FACE', compare='LESS', threshold=1)
+			bpy.ops.mesh.select_similar(type='FACE', threshold=1)
+			
+			# sometime models need to invert this sometimes not - not sure why...
+			# Should create toggle?
+			bpy.ops.mesh.select_all(action='INVERT')
+			bpy.ops.mesh.delete(type='EDGE')
+			
+			bpy.ops.mesh.select_mode(type="VERT")
+			bpy.ops.mesh.select_all(action='DESELECT')
+			bpy.ops.mesh.select_loose()
+			bpy.ops.mesh.delete(type='VERT')
+
+			bpy.ops.mesh.select_all(action='SELECT')
+			bpy.ops.mesh.separate(type='LOOSE')
+			bpy.ops.mesh.select_mode(type="EDGE")
+
+			bpy.ops.object.mode_set(mode='OBJECT')
+
+
+
+def import_plates_OLD(filename):
 
 	bpy.ops.import_curve.svg(filepath=filename)
 
