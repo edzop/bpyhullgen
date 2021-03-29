@@ -37,7 +37,7 @@ class keel:
 	station_end=1
 
 	# How much keel slicer will cut off the top of the keel for notching into bulkheads
-	slicer_cut_height=0.2
+	slicer_cut_height=0.1
 
 	keel_slicer_object=None
 	keel_slicer_slot_gap_object=None
