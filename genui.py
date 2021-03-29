@@ -577,7 +577,7 @@ class LIST_OT_RefreshConfig(Operator):
 class LIST_OT_NewLongitudalItem(Operator): 
 	"""Add a new item to the list.""" 
 	bl_idname = "genui.new_longitudal" 
-	bl_label = "Add Longutidal" 
+	bl_label = "Add Longitudal" 
 
 	@classmethod 
 	def poll(cls, context): 
