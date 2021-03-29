@@ -178,9 +178,7 @@ class modshape:
 			location=self.location,
 			rotation=self.rotation)
 
-		bool_name="mod_%s"%self.name
-		bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name=bool_name)
-		bool_new.object = mod_object
+		
 
 		if self.deform!=[0,0,0]:
 
@@ -196,10 +194,23 @@ class modshape:
 
 			bpy.ops.object.mode_set(mode='OBJECT')
 
+		bool_target_object=the_hull.hull_object
+		bool_mod_object=mod_object
+		bool_op=""
+
 		if self.mod_mode=="add":
-			bool_new.operation = 'UNION'
+			bool_op = 'UNION'
+		elif self.mod_mode=="subtract":
+			bool_op = 'DIFFERENCE'
 		else:
-			bool_new.operation = 'DIFFERENCE'
+			bool_op = "INTERSECT"
+			bool_target_object=mod_object
+			bool_mod_object=the_hull.hull_object
+
+		bool_name="mod_%s"%self.name
+		bool_new = bool_target_object.modifiers.new(type="BOOLEAN", name=bool_name)
+		bool_new.object = bool_mod_object
+		bool_new.operation=bool_op
 
 		mod_object.hide_render=True
 		mod_object.hide_viewport=True

@@ -132,6 +132,7 @@ class hullgendef_modshape_Properties(PropertyGroup):
 		description="Mode",
 		items=[ ('add', "Add", ""),
 				('subtract', "Subtract", ""),
+				('intersect', "Intersect", ""),
 			   ]
 		)
 
