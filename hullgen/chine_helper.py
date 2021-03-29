@@ -33,7 +33,7 @@ class longitudal_definition:
 
 	# ratio of longitudal to slicer means how high the slicers are in relation to longitudals
 	# If it's 0.5 it will be half - it affects the notches height for bulkheads 
-	slicer_ratio=0.5
+	slicer_ratio=0.3
 
 	bend_radius=0
 	curve_angle=0
@@ -49,7 +49,7 @@ class longitudal_definition:
 		self.curve_angle=angle
 		self.bend_radius=radius
 
-	def __init__(self,z_offset=0,width=0.1,thickness=0.1,slicer_ratio=0.5):
+	def __init__(self,z_offset=0,width=0.1,thickness=0.1,slicer_ratio=0.7):
 		self.z_offset=z_offset
 		self.width=width
 		self.thickness=thickness
@@ -153,6 +153,16 @@ class chine_helper:
 		self.view_collection_chines=bpy_helper.make_collection("chines",bpy.context.scene.collection.children)
 		self.view_collection_longitudals=bpy_helper.make_collection("longitudals",bpy.context.scene.collection.children)
 
+
+	def delete_all_vertex_group(self,ob,vertex_group_name):
+		ob.select_set(state=True)
+
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.object.vertex_group_set_active(group=vertex_group_name)
+		bpy.ops.object.vertex_group_select()
+		bpy.ops.mesh.delete(type='VERT')
+
  
 	# After the boolean operation is complete the vertices can be removed that are on the other side
 	# of the plane used for the boolean operation. 
@@ -201,6 +211,8 @@ class chine_helper:
 		newCurve=theCurveHelper.curve_object
 		bpy_helper.select_object(newCurve,True)
 
+		
+
 		geometry_helper.set_rotation_degrees(newCurve,[90,0,0])
 
 		bpy.ops.object.transform_apply(rotation=True,scale=False,location=False)
@@ -223,80 +235,15 @@ class chine_helper:
 
 		bpy.ops.object.mode_set(mode='OBJECT')
 
-		front_group = newCurve.vertex_groups.new()
-		front_group.name = "front"
-
-		back_group = newCurve.vertex_groups.new()
-		back_group.name = "back"
-		
-		y_min=0
-		y_max=0
+		base_group = newCurve.vertex_groups.new()
+		base_group.name = "base"
+		base_verts=[]
 
 		for vert in newCurve.data.vertices:
-			if vert.co.y>y_max:
-				y_max=vert.co.y
-
-			if vert.co.y<y_min:
-				y_min=vert.co.y
-
-		y_diff=y_max-y_min
-		y_half=0
-
-		if y_diff>0:
-			y_half=y_min+y_diff/2
-
-		front_verts=[]
-		back_verts=[]
-
-
-		# for some reason vector math type if vert.co.y==0 equals false negative because of some rounding issue so I'm using -1 as cutoff for comparison
-
-		#print("+++++++++++++++")
-		#print("name: %s width: %f inverted: %d"%(name,self.curve_width,inverted_curves))
-
-		for vert in newCurve.data.vertices:
-			#print("X: %f Y: %f Z: %f"%(vert.co.x,vert.co.y,vert.co.z),end =" ")
+			base_verts.append(vert.index)
 			
-			# this is messy hack... will refactor after easier way to identify
-			# modified vertices in new exact boolean modifier.
-			# for now there is no easy solution to identify newly created geometry
-			if self.curve_width<0:
-				if vert.co.y<y_half:
-					if inverted_curves==0:
-						front_verts.append(vert.index)
-						#print("front")
-					else:
-						back_verts.append(vert.index)
-						#print("back")
-
-				if vert.co.y>=y_half:
-					if inverted_curves==0:
-						back_verts.append(vert.index)
-						#print("back")
-					else:
-						front_verts.append(vert.index)
-						#print("front")
-			else:
-				if vert.co.y<y_half:
-					if inverted_curves==1:
-						front_verts.append(vert.index)
-						#print("front")
-					else:
-						back_verts.append(vert.index)
-						#print("back")
-
-				if vert.co.y>=y_half:
-					if inverted_curves==1:
-						back_verts.append(vert.index)
-						#print("back")
-					else:
-						front_verts.append(vert.index)
-						#print("front")
-
-			
-		front_group.add(front_verts, 1.0, 'ADD')
-		back_group.add(back_verts, 1.0, 'ADD')
-
+		base_group.add(base_verts, 1.0, 'ADD')
+	
 		newCurve.location.z=height
 
 		y_shift=self.curve_width*overlap_factor/2
@@ -343,16 +290,16 @@ class chine_helper:
 		
 		slicer1.select_set(True)
 		bpy.context.view_layer.objects.active=slicer1
+
 		
 		bool_cut = slicer1.modifiers.new(type="BOOLEAN", name=name_prefix)
 		bool_cut.object = wall_curve
 		bool_cut.operation = 'DIFFERENCE'
 
 		bpy.ops.object.modifier_apply(modifier=name_prefix)
-
+				
+		self.delete_all_vertex_group(slicer1,"base")
 		
-		self.delete_all_except_vertex_group(slicer1,"back")
-
 		slicer1.select_set(False)
 		
 		# Add second plane
@@ -371,7 +318,8 @@ class chine_helper:
 
 		bpy.ops.object.modifier_apply(modifier=name_prefix)
    
-		self.delete_all_except_vertex_group(slicer2,"back")
+		#self.delete_all_except_vertex_group(slicer2,"back")
+		self.delete_all_vertex_group(slicer1,"base")
 
 		bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -418,6 +366,8 @@ class chine_helper:
 
 		material_helper.assign_material(longitudal_plane,material_helper.get_material_stringer())
 
+		
+
 		extrude_amount=-longitudal_element.width
 		slicer_extrude_amount=-longitudal_element.width*longitudal_element.slicer_ratio
 
@@ -426,6 +376,8 @@ class chine_helper:
 			slicer_extrude_amount=longitudal_element.width*longitudal_element.slicer_ratio
 							
 		self.select_and_extrude_slicer(longitudal_plane,extrude_amount)
+
+
 
 		# Slicer Plane
 			
