@@ -26,7 +26,7 @@ from mathutils.bvhtree import BVHTree
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
 from ..hullgen import measure_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 
 def separate_active_by_material():
 	selected_object=bpy.context.view_layer.objects.active

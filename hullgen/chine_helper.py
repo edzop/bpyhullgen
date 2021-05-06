@@ -22,9 +22,9 @@ from math import radians, degrees
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 from ..hullgen import geometry_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 
 class longitudal_definition:
 	z_offset=0

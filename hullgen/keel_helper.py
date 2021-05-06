@@ -21,7 +21,7 @@ import bpy
 from math import radians
 
 from ..hullgen import curve_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 
 class keel:
 	lateral_offset=0

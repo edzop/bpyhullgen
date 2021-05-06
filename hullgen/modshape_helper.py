@@ -19,7 +19,7 @@
 import bpy
 
 from ..hullgen import curve_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 from ..hullgen import geometry_helper  
 from ..hullgen import window_helper  
 

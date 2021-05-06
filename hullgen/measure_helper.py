@@ -27,7 +27,7 @@ import queue
 
 from ..hullgen import curve_helper
 from ..hullgen import material_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 
 bouyancy_text_object=None
 bouyancy_text_object_name="bouyancy_text"

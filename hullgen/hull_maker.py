@@ -28,7 +28,7 @@ from ..hullgen import chine_helper
 from ..hullgen import bulkhead
 from ..hullgen import keel_helper
 from ..hullgen import geometry_helper
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 from bpyhullgen.hullgen import prop_helper
 
 class hull_maker:

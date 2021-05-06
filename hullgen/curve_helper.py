@@ -21,7 +21,7 @@ from mathutils import Vector
 import math
 from math import radians, degrees
 
-from ..hullgen import bpy_helper
+from ..bpyutils import bpy_helper
 
 def cleanup_shape(ob):
 	if bpy.context.active_object.mode=="OBJECT":

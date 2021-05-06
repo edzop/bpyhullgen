@@ -32,7 +32,7 @@ from .hullgen import modshape_helper as modshape_helper
 from .hullgen import curve_helper as curve_helper
 from .hullgen import keel_helper as keel_helper
 from .hullgen import xml_helper as xml_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 from .hullgen import chine_helper as chine_helper
 
