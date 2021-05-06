@@ -120,7 +120,7 @@ classes = (
 from .hullgen import geometry_helper as geometry_helper
 from .bpyutils import material_helper as material_helper
 from .hullgen import window_helper as window_helper
-from .hullgen import measure_helper as measure_helper
+from .bpyutils import measure_helper as measure_helper
 from .hullgen import curve_helper as curve_helper
 from .hullgen import hull_maker as hull_maker
 
