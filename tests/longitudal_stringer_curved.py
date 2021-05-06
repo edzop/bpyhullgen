@@ -18,7 +18,7 @@
 
 import bpy
    
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import material_helper
 from bpyhullgen.hullgen import curve_helper

@@ -45,11 +45,9 @@ class prop_helper:
 			ob.location=self.location
 
 		if self.rotation!=None:
-			bpy.ops.transform.rotate(value=radians(self.rotation[0]),orient_axis='X')
-
-			bpy.ops.transform.rotate(value=radians(self.rotation[1]),orient_axis='Y')
-
-			bpy.ops.transform.rotate(value=radians(self.rotation[2]),orient_axis='Z')
+			ob.rotation_euler.x=radians(self.rotation[0])
+			ob.rotation_euler.y=radians(self.rotation[1])
+			ob.rotation_euler.z=radians(self.rotation[2])
 
 		if self.parent!=None:
 			ob.parent=self.parent

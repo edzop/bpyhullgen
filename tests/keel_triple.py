@@ -22,7 +22,7 @@ from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import chine_helper
 from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 performance_timer = bpy_helper.ElapsedTimer()
 

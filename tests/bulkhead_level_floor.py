@@ -6,7 +6,7 @@ from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import bulkhead
 from bpyhullgen.hullgen import render_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 
 the_hull=hull_maker.hull_maker()

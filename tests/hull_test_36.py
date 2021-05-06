@@ -27,7 +27,7 @@ from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
 from bpyhullgen.hullgen import render_helper
 from bpyhullgen.hullgen import keel_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 the_hull=hull_maker.hull_maker(width=5,length=11,height=3)
 

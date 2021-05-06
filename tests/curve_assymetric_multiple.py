@@ -3,7 +3,7 @@ import bpy
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import render_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 text_offset=(-5,-2.44,0)
 

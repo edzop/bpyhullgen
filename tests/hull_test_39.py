@@ -26,7 +26,7 @@ from bpyhullgen.hullgen import geometry_helper
 from bpyhullgen.hullgen import window_helper
 from bpyhullgen.hullgen import keel_helper
 from bpyhullgen.hullgen import render_helper
-from bpyhullgen.hullgen import bpy_helper
+from bpyhullgen.bpyutils import bpy_helper
 
 performance_timer = bpy_helper.ElapsedTimer()
 
