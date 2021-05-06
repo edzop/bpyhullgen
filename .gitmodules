@@ -1,0 +1,3 @@
+[submodule "bpyutils"]
+	path = bpyutils
+	url = git@github.com:edzop/bpyutils.git
