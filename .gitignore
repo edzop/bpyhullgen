@@ -1,7 +1,7 @@
 tests/output/*.png
-__pycache__
 *.blend1
 *.ogv
 *.log
 *.pyc
-bpyhullgen.dxf
+*.dxf
+*.csv
