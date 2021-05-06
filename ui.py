@@ -143,7 +143,7 @@ class GenSceneOperator (bpy.types.Operator):
 # ------------------------------------------------------------------------
 
 class ApplyAllBoolOperator (bpy.types.Operator):
-	"""Applies all boolean modifiers for each object in scene while assigning unique material for each boolean modifer for further identification of faces after modifier is applied"""
+	"""Applies all boolean modifiers for each object in scene while assigning unique material for each boolean modifier for further identification of faces after modifier is applied"""
 	bl_idname = "wm.apply_all_bool"
 	bl_label = "ApplyAllBool"
 
