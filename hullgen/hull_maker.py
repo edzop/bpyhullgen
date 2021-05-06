@@ -22,7 +22,7 @@ from math import radians, degrees
 import bmesh
 
 from ..hullgen import curve_helper
-from ..hullgen import material_helper
+from ..bpyutils import material_helper
 from ..hullgen import curve_helper
 from ..hullgen import chine_helper
 from ..hullgen import bulkhead

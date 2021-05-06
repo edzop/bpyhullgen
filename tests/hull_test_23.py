@@ -19,7 +19,7 @@
 import bpy
   
 from bpyhullgen.hullgen import chine_helper
-from bpyhullgen.hullgen import material_helper
+from bpyhullgen.bpyutils import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import geometry_helper

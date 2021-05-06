@@ -21,7 +21,7 @@ import bpy
 from math import radians, degrees
  
 from bpyhullgen.hullgen import chine_helper
-from bpyhullgen.hullgen import material_helper
+from bpyhullgen.bpyutils import material_helper
 from bpyhullgen.hullgen import curve_helper
 from bpyhullgen.hullgen import hull_maker
 from bpyhullgen.hullgen import bulkhead

@@ -24,7 +24,7 @@ import bmesh
 from mathutils.bvhtree import BVHTree
 
 from ..hullgen import curve_helper
-from ..hullgen import material_helper
+from ..bpyutils import material_helper
 from ..hullgen import measure_helper
 from ..bpyutils import bpy_helper
 

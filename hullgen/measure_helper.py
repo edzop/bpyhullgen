@@ -26,7 +26,7 @@ from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 import queue
 
 from ..hullgen import curve_helper
-from ..hullgen import material_helper
+from ..bpyutils import material_helper
 from ..bpyutils import bpy_helper
 
 bouyancy_text_object=None

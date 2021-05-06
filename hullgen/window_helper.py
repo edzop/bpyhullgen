@@ -21,7 +21,7 @@ import math
 from math import radians
 
 from ..hullgen import geometry_helper
-from ..hullgen import material_helper
+from ..bpyutils import material_helper
 from ..hullgen import curve_helper
 from ..bpyutils import bpy_helper
 
