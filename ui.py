@@ -23,7 +23,8 @@ import bpy
 from .hullgen import geometry_helper as geometry_helper
 from .bpyutils import material_helper as material_helper
 from .hullgen import window_helper as window_helper
-from .hullgen import measure_helper as measure_helper
+from .bpyutils import measure_helper as measure_helper
+from .hullgen import import_export_helper as import_export_helper
 from .hullgen import flatten_helper as flatten_helper
 from .hullgen import curve_helper as curve_helper
 
@@ -165,7 +166,7 @@ class Export_CSV_Operator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.exportCSV()
+		import_export_helper.exportCSV()
 
 		return {'FINISHED'}
 
@@ -258,7 +259,7 @@ class ExportPlatesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.export_plates("bpyhullgen.svg")
+		import_export_helper.export_plates("bpyhullgen.svg")
 
 		return {'FINISHED'}
 
@@ -343,7 +344,7 @@ class ImportPlatesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.import_plates("bpyhullgen.svg")
+		import_export_helper.import_plates("bpyhullgen.svg")
 
 		return {'FINISHED'}
 
