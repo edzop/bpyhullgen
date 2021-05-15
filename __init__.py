@@ -66,6 +66,7 @@ classes = (
 
     genui.WM_OT_auto_bulkheads,
     
+    
     genui.LIST_OT_NewModshapeItem,
     genui.LIST_OT_DeleteModshapeItem,
 
@@ -101,6 +102,7 @@ classes = (
     ui.GenSceneOperator,
     ui.ApplyAllBoolOperator,
     ui.DeleteAllOperator,
+    ui.BendStressOperator,
     ui.Export_CSV_Operator,
     ui.ExportPlatesOperator,
     ui.ImportPlatesOperator,

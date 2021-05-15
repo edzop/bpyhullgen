@@ -349,6 +349,23 @@ class ImportPlatesOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class BendStressOperator (bpy.types.Operator):
+	"""Calculate and show bend stress on plates"""
+	bl_idname = "wm.bendstress"
+	bl_label = "BendStress"
+
+	def execute(self, context):
+
+		vertex_material=material_helper.get_material_vertex_colors()
+
+		for obj in bpy.context.selected_objects:
+			if obj.type=="MESH":
+				measure_helper.calculate_bend_stress(obj)
+				material_helper.assign_material(obj,vertex_material)
+
+		return {'FINISHED'}
+
+
 class AluminumPlatesOperator (bpy.types.Operator):
 	"""Assign aluminum material to plates"""
 	bl_idname = "wm.aluminumplates"
@@ -496,6 +513,8 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.bendstress")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.insideshrink")
 		rowsub.operator( "wm.shrinkoutliner")
