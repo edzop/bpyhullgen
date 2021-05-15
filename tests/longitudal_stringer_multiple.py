@@ -38,12 +38,12 @@ new_chine=chine_helper.chine_helper(the_hull,
     rotation=[75,0,0],
 	offset=[0,0.9,0.3])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,
     width=0.5,
     thickness=0.3,
     slicer_ratio=1)
 
-new_chine.add_longitudal_definition(new_longitudal)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -55,12 +55,12 @@ new_chine=chine_helper.chine_helper(the_hull,
     rotation=[45,0,0],
 	offset=[0,1.5,0])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,
     width=0.4,
     thickness=0.3,
     slicer_ratio=1)
 
-new_chine.add_longitudal_definition(new_longitudal)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -72,25 +72,25 @@ new_chine=chine_helper.chine_helper(the_hull,
 	offset=[0,0,0.6],
     symmetrical=False)
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,
     width=0.4,
     thickness=0.3,
     slicer_ratio=1)
 
-new_chine.add_longitudal_definition(new_longitudal)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
 def offline():
     # LOW Chine ==========================
-    new_chine.longitudal_z_offset=0
+    new_chine.longitudinal_z_offset=0
     new_chine.rotation=[-45,0,0]
     new_chine.offset=[0,1.5,0.0]
     new_chine.name="low_curve"
-    new_chine.clear_longitudal_elements()
-    new_longitudal=chine_helper.longitudal_element(0,0.4,0.1)
-    new_longitudal.slicer_ratio=1
-    new_chine.add_longitudal_definition(new_longitudal)
+    new_chine.clear_longitudinal_elements()
+    new_longitudinal=chine_helper.longitudinal_element(0,0.4,0.1)
+    new_longitudinal.slicer_ratio=1
+    new_chine.add_longitudinal_definition(new_longitudinal)
     new_chine.make_chine()
 
 
@@ -108,15 +108,15 @@ the_hull.integrate_components()
 
 for chine in the_hull.chine_list:   
     for chine_instances in chine.chine_instances:        
-        for longitudal_slicer in chine_instances.longitudal_slicers:
+        for longitudinal_slicer in chine_instances.longitudinal_slicers:
             modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')
-            modifier.object=longitudal_slicer
+            modifier.object=longitudinal_slicer
             modifier.operation="DIFFERENCE"
 
 for chine in the_hull.chine_list:
     for chine_instances in chine.chine_instances:
-        for longitudal_object in chine_instances.longitudal_objects:
-            curve_helper.make_rounded(longitudal_object,0.2)
+        for longitudinal_object in chine_instances.longitudinal_objects:
+            curve_helper.make_rounded(longitudinal_object,0.2)
 
 
 framedata=[

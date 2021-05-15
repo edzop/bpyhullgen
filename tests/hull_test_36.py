@@ -46,8 +46,8 @@ new_chine=chine_helper.chine_helper(the_hull,
 	rotation=[180,0,0],
 	offset=[0,-0.27,-0.5])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=-0.3,width=-0.2,thickness=0.1)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=-0.3,width=-0.2,thickness=0.1)
+new_chine.add_longitudinal_definition(new_longitudinal)
 the_hull.add_chine(new_chine)
 
 new_chine=chine_helper.chine_helper(the_hull,
@@ -57,7 +57,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 	rotation=[40,0,0],
 	offset=[0,-0.2,0.45])
 
-new_chine.add_longitudal_definition(chine_helper.longitudal_definition(z_offset=-0.83,width=-0.2,thickness=0.1))
+new_chine.add_longitudinal_definition(chine_helper.longitudinal_definition(z_offset=-0.83,width=-0.2,thickness=0.1))
 
 the_hull.add_chine(new_chine)
 
@@ -85,10 +85,10 @@ new_chine=chine_helper.chine_helper(the_hull,
 
 new_chine.curve_twist=[0,30,-50]
 
-#new_chine.longitudal_count=0
-#new_chine.longitudal_bend_radius=0.2
-#new_chine.set_longitudal_curve(0.2,10)
-#new_chine.longitudal_z_offset=-0.4
+#new_chine.longitudinal_count=0
+#new_chine.longitudinal_bend_radius=0.2
+#new_chine.set_longitudinal_curve(0.2,10)
+#new_chine.longitudinal_z_offset=-0.4
 the_hull.add_chine(new_chine)
 
 new_chine=chine_helper.chine_helper(the_hull,
@@ -100,8 +100,8 @@ new_chine=chine_helper.chine_helper(the_hull,
 	symmetrical=False)
 
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,width=-0.2,thickness=0.1)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,width=-0.2,thickness=0.1)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -247,7 +247,7 @@ the_keel_builder.make_solid_double_keel(top_height=levels[0],start_bulkhead=1,en
 
 the_hull.integrate_components()
 
-the_hull.cleanup_longitudal_ends(x_locations,rotations)
+the_hull.cleanup_longitudinal_ends(x_locations,rotations)
 
 add_deck_cockpit()
 

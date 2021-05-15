@@ -38,13 +38,13 @@ new_chine=chine_helper.chine_helper(the_hull,
     rotation=[75,0,0],
 	offset=[0,0.9,0.3])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,
     width=0.6,
     thickness=0.6,
     slicer_ratio=1)
 
-new_longitudal.set_curve(radius=0.8,angle=4)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal.set_curve(radius=0.8,angle=4)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -67,15 +67,15 @@ the_hull.integrate_components()
 
 for chine in the_hull.chine_list:   
     for chine_instances in chine.chine_instances:        
-        for longitudal_slicer in chine_instances.longitudal_slicers:
+        for longitudinal_slicer in chine_instances.longitudinal_slicers:
             modifier=the_hull.hull_object.modifiers.new(name="bool_long_slice", type='BOOLEAN')
-            modifier.object=longitudal_slicer
+            modifier.object=longitudinal_slicer
             modifier.operation="DIFFERENCE"
 
 for chine in the_hull.chine_list:
     for chine_instances in chine.chine_instances:
-        for longitudal_object in chine_instances.longitudal_objects:
-            curve_helper.make_rounded(longitudal_object,0.2)
+        for longitudinal_object in chine_instances.longitudinal_objects:
+            curve_helper.make_rounded(longitudinal_object,0.2)
 
 
 framedata=[

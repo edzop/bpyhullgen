@@ -35,11 +35,11 @@ new_chine=chine_helper.chine_helper(the_hull,
 	width=-1,
 	offset=[0,0.7,0])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0,
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0,
     width=0.2,
     thickness=0.2)
 
-new_chine.add_longitudal_definition(new_longitudal)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 

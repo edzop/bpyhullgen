@@ -38,7 +38,7 @@ class hull_maker:
 
 	make_bulkheads=True
 	make_keels=True
-	make_longitudals=True
+	make_longitudinals=True
 	hide_hull=True
 		
 	default_floor_height=-0.7
@@ -74,7 +74,7 @@ class hull_maker:
 	subtractive_objects=None
 
 
-	# longitudal spacing is based on bulkheads
+	# longitudinal spacing is based on bulkheads
 	bulkhead_spacing=1.0
 
 	start_bulkhead_location=-3
@@ -115,16 +115,16 @@ class hull_maker:
 				delete_list.append(chine_instance.curve_object)
 				delete_list.append(chine_instance.curve_backup)
 				
-				for lg in chine_instance.longitudal_slicers:
+				for lg in chine_instance.longitudinal_slicers:
 					delete_list.append(lg)
 
-				for lg in chine_instance.longitudal_slicers:
+				for lg in chine_instance.longitudinal_slicers:
 					delete_list.append(lg)
 
-				for lg in chine_instance.longitudal_slicers_slot_gap_objects:
+				for lg in chine_instance.longitudinal_slicers_slot_gap_objects:
 					delete_list.append(lg)
 
-				for lg in chine_instance.longitudal_objects:
+				for lg in chine_instance.longitudinal_objects:
 					delete_list.append(lg)
 
 		for keel in self.keel_list:
@@ -331,9 +331,9 @@ class hull_maker:
 		use_props=True
 		#======================================
 		
-		# Longitudal stringers created at same time as chines so as to reuse the curve
+		# longitudinal stringers created at same time as chines so as to reuse the curve
 		for chine_object in self.chine_list:
-				chine_object.longitudal_elements_enabled=self.make_longitudals
+				chine_object.longitudinal_elements_enabled=self.make_longitudinals
 				chine_object.make_chine()
 
 
@@ -361,8 +361,8 @@ class hull_maker:
 		if self.make_bulkheads:
 			self.make_bulkhead_booleans()
 
-		if self.make_longitudals:
-			self.make_longitudal_booleans()
+		if self.make_longitudinals:
+			self.make_longitudinal_booleans()
 
 		if use_subtractive_objects:
 			self.apply_subtractive_objects()
@@ -392,7 +392,7 @@ class hull_maker:
 
 			for chine in self.chine_list:
 				for chine_instance in chine.chine_instances:
-					for lg in chine_instance.longitudal_objects:				
+					for lg in chine_instance.longitudinal_objects:				
 						if geometry_helper.check_intersect(ob,lg):
 							modifier=lg.modifiers.new(type='BOOLEAN',name=bool_name)
 							modifier.object=ob
@@ -407,26 +407,26 @@ class hull_maker:
 			bool_void.operation = 'DIFFERENCE'
 
 
-	def make_longitudal_booleans(self):
+	def make_longitudinal_booleans(self):
 
 		for chine in self.chine_list:
 			for chine_instance in chine.chine_instances:
 
-				for longitudal_slicer in chine_instance.longitudal_slicers:
+				for longitudinal_slicer in chine_instance.longitudinal_slicers:
 
 					for bh in self.bulkhead_instances:
 						#print("bh: %s"%bh.bulkhead_object.name,end=" ")
 						# TODO for some reason interection code not returning correct result
-						if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_slicer) or True:
-							modifier_name=longitudal_slicer.name
+						if geometry_helper.check_intersect(bh.bulkhead_object,longitudinal_slicer) or True:
+							modifier_name=longitudinal_slicer.name
 							bulkhead_modifier=bh.bulkhead_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-							bulkhead_modifier.object=longitudal_slicer
+							bulkhead_modifier.object=longitudinal_slicer
 							bulkhead_modifier.operation="DIFFERENCE"
 
 							if self.slicer_overcut_ratio>1:
 								if bh.bulkhead_overcut_object!=None:
 									bulkhead_overcut_modifier=bh.bulkhead_overcut_object.modifiers.new(name=modifier_name, type='BOOLEAN')
-									bulkhead_overcut_modifier.object=longitudal_slicer
+									bulkhead_overcut_modifier.object=longitudinal_slicer
 									bulkhead_overcut_modifier.operation="DIFFERENCE"
 
 
@@ -437,12 +437,12 @@ class hull_maker:
 								bpy_helper.select_object(bh.bulkhead_object,True)
 								bpy.ops.object.modifier_apply(modifier=modifier_name)
 
-				for longitudal_object in chine_instance.longitudal_objects:
+				for longitudinal_object in chine_instance.longitudinal_objects:
 						for bh in self.bulkhead_instances:
 							# TODO for some reason interection code not returning correct result
-							if geometry_helper.check_intersect(bh.bulkhead_object,longitudal_object) or True:
+							if geometry_helper.check_intersect(bh.bulkhead_object,longitudinal_object) or True:
 								modifier_name=bh.bulkhead_object.name
-								chine_modifier=longitudal_object.modifiers.new(name=modifier_name, type='BOOLEAN')
+								chine_modifier=longitudinal_object.modifiers.new(name=modifier_name, type='BOOLEAN')
 
 								mod_obj = bh.bulkhead_object
 
@@ -456,8 +456,8 @@ class hull_maker:
 								# If we have a slot gap for CNC operations
 								if self.slot_gap>0:
 
-									# Apply modifier to longitudal object because we are going to further modify bulkhead...
-									bpy_helper.select_object(longitudal_object,True)
+									# Apply modifier to longitudinal object because we are going to further modify bulkhead...
+									bpy_helper.select_object(longitudinal_object,True)
 									bpy.ops.object.modifier_apply(modifier=modifier_name)
 
 									# Now use stop gap object to create a larger gap
@@ -465,7 +465,7 @@ class hull_maker:
 
 				# If we have a slot gap for CNC operations
 				if self.slot_gap>0:
-					for lg in chine_instance.longitudal_slicers_slot_gap_objects:
+					for lg in chine_instance.longitudinal_slicers_slot_gap_objects:
 
 						for bh in self.bulkhead_instances:
 							#print("bh: %s"%bh.bulkhead_object.name,end=" ")
@@ -482,9 +482,9 @@ class hull_maker:
 
 
 
-	def make_longitudal_elements(self):
+	def make_longitudinal_elements(self):
 		for chine_object in self.chine_list:
-			chine_object.make_longitudal_elements()
+			chine_object.make_longitudinal_elements()
 
 	def make_chine_hull_booleans(self):
 
@@ -652,8 +652,8 @@ class hull_maker:
 				keel.keel_object.parent=self.hull_object
 
 
-	# Cleans up longitudal framing in center of hull for access to entrance / pilothouse 
-	# so longitudal frames don't block entrance
+	# Cleans up longitudinal framing in center of hull for access to entrance / pilothouse 
+	# so longitudinal frames don't block entrance
 	def cleanup_center(self,clean_location,clean_size):
 
 		view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
@@ -664,17 +664,17 @@ class hull_maker:
 
 		material_helper.assign_material(object_end_clean,material_helper.get_material_bool())
 
-		for lg in self.longitudal_list:
+		for lg in self.longitudinal_list:
 
 			modifier=lg.modifiers.new(name="bool", type='BOOLEAN')
 			modifier.object=object_end_clean
 			modifier.operation="DIFFERENCE"
 			bpy_helper.hide_object(object_end_clean)
 
-	# Trims the ends of the longitudal framing where it extends past last bulkhead
+	# Trims the ends of the longitudinal framing where it extends past last bulkhead
 	# x_locations is a list of stations where they will be chopped
 	# rotations is a corresponding list of rotations in the Y axis. Bulkheads are assumed to be not rotated on X an Z axises. 
-	def cleanup_longitudal_ends(self,x_locations,rotations=None):
+	def cleanup_longitudinal_ends(self,x_locations,rotations=None):
 
 		view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
 
@@ -682,7 +682,7 @@ class hull_maker:
 
 		for index,x_location in enumerate(x_locations):
 			# =========================================
-			# Clean up ends of longitudal slicers
+			# Clean up ends of longitudinal slicers
 
 			block_width=self.hull_width
 
@@ -709,7 +709,7 @@ class hull_maker:
 			for chine_object in self.chine_list:	
 				for chine_instance in chine_object.chine_instances:	
 					#print("chine: %s"%chine_instance)
-					for lg in chine_instance.longitudal_objects:
+					for lg in chine_instance.longitudinal_objects:
 						#print("eval: %s"%lg.name)
 						for object_end_clean in end_clean_list:
 							#print("clean: %s"%object_end_clean.name)

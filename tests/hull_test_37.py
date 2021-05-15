@@ -41,9 +41,9 @@ new_chine=chine_helper.chine_helper(the_hull,
 	offset=[0,0.06,0],
 	)
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0.4,width=-0.15,thickness=0.05)
-new_longitudal.set_limit_x_length(-4.5,4.5)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0.4,width=-0.15,thickness=0.05)
+new_longitudinal.set_limit_x_length(-4.5,4.5)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -60,10 +60,10 @@ new_chine=chine_helper.chine_helper(the_hull,
 	offset=[0,-0.2,-0.4],
 	)
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0.15,width=-0.15,thickness=0.05)
-new_longitudal.set_curve(0.4,5)
-new_longitudal.set_limit_x_length(-4.5,4.5)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0.15,width=-0.15,thickness=0.05)
+new_longitudinal.set_curve(0.4,5)
+new_longitudinal.set_limit_x_length(-4.5,4.5)
+new_chine.add_longitudinal_definition(new_longitudinal)
 the_hull.add_chine(new_chine)
 
 
@@ -86,10 +86,10 @@ new_chine=chine_helper.chine_helper(the_hull,
 	rotation=[79,0,0],
 	)
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0.65,width=-0.15,thickness=0.05)
-new_longitudal.set_curve(0.6,10)
-new_longitudal.set_limit_x_length(-3.4,3.4)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0.65,width=-0.15,thickness=0.05)
+new_longitudinal.set_curve(0.6,10)
+new_longitudinal.set_limit_x_length(-3.4,3.4)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -105,9 +105,9 @@ new_chine=chine_helper.chine_helper(the_hull,
 	symmetrical=False
 	)
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=0.0,width=-0.15,thickness=0.05)
-new_longitudal.set_limit_x_length(-4.7,4.7)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=0.0,width=-0.15,thickness=0.05)
+new_longitudinal.set_limit_x_length(-4.7,4.7)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 

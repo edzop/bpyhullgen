@@ -43,10 +43,10 @@ new_chine=chine_helper.chine_helper(the_hull,
 	offset=[0,0.35,0],
 	asymmetry=[1,0])
 
-new_longitudal=chine_helper.longitudal_definition(z_offset=-0.2,width=-0.13,thickness=0.1)
-new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
+new_longitudinal=chine_helper.longitudinal_definition(z_offset=-0.2,width=-0.13,thickness=0.1)
+new_longitudinal.set_limit_x_length(the_hull.start_bulkhead_location,2)
 
-new_chine.add_longitudal_definition(new_longitudal)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
@@ -81,9 +81,9 @@ new_chine=chine_helper.chine_helper(the_hull,
 	asymmetry=[1,0]
 	)
 
-new_longitudal=chine_helper.longitudal_definition(width=-0.13,thickness=0.1)
-new_longitudal.set_limit_x_length(the_hull.start_bulkhead_location,2)
-new_chine.add_longitudal_definition(new_longitudal)
+new_longitudinal=chine_helper.longitudinal_definition(width=-0.13,thickness=0.1)
+new_longitudinal.set_limit_x_length(the_hull.start_bulkhead_location,2)
+new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 

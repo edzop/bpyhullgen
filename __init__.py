@@ -57,7 +57,7 @@ classes = (
     ui.hullgen_Properties,
 
     genui.hullgendef_keel_Properties,
-    genui.hullgendef_longitudal_Properties,
+    genui.hullgendef_longitudinal_Properties,
     genui.hullgendef_chine_Properties,
     genui.hullgendef_bulkhead_Properties,
     genui.hullgendef_modshape_Properties,
@@ -74,8 +74,8 @@ classes = (
     genui.LIST_OT_NewChineItem,
     genui.LIST_OT_DeleteChineItem,
 
-    genui.LIST_OT_DeleteLongitudalItem,
-    genui.LIST_OT_NewLongitudalItem,
+    genui.LIST_OT_DeletelongitudinalItem,
+    genui.LIST_OT_NewlongitudinalItem,
 
     genui.LIST_OT_NewKeelItem,
     genui.LIST_OT_DeleteKeelItem,

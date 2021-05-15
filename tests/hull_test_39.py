@@ -40,7 +40,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 	width=1.2,
 	offset=[0,0.06,-0.5])
 
-new_chine.add_longitudal_definition(chine_helper.longitudal_definition(z_offset=0.1,width=-0.2,thickness=0.1))
+new_chine.add_longitudinal_definition(chine_helper.longitudinal_definition(z_offset=0.1,width=-0.2,thickness=0.1))
 
 the_hull.add_chine(new_chine)
 
@@ -58,7 +58,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 
 	)
 
-new_chine.add_longitudal_definition(chine_helper.longitudal_definition(z_offset=-0.3,width=-0.2,thickness=0.1))
+new_chine.add_longitudinal_definition(chine_helper.longitudinal_definition(z_offset=-0.3,width=-0.2,thickness=0.1))
 
 the_hull.add_chine(new_chine)
 
@@ -79,7 +79,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 	rotation=[79,3,0],
 	)
 
-new_chine.add_longitudal_definition(chine_helper.longitudal_definition(z_offset=0,width=-0.2,thickness=0.1))
+new_chine.add_longitudinal_definition(chine_helper.longitudinal_definition(z_offset=0,width=-0.2,thickness=0.1))
 
 the_hull.add_chine(new_chine)
 

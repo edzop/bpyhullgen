@@ -32,7 +32,7 @@ class keel:
 	keel_object=None
 	view_keel_collection=None
 
-	# measured in Longitudal station (X position) 
+	# measured in longitudinal station (X position) 
 	station_start=0
 	station_end=1
 

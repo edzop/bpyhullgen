@@ -25,7 +25,7 @@ from mathutils.bvhtree import BVHTree
 
 from ..hullgen import curve_helper
 from ..bpyutils import material_helper
-from ..hullgen import measure_helper
+from ..bpyutils import measure_helper
 from ..bpyutils import bpy_helper
 
 def separate_active_by_material():

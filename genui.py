@@ -26,7 +26,7 @@ import os
 from .hullgen import geometry_helper as geometry_helper
 from .bpyutils import material_helper as material_helper
 from .hullgen import window_helper as window_helper
-from .hullgen import measure_helper as measure_helper
+from .bpyutils import measure_helper as measure_helper
 from .hullgen import bulkhead as bulkhead
 from .hullgen import modshape_helper as modshape_helper
 from .hullgen import curve_helper as curve_helper
@@ -192,8 +192,8 @@ class hullgendef_keel_Properties(PropertyGroup):
 		)
 
 
-class hullgendef_longitudal_Properties(PropertyGroup): 
-	"""Group of properties representing a longitudal stringer.""" 
+class hullgendef_longitudinal_Properties(PropertyGroup): 
+	"""Group of properties representing a longitudinal stringer.""" 
 
 	name: StringProperty( 
 		name="Name", 
@@ -285,11 +285,11 @@ class hullgendef_chine_Properties(PropertyGroup):
 		max = 1
 		)
 
-	active_longitudal_index: IntProperty(default=-1)
+	active_longitudinal_index: IntProperty(default=-1)
 
-	longitudals: CollectionProperty(
-		name = "Longitudals",
-		type = hullgendef_longitudal_Properties		
+	longitudinals: CollectionProperty(
+		name = "longitudinals",
+		type = hullgendef_longitudinal_Properties		
 	)
 
 
@@ -391,10 +391,10 @@ class hullgendef_hull_Properties(PropertyGroup):
 		description = "Generate Keels"
 	)
 
-	make_longitudals : BoolProperty(
-		name = "Make Longitudals",
+	make_longitudinals : BoolProperty(
+		name = "Make longitudinals",
 		default = True,
-		description = "Generate Longitudals"
+		description = "Generate longitudinals"
 	)
 
 	hide_hull : BoolProperty(
@@ -574,10 +574,10 @@ class LIST_OT_RefreshConfig(Operator):
 
 #===============================================================================
 
-class LIST_OT_NewLongitudalItem(Operator): 
+class LIST_OT_NewlongitudinalItem(Operator): 
 	"""Add a new item to the list.""" 
-	bl_idname = "genui.new_longitudal" 
-	bl_label = "Add Longitudal" 
+	bl_idname = "genui.new_longitudinal" 
+	bl_label = "Add longitudinal" 
 
 	@classmethod 
 	def poll(cls, context): 
@@ -593,29 +593,29 @@ class LIST_OT_NewLongitudalItem(Operator):
 		hull_props = context.scene.hull_properties 
 
 		chine_index=hull_props.active_chine_index
-		#longitudal_index=context.scene.hullgen_longitudal_index
-		#longitudal_props=context.scene.longitudal_properties
+		#longitudinal_index=context.scene.hullgen_longitudinal_index
+		#longitudinal_props=context.scene.longitudinal_properties
 
 		chine_props=hull_props.chines[chine_index]
 
-		new_longitudal=chine_props.longitudals.add()
+		new_longitudinal=chine_props.longitudinals.add()
 
-		prop_count=len(chine_props.longitudals)
-		new_longitudal.name="Longitudal_%d"%prop_count
+		prop_count=len(chine_props.longitudinals)
+		new_longitudinal.name="longitudinal_%d"%prop_count
 
-		#hull_props.chines[chine_index].active_longitudal_index=prop_count
+		#hull_props.chines[chine_index].active_longitudinal_index=prop_count
 
-		chine_props.active_longitudal_index=prop_count-1
+		chine_props.active_longitudinal_index=prop_count-1
 
-		#longitudal_props[prop_count-1].chine_index=chine_index
+		#longitudinal_props[prop_count-1].chine_index=chine_index
 		#print(context.scene.the_hull.hull_length)
 		return{'FINISHED'} 
 
 
-class LIST_OT_DeleteLongitudalItem(Operator): 
+class LIST_OT_DeletelongitudinalItem(Operator): 
 	"""Delete the selected item from the list.""" 
-	bl_idname = "genui.delete_longitudal" 
-	bl_label = "Delete Longitudal" 
+	bl_idname = "genui.delete_longitudinal" 
+	bl_label = "Delete longitudinal" 
 
 
 	@classmethod 
@@ -625,7 +625,7 @@ class LIST_OT_DeleteLongitudalItem(Operator):
 
 		if context.scene.hull_properties.active_chine_index>=0:
 			chine_prop=hull_props.chines[hull_props.active_chine_index]
-			if chine_prop.active_longitudal_index>=0:
+			if chine_prop.active_longitudinal_index>=0:
 				return True
 
 		return False
@@ -637,13 +637,13 @@ class LIST_OT_DeleteLongitudalItem(Operator):
 
 		chine_prop=hull_props.chines[hull_props.active_chine_index]
 
-		longitudal_props=hull_props.chines[chine_index].longitudals
+		longitudinal_props=hull_props.chines[chine_index].longitudinals
 
-		longitudal_index = hull_props.chines[chine_index].active_longitudal_index 
+		longitudinal_index = hull_props.chines[chine_index].active_longitudinal_index 
 
-		longitudal_props.remove(longitudal_index)
+		longitudinal_props.remove(longitudinal_index)
 
-		chine_prop.active_longitudal_index= min(max(0, longitudal_index - 1), len(longitudal_props) - 1) 
+		chine_prop.active_longitudinal_index= min(max(0, longitudinal_index - 1), len(longitudinal_props) - 1) 
 		return{'FINISHED'}
 
 
@@ -726,11 +726,11 @@ class LIST_OT_DeleteChineItem(Operator):
 		hull_properties.active_chine_index = min(max(0, chine_index - 1), len(hull_properties.chines) - 1) 
 
 
-		#for idx,longitudal_prop in enumerate(context.scene.longitudal_properties):
-		#	if longitudal_prop.chine_index>chine_index:
-		#		longitudal_prop.chine_index=longitudal_prop.chine_index-1
-		#	elif longitudal_prop.chine_index==chine_index:
-		#		context.scene.longitudal_properties.remove(idx)
+		#for idx,longitudinal_prop in enumerate(context.scene.longitudinal_properties):
+		#	if longitudinal_prop.chine_index>chine_index:
+		#		longitudinal_prop.chine_index=longitudinal_prop.chine_index-1
+		#	elif longitudinal_prop.chine_index==chine_index:
+		#		context.scene.longitudinal_properties.remove(idx)
 
 
 
@@ -829,11 +829,11 @@ class LIST_OT_DeleteBulkheadItem(Operator):
 		hull_properties.active_bulkhead_index = min(max(0, active_bulkhead_index - 1), len(hull_properties.bulkheads) - 1) 
 
 
-		#for idx,longitudal_prop in enumerate(context.scene.longitudal_properties):
-		#	if longitudal_prop.chine_index>chine_index:
-		#		longitudal_prop.chine_index=longitudal_prop.chine_index-1
-		#	elif longitudal_prop.chine_index==chine_index:
-		#		context.scene.longitudal_properties.remove(idx)
+		#for idx,longitudinal_prop in enumerate(context.scene.longitudinal_properties):
+		#	if longitudinal_prop.chine_index>chine_index:
+		#		longitudinal_prop.chine_index=longitudinal_prop.chine_index-1
+		#	elif longitudinal_prop.chine_index==chine_index:
+		#		context.scene.longitudinal_properties.remove(idx)
 
 
 		return{'FINISHED'}
@@ -881,11 +881,11 @@ class LIST_OT_DeleteModshapeItem(Operator):
 		hull_properties.active_modshape_index = min(max(0, active_modshape_index - 1), len(hull_properties.modshapes) - 1) 
 
 
-		#for idx,longitudal_prop in enumerate(context.scene.longitudal_properties):
-		#	if longitudal_prop.chine_index>chine_index:
-		#		longitudal_prop.chine_index=longitudal_prop.chine_index-1
-		#	elif longitudal_prop.chine_index==chine_index:
-		#		context.scene.longitudal_properties.remove(idx)
+		#for idx,longitudinal_prop in enumerate(context.scene.longitudinal_properties):
+		#	if longitudinal_prop.chine_index>chine_index:
+		#		longitudinal_prop.chine_index=longitudinal_prop.chine_index-1
+		#	elif longitudinal_prop.chine_index==chine_index:
+		#		context.scene.longitudinal_properties.remove(idx)
 
 
 		return{'FINISHED'}
@@ -907,7 +907,7 @@ def update_properties_from_hull(the_hull,context):
 
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
-	hull_properties.make_longitudals=the_hull.make_longitudals
+	hull_properties.make_longitudinals=the_hull.make_longitudinals
 	hull_properties.hide_hull=the_hull.hide_hull
 
 	hull_properties.bulkheads.clear()
@@ -966,17 +966,17 @@ def update_properties_from_hull(the_hull,context):
 		chine_prop.symmetrical=chine.symmetrical
 
 
-		for longitudal_definition in chine.longitudal_definitions:
-			longitudal_prop=chine_prop.longitudals.add()
+		for longitudinal_definition in chine.longitudinal_definitions:
+			longitudinal_prop=chine_prop.longitudinals.add()
 
-			#longitudal_prop=longitudal_properties[len(longitudal_properties) - 1]
+			#longitudinal_prop=longitudinal_properties[len(longitudinal_properties) - 1]
 
-			longitudal_prop.x_min=longitudal_definition.limit_x_min
-			longitudal_prop.x_max=longitudal_definition.limit_x_max
+			longitudinal_prop.x_min=longitudinal_definition.limit_x_min
+			longitudinal_prop.x_max=longitudinal_definition.limit_x_max
 
-			longitudal_prop.z_offset=longitudal_definition.z_offset
+			longitudinal_prop.z_offset=longitudinal_definition.z_offset
 
-			longitudal_prop.width=longitudal_definition.width
+			longitudinal_prop.width=longitudinal_definition.width
 
 	#keel_properties.clear()
 
@@ -1014,7 +1014,7 @@ def update_hull_from_properties(the_hull,context):
 
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
-	the_hull.make_longitudals=hull_properties.make_longitudals
+	the_hull.make_longitudinals=hull_properties.make_longitudinals
 	the_hull.hide_hull=hull_properties.hide_hull
 
 	for modshapeprop in hull_properties.modshapes:
@@ -1073,17 +1073,17 @@ def update_hull_from_properties(the_hull,context):
 
 		the_hull.add_chine(new_chine)
 
-		for longitudal_prop in chineprop.longitudals:
+		for longitudinal_prop in chineprop.longitudinals:
 			
-			new_longitudal=chine_helper.longitudal_definition(z_offset=longitudal_prop.z_offset,
-				width=longitudal_prop.width,
+			new_longitudinal=chine_helper.longitudinal_definition(z_offset=longitudinal_prop.z_offset,
+				width=longitudinal_prop.width,
 				thickness=hull_properties.thickness)
 
-			new_longitudal.set_limit_x_length(
-						longitudal_prop.x_min,
-						longitudal_prop.x_max)
+			new_longitudinal.set_limit_x_length(
+						longitudinal_prop.x_min,
+						longitudinal_prop.x_max)
 
-			new_chine.add_longitudal_definition(new_longitudal)
+			new_chine.add_longitudinal_definition(new_longitudinal)
 
 	for keelprop in hull_properties.keels:
 
@@ -1213,7 +1213,7 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		row = layout.row()
 		layout.prop( hull_props, "make_bulkheads")
 		layout.prop( hull_props, "make_keels")		
-		layout.prop( hull_props, "make_longitudals")
+		layout.prop( hull_props, "make_longitudinals")
 		layout.prop( hull_props, "hide_hull")	
 
 		row = layout.row()
@@ -1353,40 +1353,40 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 				row.prop(chine_item,"a0")
 				row.prop(chine_item,"a1")
 
-				if len(chine_item.longitudals)>0:
+				if len(chine_item.longitudinals)>0:
 
 					row = layout.row() 
-					layout.label(text="Longitudals") 
+					layout.label(text="longitudinals") 
 					row = layout.row() 
 					row.template_list(listtype_name="MY_UL_NameList", 
-								list_id="Longitudal_List", 
+								list_id="longitudinal_List", 
 								dataptr=chine_item,
-								propname="longitudals",
+								propname="longitudinals",
 								active_dataptr=chine_item, 
-								active_propname="active_longitudal_index",
+								active_propname="active_longitudinal_index",
 								rows=min_rows
 					)
 
 				row = layout.row() 
-				row.operator('genui.new_longitudal') 
-				row.operator('genui.delete_longitudal') 
-			#			scene, "longitudal_properties", scene, "hullgen_longitudal_index") #,type='COMPACT') 
+				row.operator('genui.new_longitudinal') 
+				row.operator('genui.delete_longitudinal') 
+			#			scene, "longitudinal_properties", scene, "hullgen_longitudinal_index") #,type='COMPACT') 
 
-				if chine_item.active_longitudal_index >= 0:
+				if chine_item.active_longitudinal_index >= 0:
 					
-					longitudal_item=chine_item.longitudals[chine_item.active_longitudal_index]
+					longitudinal_item=chine_item.longitudinals[chine_item.active_longitudinal_index]
 
 					row = layout.row() 
-					row.prop(longitudal_item, "name") 
+					row.prop(longitudinal_item, "name") 
 
 					row = layout.row() 
 
-					row.prop(longitudal_item, "x_min") 
-					row.prop(longitudal_item, "x_max") 
+					row.prop(longitudinal_item, "x_min") 
+					row.prop(longitudinal_item, "x_max") 
 					
 					row = layout.row() 
-					row.prop(longitudal_item, "z_offset") 
-					row.prop(longitudal_item, "width") 
+					row.prop(longitudinal_item, "z_offset") 
+					row.prop(longitudinal_item, "width") 
 
 		if len(hull_props.keels)>0:
 			row = layout.row() 
