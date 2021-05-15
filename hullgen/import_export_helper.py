@@ -98,9 +98,10 @@ def exportCSV():
 					vol=measure_helper.measure_object_volume(obj)
 					csv_row.append(vol)
 
-					face_data=measure_helper.measure_selected_faces_area(obj,True)
-					csv_row.append(face_data[0])
-					csv_row.append(face_data[1])
+					face_area=measure_helper.measure_face_area(obj,True)
+					csv_row.append(face_area)
+					face_count=measure_helper.measure_face_count(obj,True)
+					csv_row.append(face_count)
 
 					csv_row.append(obj.dimensions.x)
 					csv_row.append(obj.dimensions.y)
