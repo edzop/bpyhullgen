@@ -53,6 +53,10 @@ def dump_hull(the_hull):
             chine.asymmetry[0],
             chine.asymmetry[1]))
 
+
+def format_float(val):
+    return "%0.3f"%val
+
 def parse_int_val(elem,name,default=0):
     val=default
     if name in elem.attrib:
@@ -100,7 +104,7 @@ def read_hull(filename):
         if elem.tag=="generate":
             newhull.make_bulkheads=parse_int_val(elem,"bulkheads",default=True)
             newhull.make_keels=parse_int_val(elem,"keels",default=True)
-            newhull.make_longitudals=parse_int_val(elem,"longitudals",default=True)
+            newhull.make_longitudinals=parse_int_val(elem,"longitudinals",default=True)
             newhull.hide_hull=parse_int_val(elem,"hide_hull",default=False)
 
 
@@ -202,7 +206,7 @@ def read_hull(filename):
                 rotation=[0,0,0]
                 asymmetry=[0,0]
 
-                longitudal_defs=[]
+                longitudinal_defs=[]
 
                 for subelem in chine_elem:
 
@@ -227,26 +231,26 @@ def read_hull(filename):
                         rotation[1]=parse_float_val(subelem,"y",0)
                         rotation[2]=parse_float_val(subelem,"z",0)
 
-                    if subelem.tag=="longitudals":
+                    if subelem.tag=="longitudinals":
 
-                        for longitudal_elem in subelem:
+                        for longitudinal_elem in subelem:
                             z_offset=0
-                            longitudal_width=1
+                            longitudinal_width=1
                             x_min=-3
                             x_max=3
 
-                            z_offset=parse_float_val(longitudal_elem,"z_offset",z_offset)
-                            longitudal_width=parse_float_val(longitudal_elem,"width",width)
-                            x_min=parse_float_val(longitudal_elem,"x_min",x_min)
-                            x_max=parse_float_val(longitudal_elem,"x_max",x_max)
+                            z_offset=parse_float_val(longitudinal_elem,"z_offset",z_offset)
+                            longitudinal_width=parse_float_val(longitudinal_elem,"width",width)
+                            x_min=parse_float_val(longitudinal_elem,"x_min",x_min)
+                            x_max=parse_float_val(longitudinal_elem,"x_max",x_max)
 
-                            longitudal_definition=chine_helper.longitudal_definition(
-                                width=longitudal_width,z_offset=z_offset
+                            longitudinal_definition=chine_helper.longitudinal_definition(
+                                width=longitudinal_width,z_offset=z_offset
                             )
 
-                            longitudal_definition.set_limit_x_length(x_min,x_max)
+                            longitudinal_definition.set_limit_x_length(x_min,x_max)
 
-                            longitudal_defs.append(longitudal_definition)
+                            longitudinal_defs.append(longitudinal_definition)
 
 
                 new_chine=chine_helper.chine_helper(newhull,
@@ -259,8 +263,8 @@ def read_hull(filename):
                 new_chine.rotation=rotation
                 new_chine.extrude_width=extrude_width
 
-                for ld in longitudal_defs:
-                    new_chine.add_longitudal_definition(ld)
+                for ld in longitudinal_defs:
+                    new_chine.add_longitudinal_definition(ld)
 
                 newhull.add_chine(new_chine)
   
@@ -276,22 +280,22 @@ def write_xml(the_hull,filename):
 
     #================================================================
     size = ET.SubElement(hull, "size")
-    size.set('length',str(the_hull.hull_length))
-    size.set("width", str(the_hull.hull_width))
-    size.set("height", str(the_hull.hull_height))
+    size.set('length',format_float(the_hull.hull_length))
+    size.set("width", format_float(the_hull.hull_width))
+    size.set("height", format_float(the_hull.hull_height))
 
     #================================================================
     size = ET.SubElement(hull, "materials")
-    size.set('structural_thickness',str(the_hull.structural_thickness))
-    size.set('slicer_overcut_ratio',str(the_hull.slicer_overcut_ratio))
-    size.set('slot_gap',str(the_hull.slot_gap))
+    size.set('structural_thickness',format_float(the_hull.structural_thickness))
+    size.set('slicer_overcut_ratio',format_float(the_hull.slicer_overcut_ratio))
+    size.set('slot_gap',format_float(the_hull.slot_gap))
 
 
     #================================================================
     size = ET.SubElement(hull, "generate")
     size.set('bulkheads',str(int(the_hull.make_bulkheads)))
     size.set("keels", str(int(the_hull.make_keels)))
-    size.set("longitudals", str(int(the_hull.make_longitudals)))
+    size.set("longitudinals", str(int(the_hull.make_longitudinals)))
     size.set("hide_hull", str(int(the_hull.hide_hull)))
 
     #================================================================
@@ -300,10 +304,10 @@ def write_xml(the_hull,filename):
     for bulkhead_definition in the_hull.bulkhead_definitions:
         node_bulkhead=ET.SubElement(node_bulkheads, 'bulkhead')
 
-        node_bulkhead.set("station", str(bulkhead_definition.station))
-        node_bulkhead.set("floor_height", str(bulkhead_definition.floor_height))
+        node_bulkhead.set("station", format_float(bulkhead_definition.station))
+        node_bulkhead.set("floor_height", format_float(bulkhead_definition.floor_height))
         node_bulkhead.set("watertight", str(int(bulkhead_definition.watertight)))
-        node_bulkhead.set("thickness", str(bulkhead_definition.thickness))
+        node_bulkhead.set("thickness", format_float(bulkhead_definition.thickness))
 
 
     #================================================================
@@ -312,11 +316,11 @@ def write_xml(the_hull,filename):
     for keel in the_hull.keel_list:
         node_keel=ET.SubElement(node_keels, 'keel')
 
-        node_keel.set('lateral_offset',str(keel.lateral_offset))
-        node_keel.set('top_height',str(keel.top_height))
+        node_keel.set('lateral_offset',format_float(keel.lateral_offset))
+        node_keel.set('top_height',format_float(keel.top_height))
 
-        node_keel.set('station_start',str(keel.station_start))
-        node_keel.set('station_end',str(keel.station_end))
+        node_keel.set('station_start',format_float(keel.station_start))
+        node_keel.set('station_end',format_float(keel.station_end))
 
 
     #================================================================
@@ -332,24 +336,24 @@ def write_xml(the_hull,filename):
         node_modshape.set("symmetrical",str(int(modshape.symmetrical)))
 
         node_location = ET.SubElement(node_modshape, "location")
-        node_location.set('x',str(modshape.location[0]))
-        node_location.set("y", str(modshape.location[1]))
-        node_location.set("z", str(modshape.location[2]))
+        node_location.set('x',format_float(modshape.location[0]))
+        node_location.set("y", format_float(modshape.location[1]))
+        node_location.set("z", format_float(modshape.location[2]))
 
         node_rotation = ET.SubElement(node_modshape, "rotation")
-        node_rotation.set('x',str(modshape.rotation[0]))
-        node_rotation.set("y", str(modshape.rotation[1]))
-        node_rotation.set("z", str(modshape.rotation[2]))
+        node_rotation.set('x',format_float(modshape.rotation[0]))
+        node_rotation.set("y", format_float(modshape.rotation[1]))
+        node_rotation.set("z", format_float(modshape.rotation[2]))
 
         node_size = ET.SubElement(node_modshape, "size")
-        node_size.set('x',str(modshape.size[0]))
-        node_size.set("y", str(modshape.size[1]))
-        node_size.set("z", str(modshape.size[2]))
+        node_size.set('x',format_float(modshape.size[0]))
+        node_size.set("y", format_float(modshape.size[1]))
+        node_size.set("z", format_float(modshape.size[2]))
 
         node_deform = ET.SubElement(node_modshape, "deform")
-        node_deform.set('p1',str(modshape.deform[0]))
-        node_deform.set("p2", str(modshape.deform[1]))
-        node_deform.set("p3", str(modshape.deform[2]))
+        node_deform.set('p1',format_float(modshape.deform[0]))
+        node_deform.set("p2", format_float(modshape.deform[1]))
+        node_deform.set("p3", format_float(modshape.deform[2]))
 
 
     #================================================================
@@ -362,34 +366,34 @@ def write_xml(the_hull,filename):
         node_chine.set("symmetrical", str(int(chine.symmetrical)))
 
         node_curve = ET.SubElement(node_chine, "curve")
-        node_curve.set('length',str(chine.curve_length))
-        node_curve.set("width", str(chine.curve_width))
-        node_curve.set("height", str(chine.curve_height))
-        node_curve.set("extrude_width", str(chine.extrude_width))
+        node_curve.set('length',format_float(chine.curve_length))
+        node_curve.set("width", format_float(chine.curve_width))
+        node_curve.set("height", format_float(chine.curve_height))
+        node_curve.set("extrude_width", format_float(chine.extrude_width))
 
         node_offset = ET.SubElement(node_chine, "offset")
-        node_offset.set('x',str(chine.offset[0]))
-        node_offset.set("y", str(chine.offset[1]))
-        node_offset.set("z", str(chine.offset[2]))
+        node_offset.set('x',format_float(chine.offset[0]))
+        node_offset.set("y", format_float(chine.offset[1]))
+        node_offset.set("z", format_float(chine.offset[2]))
 
         node_rotation = ET.SubElement(node_chine, "rotation")
-        node_rotation.set('x',str(chine.rotation[0]))
-        node_rotation.set("y", str(chine.rotation[1]))
-        node_rotation.set("z", str(chine.rotation[2]))
+        node_rotation.set('x',format_float(chine.rotation[0]))
+        node_rotation.set("y", format_float(chine.rotation[1]))
+        node_rotation.set("z", format_float(chine.rotation[2]))
 
         node_asymmetry = ET.SubElement(node_chine, "asymmetry")
-        node_asymmetry.set('a0',str(chine.asymmetry[0]))
-        node_asymmetry.set("a1", str(chine.asymmetry[1]))
+        node_asymmetry.set('a0',format_float(chine.asymmetry[0]))
+        node_asymmetry.set("a1", format_float(chine.asymmetry[1]))
 
-        node_longitudals = ET.SubElement(node_chine, 'longitudals')
+        node_longitudinals = ET.SubElement(node_chine, 'longitudinals')
 
-        for longitudal_definition in chine.longitudal_definitions:
-            node_longitudal=ET.SubElement(node_longitudals, 'longitudal')
+        for longitudinal_definition in chine.longitudinal_definitions:
+            node_longitudinal=ET.SubElement(node_longitudinals, 'longitudinal')
 
-            node_longitudal.set("z_offset", str(longitudal_definition.z_offset))
-            node_longitudal.set("width", str(longitudal_definition.width))
-            node_longitudal.set("x_min", str(longitudal_definition.limit_x_min))
-            node_longitudal.set("x_max", str(longitudal_definition.limit_x_max))
+            node_longitudinal.set("z_offset", format_float(longitudinal_definition.z_offset))
+            node_longitudinal.set("width", format_float(longitudinal_definition.width))
+            node_longitudinal.set("x_min", format_float(longitudinal_definition.limit_x_min))
+            node_longitudinal.set("x_max", format_float(longitudinal_definition.limit_x_max))
 
 
 
