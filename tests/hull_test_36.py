@@ -120,8 +120,8 @@ def add_deck_cockpit():
 	
 	bpy.ops.transform.resize(value=(1,1,2))
 	bpy.ops.object.transform_apply(scale=True,location=False)
-	bpy.ops.transform.rotate(value=radians(tail_cut_angle),orient_axis='Y')
-
+	ob.rotation_euler.y=radians(tail_cut_angle)
+	
 	bool_new = the_hull.hull_object.modifiers.new(type="BOOLEAN", name="hull_cut")
 	bool_new.object = ob
 	bool_new.operation = 'DIFFERENCE'
@@ -260,5 +260,3 @@ framedata=[
 ]
 
 render_helper.setup_keyframes(framedata)
-
-performance_timer.get_elapsed_string()
