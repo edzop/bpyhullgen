@@ -70,8 +70,6 @@ the_keel_builder.make_solid_single_keel(top_height=the_hull.default_floor_height
 
 the_hull.integrate_components()
 
-the_hull.hull_object.hide_viewport=True
-
 framedata=[
 [ 1, [3.191784,-9.493891,3.358960],[0.403186,0.026390,-0.141792] ],
 [ 2, [0.578287,-0.787018,10.949531],[0.262983,0.032428,-0.003520] ],
