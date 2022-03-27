@@ -81,11 +81,11 @@ def setup_keyframes(framedata):
     # first find camTarget
     for obj in bpy.data.objects:
         if obj.type=="CAMERA":
+            camObject=obj
             for constraint in obj.constraints:
                 if constraint.type == 'TRACK_TO':
                     camTarget=constraint.target
-                    camObject=obj
-        
+                    
     # Create a focus object if not found            
     if camTarget==None:
         bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
