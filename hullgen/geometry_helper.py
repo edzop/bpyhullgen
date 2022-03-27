@@ -227,7 +227,7 @@ def apply_all_bool_modifiers():
 
 						bpy.context.view_layer.objects.active = obj
 						
-						print("Applying object: %s"%obj.name)
+						print("Applying object: %s bool: %s"%(obj.name,modifier.name))
 
 						bpy.ops.object.mode_set(mode='EDIT')
 						bpy.ops.mesh.select_mode(type="FACE")

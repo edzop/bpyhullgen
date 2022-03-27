@@ -39,7 +39,7 @@ class hull_maker:
 	make_bulkheads=True
 	make_keels=True
 	make_longitudinals=True
-	hide_hull=True
+	hide_hull=False
 		
 	default_floor_height=-0.7
 
@@ -185,6 +185,8 @@ class hull_maker:
 
 	def make_hull_object(self):
 		self.hull_object=geometry_helper.make_cube(self.hull_name,size=(self.hull_length, self.hull_width, self.hull_height))
+
+		self.hull_object.display_type="WIRE"
 
 		material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
 
@@ -696,8 +698,9 @@ class hull_maker:
 			object_end_clean = geometry_helper.make_cube("end_clean_%s"%index,location=[adjusted_location,0,0],size=(block_width,block_width,self.hull_height))
 
 			if rotations!=None:
-				bpy_helper.select_object(object_end_clean,True)
-				bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
+#				bpy_helper.select_object(object_end_clean,True)
+				#bpy.ops.transform.rotate(value=radians(rotations[index]),orient_axis='Y')
+				object_end_clean.rotation_euler.y=radians(rotations[index])
 
 			bpy_helper.move_object_to_collection(view_collection_cleaner,object_end_clean)
 
