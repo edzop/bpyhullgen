@@ -78,7 +78,7 @@ class hull_maker:
 	bulkhead_spacing=1.0
 
 	start_bulkhead_location=-3
-	bulkhead_count=6
+	bulkhead_count=0
 	bulkhead_thickness=0.05
 
 	# output scale for fabrication = 1:16 = 1/16 = 0.0625
@@ -350,7 +350,7 @@ class hull_maker:
 			self.merge_keels()
 
 		if self.make_bulkheads:
-			#self.add_auto_bulkheads()
+			self.add_auto_bulkheads()
 			self.make_bulkhead_objects(self.bulkhead_definitions)			
 
 		if use_props:
