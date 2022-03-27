@@ -104,8 +104,6 @@ classes = (
     ui.DeleteAllOperator,
     ui.BendStressOperator,
     ui.Export_CSV_Operator,
-    ui.ExportPlatesOperator,
-    ui.ImportPlatesOperator,
     ui.FlattenPlatesOperator,
     ui.ExportHulldxfOperator,
     ui.DeleteFacesOperator,

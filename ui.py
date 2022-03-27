@@ -93,8 +93,6 @@ class hullgen_Properties (PropertyGroup):
 		max = 10
 		)
 
-	
-
 	output_csv : BoolProperty(
 		name="Output CSV",
 		description="Output hydro.csv file containing simulation data",
@@ -252,16 +250,6 @@ class CutWindowsOperator (bpy.types.Operator):
 
 		return {'FINISHED'}		
 
-class ExportPlatesOperator (bpy.types.Operator):
-	"""Export plate geometry to SVG file"""
-	bl_idname = "wm.exportplates"
-	bl_label = "ExportPlates"
-
-	def execute(self, context):
-
-		import_export_helper.export_plates("bpyhullgen.svg")
-
-		return {'FINISHED'}
 
 
 class FlattenPlatesOperator (bpy.types.Operator):
@@ -332,19 +320,6 @@ class DeleteFacesOperator (bpy.types.Operator):
 					elif obj.name.startswith("cutterchine_"):
 						geometry_helper.delete_non_aligned_faces(obj,geometry_helper.select_going_up)
 
-
-		return {'FINISHED'}
-
-
-
-class ImportPlatesOperator (bpy.types.Operator):
-	"""Import plate geometry from SVG file"""
-	bl_idname = "wm.importplates"
-	bl_label = "ImportPlates"
-
-	def execute(self, context):
-
-		import_export_helper.import_plates("bpyhullgen.svg")
 
 		return {'FINISHED'}
 
@@ -472,14 +447,12 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		row.label(text="Output:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.exportcsv")
-		rowsub.operator( "wm.exportplates")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.exporthulldxf")
 
 		row = layout.row()
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.importplates")
 		rowsub.operator( "wm.measureedges")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measure_two_vertice_distance")
