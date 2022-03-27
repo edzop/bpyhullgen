@@ -225,7 +225,7 @@ print("extra")
 the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.sit_chair",location=[1.3,0,-0.6])
 the_hull.add_prop(blend_file="assets/actors.blend",target_object="man.stand",location=[0.2,0,-0.95])
 
-the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="propshaft",location=[-4.05,0,-1.2],rotation=[0,93,0])
+the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="propshaft",location=[-4.05,0,-1.2],rotation=[0,-93,0])
 the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="wheel_axle.8ft",location=[0.6,0,-1.3])
 the_hull.add_prop(blend_file="assets/boat_assets.blend",target_object="wheel_axle.8ft",location=[-0.6,0,-1.3])
 
