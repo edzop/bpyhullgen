@@ -66,13 +66,11 @@ the_hull.add_chine(new_chine)
 
 the_hull.default_floor_height=-1.2
 the_hull.start_bulkhead_location=-5
-the_hull.bulkhead_spacing=0.3
-the_hull.bulkhead_count=27
+the_hull.bulkhead_spacing=0.5
+the_hull.bulkhead_count=20
 
 the_hull.integrate_components()
 	
-the_hull.hull_object.hide_viewport=True
-
 framedata=[
 [ 1, [8.927623,-10.659976,-0.208632],[1.458442,-0.166389,-0.166539] ],
 [ 2, [0.460886,-0.961136,14.928463],[0.095418,-0.164318,-0.010775] ],
