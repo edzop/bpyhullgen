@@ -1,4 +1,5 @@
 import bpy
+import os,sys
 from math import radians, degrees
 
 # Props are objects linked (imported) from an external blender file like movie props
@@ -32,8 +33,12 @@ class prop_helper:
 		self.blend_file=blend_file
 
 	def import_object(self,view_collection):
-		full_import_path="%s/%s/"%(self.blend_file,self.library_path)
+		
+		this_script_directory = os.path.dirname(os.path.realpath(__file__))
+		parent_directory=os.path.dirname(this_script_directory)
 
+		full_import_path="%s/%s/%s/"%(parent_directory,self.blend_file,self.library_path)
+		
 		bpy.ops.wm.link(directory=full_import_path,
 			link=True,
 			files=[{'name': self.target_object}], 
