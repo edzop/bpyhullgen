@@ -3,7 +3,7 @@ bpyhullgen is a Blender based Parametric Hull Generator
 
 **bpyhullgen has been updated for blender 3.1**
 
-The WIKI has been updated to reflect new projects generated with bpyhullgen.
+The [WIKI](https://github.com/edzop/bpyhullgen/wiki) has been updated to reflect new projects generated with bpyhullgen.
 
 bpyhullgen was started for the purpose of generating parametric boat hull designs that can easily converted to real world objects. 
 

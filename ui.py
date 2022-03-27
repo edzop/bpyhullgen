@@ -421,35 +421,22 @@ class ScaleToSizeOperator (bpy.types.Operator):
 
 
 
-
 # ------------------------------------------------------------------------
-#    bpyHullGen in objectmode
+# Utility Panel
 # ------------------------------------------------------------------------
 
-class OBJECT_PT_bpyhullgen_panel (Panel):
+class OBJECT_PT_utility_panel (Panel):
 
-	bl_label = "bpyHullGen"
+	bl_label = "Utility"
 	bl_space_type = "VIEW_3D"   
 	bl_region_type = "UI"
 	bl_category = "bpyHullGen"
-
-
-	@classmethod
-	def poll(self,context):
-		return context.object is not None
 
 	def draw(self, context):
 		layout = self.layout
 		scene = context.scene
 		mytool = scene.hullgen_Props
 		
-		row = layout.row()
-		row.label(text="Output:")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.exportcsv")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.exporthulldxf")
-
 		row = layout.row()
 		row.label(text="Import:")
 		rowsub = layout.row(align=True)
@@ -473,16 +460,54 @@ class OBJECT_PT_bpyhullgen_panel (Panel):
 		layout.prop( mytool, "solidify_thickness")
 
 		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.cleanupmeshes")
+		
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.cutwindows")
+		rowsub.operator( "wm.aluminumplates")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.bendstress")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.insideshrink")
+		rowsub.operator( "wm.shrinkoutliner")
+
+
+
+
+
+# ------------------------------------------------------------------------
+# Production Panel
+# ------------------------------------------------------------------------
+
+class OBJECT_PT_production_panel (Panel):
+
+	bl_label = "Production"
+	bl_space_type = "VIEW_3D"   
+	bl_region_type = "UI"
+	bl_category = "bpyHullGen"
+
+	def draw(self, context):
+		layout = self.layout
+		scene = context.scene
+		mytool = scene.hullgen_Props
+		
+		row = layout.row()
+		row.label(text="Output:")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.exportcsv")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.exporthulldxf")
+
+		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
 		rowsub.operator("wm.flattenplates")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.cleanupmeshes")
 
 		rowsub.operator( "wm.delete_faces_operator")
 		layout.prop( mytool, "cleanup_choice", text="Cleanup") 
 		
+
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")

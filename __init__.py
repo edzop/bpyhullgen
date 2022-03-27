@@ -87,7 +87,7 @@ classes = (
     genui.MY_UL_NameList,
     genui.FILE_UL_List,
     genui.STATION_UL_List,
-    genui.OBJECT_PT_bpyhullgendef_panel,
+    genui.OBJECT_PT_hullgen_panel,
     genui.OBJECT_PT_bpyhullgendef_load_save_panel,
     genui.LIST_OT_GenHull,
     genui.LIST_OT_DeleteHull,
@@ -96,7 +96,8 @@ classes = (
     genui.LIST_OT_Newconfig,
     genui.LIST_OT_RefreshConfig,
 
-    ui.OBJECT_PT_bpyhullgen_panel,
+    ui.OBJECT_PT_production_panel,
+    ui.OBJECT_PT_utility_panel,
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
     ui.GenSceneOperator,

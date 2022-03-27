@@ -307,29 +307,29 @@ class hullgendef_hull_Properties(PropertyGroup):
 
 
 	thickness : FloatProperty(
-		name = "thickness",
-		description = "Material thickness",
-		default = 0.1,
+		name = "Thickness",
+		description = "Material thickness in MM",
+		default = 6,
 		min = 0.0001,
 		max = 256
 		)
 
 	overcut : FloatProperty(
-		name = "overcut",
-		description = "Slicer Overcut",
+		name = "Overcut",
+		description = "Slicer Overcut Ratio (1.1=110%)",
 		default = 1.1
 		)
 
 	slot_gap : FloatProperty(
-		name = "slotgap",
-		description = "Slot Gap",
-		default = 0.05
+		name = "Slotgap",
+		description = "Slot Gap in MM",
+		default = 5
 		)
 
 
 	hull_length : FloatProperty(
-		name = "HullLength",
-		description = "Length of Hull (m)",
+		name = "Hull Length",
+		description = "Length of Hull in meters",
 		default = 10,
 		min = 1,
 		max = 500.0
@@ -337,8 +337,8 @@ class hullgendef_hull_Properties(PropertyGroup):
 
 
 	hull_width : FloatProperty(
-		name = "HullWidth",
-		description = "Width of Hull (m)",
+		name = "Hull Width",
+		description = "Width of Hull in meters",
 		default = 3,
 		min = 1,
 		max = 250.0
@@ -901,9 +901,10 @@ def update_properties_from_hull(the_hull,context):
 	hull_properties.hull_width=the_hull.hull_width
 	hull_properties.hull_length=the_hull.hull_length
 	hull_properties.curve_resolution=the_hull.curve_resolution
-	hull_properties.thickness=the_hull.structural_thickness
+	hull_properties.thickness=the_hull.structural_thickness*100
 	hull_properties.overcut=the_hull.slicer_overcut_ratio
-	hull_properties.slot_gap=the_hull.slot_gap
+
+	hull_properties.slot_gap=the_hull.slot_gap*100
 
 	hull_properties.make_keels=the_hull.make_keels
 	hull_properties.make_bulkheads=the_hull.make_bulkheads
@@ -1008,9 +1009,9 @@ def update_hull_from_properties(the_hull,context):
 	the_hull.hull_length=hull_properties.hull_length
 
 	the_hull.curve_resolution=hull_properties.curve_resolution
-	the_hull.structural_thickness=hull_properties.thickness
+	the_hull.structural_thickness=hull_properties.thickness/100
 	the_hull.slicer_overcut_ratio=hull_properties.overcut
-	the_hull.slot_gap=hull_properties.slot_gap
+	the_hull.slot_gap=hull_properties.slot_gap/100
 
 	the_hull.make_keels=hull_properties.make_keels
 	the_hull.make_bulkheads=hull_properties.make_bulkheads
@@ -1046,7 +1047,7 @@ def update_hull_from_properties(the_hull,context):
 			station=bulkheadprop.station,
 			watertight=bulkheadprop.watertight,
 			floor_height=bulkheadprop.floor_height,
-			thickness=hull_properties.thickness
+			thickness=hull_properties.thickness/100
 		)
 
 		the_hull.add_bulkhead_definition(new_bulkhead_definition)
@@ -1077,7 +1078,7 @@ def update_hull_from_properties(the_hull,context):
 			
 			new_longitudinal=chine_helper.longitudinal_definition(z_offset=longitudinal_prop.z_offset,
 				width=longitudinal_prop.width,
-				thickness=hull_properties.thickness)
+				thickness=hull_properties.thickness/100)
 
 			new_longitudinal.set_limit_x_length(
 						longitudinal_prop.x_min,
@@ -1092,7 +1093,7 @@ def update_hull_from_properties(the_hull,context):
 			top_height=keelprop.top_height,
 			station_start=keelprop.station_start,
 			station_end=keelprop.station_end,
-			thickness=hull_properties.thickness
+			thickness=hull_properties.thickness/100
 		)
 
 		the_hull.add_keel(new_keel)
@@ -1187,9 +1188,9 @@ class OBJECT_PT_bpyhullgendef_load_save_panel (Panel):
 
 
 
-class OBJECT_PT_bpyhullgendef_panel (Panel):
+class OBJECT_PT_hullgen_panel (Panel):
 
-	bl_label = "bpyHullDef"
+	bl_label = "Hull Generation"
 	bl_space_type = "VIEW_3D"   
 	bl_region_type = "UI"
 	bl_category = "bpyHullGen"
@@ -1198,7 +1199,6 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 		layout = self.layout 
 		scene = context.scene 
 		hull_props=context.scene.hull_properties
-
 
 		row = layout.row()
 		layout.prop( hull_props, "hull_length")
@@ -1271,11 +1271,6 @@ class OBJECT_PT_bpyhullgendef_panel (Panel):
 				row = layout.row() 
 				row.prop(modshape_item, "symmetrical") 
 
-
-
-
-
-				
 
 
 		# ======== Bulkheads ==============
