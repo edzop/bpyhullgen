@@ -399,7 +399,7 @@ class hullgendef_hull_Properties(PropertyGroup):
 
 	hide_hull : BoolProperty(
 		name = "Hide Hull",
-		default = True,
+		default = False,
 		description = "Hide Hull from view after generation (to see structure more clearly)"
 	)
 

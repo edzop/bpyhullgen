@@ -186,7 +186,8 @@ class hull_maker:
 	def make_hull_object(self):
 		self.hull_object=geometry_helper.make_cube(self.hull_name,size=(self.hull_length, self.hull_width, self.hull_height))
 
-		self.hull_object.display_type="WIRE"
+		#self.hull_object.display_type="WIRE"
+		
 
 		material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
 
