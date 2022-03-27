@@ -289,8 +289,8 @@ class ExportHulldxfOperator (bpy.types.Operator):
 
 class DeleteFacesOperator (bpy.types.Operator):
 	"""LaserClean-Delete faces not complying with normal direction - basically flattens objects for laser cutting"""
-	bl_idname = "wm.delete_faces_operator"
-	bl_label = "PreLaserClean"
+	bl_idname = "wm.flatten_faces"
+	bl_label = "FlattenFaces"
 
 	def execute(self, context):
 
@@ -438,7 +438,7 @@ class OBJECT_PT_utility_panel (Panel):
 		mytool = scene.hullgen_Props
 		
 		row = layout.row()
-		row.label(text="Import:")
+		row.label(text="Measure:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.measureedges")
 		rowsub = layout.row(align=True)
@@ -462,9 +462,6 @@ class OBJECT_PT_utility_panel (Panel):
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cleanupmeshes")
 		
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.cutwindows")
-		rowsub.operator( "wm.aluminumplates")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.bendstress")
 		rowsub = layout.row(align=True)
@@ -502,18 +499,13 @@ class OBJECT_PT_production_panel (Panel):
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
-		rowsub.operator("wm.flattenplates")
 
-		rowsub.operator( "wm.delete_faces_operator")
+		rowsub = layout.row(align=True)
+		rowsub.operator("wm.flatten_faces")
 		layout.prop( mytool, "cleanup_choice", text="Cleanup") 
 		
 
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.cutwindows")
 		rowsub.operator( "wm.aluminumplates")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.bendstress")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.insideshrink")
-		rowsub.operator( "wm.shrinkoutliner")
 
