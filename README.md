@@ -1,7 +1,7 @@
 # bpyhullgen
 bpyhullgen is a Blender based Parametric Hull Generator
 
-**bpyhullgen has been updated for blender 2.92**
+**bpyhullgen has been updated for blender 3.1**
 
 The WIKI has been updated to reflect new projects generated with bpyhullgen.
 
