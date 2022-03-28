@@ -499,6 +499,8 @@ class OBJECT_PT_production_panel (Panel):
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.apply_all_bool")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.flattenplates")
 
 		rowsub = layout.row(align=True)
 		rowsub.operator("wm.flatten_faces")
