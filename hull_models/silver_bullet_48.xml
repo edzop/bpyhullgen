@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<hull>
+	<size height="3.6" length="4.800000190734863" width="1.2999999523162842"/>
+	<materials slicer_overcut_ratio="1.100000023841858" slot_gap="0.0" structural_thickness="0.004780000075697899"/>
+	<generate bulkheads="1" hide_hull="1" keels="1" longitudals="1"/>
+	<bulkheads>
+		<bulkhead floor_height="-0.4000000059604645" station="0.0" thickness="0.004780000075697899" watertight="0"/>
+		<bulkhead floor_height="-0.20000000298023224" station="-1.7999999523162842" thickness="0.004780000075697899" watertight="0"/>
+		<bulkhead floor_height="-0.4000000059604645" station="1.7999999523162842" thickness="0.004780000075697899" watertight="0"/>
+		<bulkhead floor_height="-0.4000000059604645" station="1.0" thickness="0.004780000075697899" watertight="0"/>
+		<bulkhead floor_height="-0.4000000059604645" station="-1.0" thickness="0.004780000075697899" watertight="0"/>
+	</bulkheads>
+	<keels>
+		<keel lateral_offset="0.0" station_end="1.2000000476837158" station_start="-1.2000000476837158" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="0.0" station_end="-1.2000000476837158" station_start="-1.7000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="0.0" station_end="-1.7000000476837158" station_start="-2.4000000953674316" top_height="-0.20000000298023224"/>
+		<keel lateral_offset="0.0" station_end="1.600000023841858" station_start="1.2000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="0.0" station_end="2.4000000953674316" station_start="1.600000023841858" top_height="-0.20000000298023224"/>
+		<keel lateral_offset="0.30000001192092896" station_end="1.0499999523162842" station_start="-1.0499999523162842" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="-0.30000001192092896" station_end="1.0499999523162842" station_start="-1.0499999523162842" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="0.20000000298023224" station_end="1.600000023841858" station_start="1.2000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="0.20000000298023224" station_end="1.850000023841858" station_start="1.600000023841858" top_height="-0.20000000298023224"/>
+		<keel lateral_offset="0.20000000298023224" station_end="1.2000000476837158" station_start="0.949999988079071" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="1.600000023841858" station_start="1.2000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="1.850000023841858" station_start="1.600000023841858" top_height="-0.20000000298023224"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="1.2000000476837158" station_start="0.949999988079071" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="-0.949999988079071" station_start="-1.2000000476837158" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="-1.2000000476837158" station_start="-1.7000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="-0.20000000298023224" station_end="-1.7000000476837158" station_start="-1.850000023841858" top_height="-0.20000000298023224"/>
+		<keel lateral_offset="0.20000000298023224" station_end="-0.949999988079071" station_start="-1.2000000476837158" top_height="-0.4000000059604645"/>
+		<keel lateral_offset="0.20000000298023224" station_end="-1.2000000476837158" station_start="-1.7000000476837158" top_height="-0.30000001192092896"/>
+		<keel lateral_offset="0.20000000298023224" station_end="-1.7000000476837158" station_start="-1.850000023841858" top_height="-0.20000000298023224"/>
+	</keels>
+	<modshapes>
+		<modshape mod_mode="intersect" mod_shape="trapezoid" mod_type="cube" name="nose_brace" symmetrical="1">
+			<location x="2.299999952316284" y="0.0" z="0.0"/>
+			<rotation x="0.0" y="0.0" z="0.0"/>
+			<size x="0.4000000059604645" y="0.800000011920929" z="0.004800000227987766"/>
+			<deform p1="0.0" p2="0.0" p3="0.0"/>
+		</modshape>
+		<modshape mod_mode="intersect" mod_shape="trapezoid" mod_type="cube" name="tail_brace" symmetrical="1">
+			<location x="-2.4000000953674316" y="0.0" z="0.0"/>
+			<rotation x="0.0" y="0.0" z="0.0"/>
+			<size x="0.4000000059604645" y="0.8999999761581421" z="0.004999999888241291"/>
+			<deform p1="0.0" p2="0.0" p3="0.0"/>
+		</modshape>
+	</modshapes>
+	<chines>
+		<chine name="side" symmetrical="1">
+			<curve extrude_width="10.8" height="3.6" length="5.199999809265137" width="0.6499999761581421"/>
+			<offset x="0.0" y="0.0" z="0.0"/>
+			<rotation x="0.0" y="0.0" z="0.0"/>
+			<asymmetry a0="0.5" a1="0.0"/>
+			<longitudals>
+				<longitudal width="-0.15000000596046448" x_max="2.200000047683716" x_min="-2.4000000953674316" z_offset="-0.10000000149011612"/>
+			</longitudals>
+		</chine>
+		<chine name="bottom" symmetrical="1">
+			<curve extrude_width="10.8" height="3.6" length="5.199999809265137" width="0.6000000238418579"/>
+			<offset x="0.0" y="0.0" z="0.0"/>
+			<rotation x="79.99999767274336" y="0.0" z="0.0"/>
+			<asymmetry a0="0.4000000059604645" a1="0.20000000298023224"/>
+			<longitudals/>
+		</chine>
+		<chine name="top" symmetrical="0">
+			<curve extrude_width="10.8" height="3.6" length="5.400000095367432" width="0.6499999761581421"/>
+			<offset x="0.0" y="0.0" z="0.0"/>
+			<rotation x="-90.00000250447816" y="0.0" z="0.0"/>
+			<asymmetry a0="0.5" a1="0.10000000149011612"/>
+			<longitudals/>
+		</chine>
+		<chine name="upper_side" symmetrical="1">
+			<curve extrude_width="10.8" height="3.6" length="5.400000095367432" width="0.6499999761581421"/>
+			<offset x="0.0" y="0.0" z="0.0"/>
+			<rotation x="-36.99999875288908" y="0.0" z="0.0"/>
+			<asymmetry a0="0.4000000059604645" a1="0.0"/>
+			<longitudals>
+				<longitudal width="-0.10000000149011612" x_max="1.850000023841858" x_min="-1.850000023841858" z_offset="0.07000000029802322"/>
+			</longitudals>
+		</chine>
+	</chines>
+</hull>

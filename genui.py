@@ -457,8 +457,13 @@ def ensure_dir(f):
 		os.makedirs(d)
 
 
+def get_default_path():
+	this_script_directory = os.path.dirname(os.path.realpath(__file__))
+	#parent_directory=os.path.dirname(this_script_directory)
 
-defaults_path="bpyhullgen_defaults"
+	full_default_path="%s/%s/"%(this_script_directory,"hull_models")
+	return full_default_path
+
 file_extension="xml"
 
 def get_selected_file_path(context):
@@ -466,7 +471,7 @@ def get_selected_file_path(context):
 	index = context.scene.hullgen_file_index
 
 	file_property=file_properties[index]
-	return "%s/%s.%s"%(defaults_path,file_property.filename,file_extension)
+	return "%s/%s.%s"%(get_default_path(),file_property.filename,file_extension)
 
 
 
@@ -546,7 +551,7 @@ class LIST_OT_RefreshConfig(Operator):
 	
 	def execute(self, context): 
 
-		search_path="%s/*.%s"%(defaults_path,file_extension)
+		search_path="%s/*.%s"%(get_default_path(),file_extension)
 
 		file_list = glob.glob(search_path)
 		#print("searching: %s found: %d"%(search_path,len(file_list)))
