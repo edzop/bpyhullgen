@@ -105,7 +105,7 @@ classes = (
     ui.DeleteAllOperator,
     ui.BendStressOperator,
     ui.Export_CSV_Operator,
-    ui.FlattenPlatesOperator,
+    ui.UnfoldOperator,
     ui.ExportHulldxfOperator,
     ui.DeleteFacesOperator,
     ui.CutWindowsOperator,
@@ -115,6 +115,7 @@ classes = (
     ui.MeasureDistanceBetweenVerticesOperator,
     ui.ScaleToSizeOperator,
     ui.CleanupMeshesOperator,
+    ui.HollowOutOperator,
     ui.MeasureEdgesOperator
 )
 
