@@ -251,6 +251,24 @@ def apply_all_bool_modifiers():
 
 	print("Finished!")
 
+# Hollows out a mesh by deleting any edges that are not boundry edges
+def hollowout_mesh(ob):
+	me = ob.data
+
+	bm = bmesh.new()
+	bm.from_mesh(me)
+
+	edges = [e for e in bm.edges if not e.is_boundary]
+
+	for e in edges:
+		bm.edges.remove(e)
+
+	bm.to_mesh(me)
+	bm.free()
+
+	me.update()
+
+
 
 def mesh_deselect_all():
 	old_mode=bpy.context.active_object.mode

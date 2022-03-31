@@ -176,7 +176,10 @@ class flatten_helper():
 				angle=math.degrees(l.calc_angle())
 				length=l.edge.calc_length()
 				print("length: %2.02f loop angle: %d "%(length,round(angle)))
-			
+		
+		bm_old.free()
+
+
 	# Reproduces shape in flattened form
 	def clone_object_faces(self,selected_object):
 
@@ -189,7 +192,6 @@ class flatten_helper():
 			bm_old = bmesh.new()         # Create a new bmesh container instance
 			bm_old.from_mesh(me)         # Pass your mesh into this container
 
-			
 			# bm_old.verts.ensure_lookup_table()
 
 			mesh_name="%s_flat"%selected_object.name
@@ -198,8 +200,6 @@ class flatten_helper():
 			bm_new = bmesh.new()         # Create a new bmesh container instance
 			mesh_data = bpy.data.meshes.new(mesh_name)
 			
-			
-
 			new_mapped_mesh = mapped_mesh.mapped_mesh(bm_new)
 
 			bm_old.faces.ensure_lookup_table()
@@ -243,21 +243,14 @@ class flatten_helper():
 			bpy_helper.move_object_to_collection(flattened_collection,mesh_obj)
   
 			
-
-
-
-	def flatten_plates(self):
-
-		#self.make_shape()
-
-		#return self.measure_angle()
+	def unfold_plates(self):
 
 		ob = bpy.context.object
 
-		if ob is not None:
-			self.print_inside_angles(ob)
+		#if ob is not None:
+		#	self.print_inside_angles(ob)
 
-			self.print_inside_angles2(ob)
+		#	self.print_inside_angles2(ob)
 
 		# Reset output position
 		self.output_pos_X=0

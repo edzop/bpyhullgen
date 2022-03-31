@@ -25,7 +25,7 @@ from .bpyutils import material_helper as material_helper
 from .hullgen import window_helper as window_helper
 from .bpyutils import measure_helper as measure_helper
 from .hullgen import import_export_helper as import_export_helper
-from .hullgen import flatten_helper as flatten_helper
+from .hullgen import unfold_helper as unfold_helper
 from .hullgen import curve_helper as curve_helper
 
 from bpy.props import (StringProperty,
@@ -64,8 +64,8 @@ class hullgen_Properties (PropertyGroup):
 
 	cleanup_choice: EnumProperty(
 		items=cleanup_options,
-		description="Cleanup....",
-		name="cleanup",
+		description="Keep faces facing this direction",
+		name="keep",
 		default="auto"
 	)
 
@@ -89,7 +89,7 @@ class hullgen_Properties (PropertyGroup):
 		name = "Thickness",
 		description = "Solidify Thickness",
 		default = 0.003,
-		min = 0.001,
+		min = -10,
 		max = 10
 		)
 
@@ -207,6 +207,23 @@ class CleanupMeshesOperator (bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class HollowOutOperator (bpy.types.Operator):
+	"""Hollow out a mesh by deleting any edges that are not exterior"""
+	bl_idname = "wm.hollowout"
+	bl_label = "Hollow"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
+
+	def execute(self, context):
+
+		for obj in bpy.context.selected_objects:
+			if obj.type=="MESH":
+				geometry_helper.hollowout_mesh(obj)
+
+		return {'FINISHED'}
+
 
 # ------------------------------------------------------------------------
 #    SeparateSolidify
@@ -216,6 +233,10 @@ class SeparateMaterialOperator (bpy.types.Operator):
 	"""Separate active object into new objects based on material"""
 	bl_idname = "wm.separatematerial"
 	bl_label = "SeparateMat"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
 
 	def execute(self, context):
 
@@ -227,6 +248,10 @@ class SolidifySelectedObjectsOperator (bpy.types.Operator):
 	"""Solidify each selected object to hull material thickness"""
 	bl_idname = "wm.solidifyselections"
 	bl_label = "Solidify Selections"
+
+	@classmethod
+	def poll(cls, context):
+		return context.selected_objects is not None
 
 	def execute(self, context):
 
@@ -252,11 +277,11 @@ class CutWindowsOperator (bpy.types.Operator):
 
 
 
-class FlattenPlatesOperator (bpy.types.Operator):
+class UnfoldOperator (bpy.types.Operator):
 
 	"""Flatten plate for fabrication (laser cut or CNC router)"""
-	bl_idname = "wm.flattenplates"
-	bl_label = "Flatten"
+	bl_idname = "wm.unfold"
+	bl_label = "Unfold"
 
 	@classmethod
 	def poll(cls, context):
@@ -264,9 +289,9 @@ class FlattenPlatesOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		flatten = flatten_helper.flatten_helper()
+		unfolder = unfold_helper.flatten_helper()
 
-		summary = flatten.flatten_plates()
+		summary = unfolder.unfold_plates()
 
 		self.report({'INFO'}, "-  %s"%(summary))
 
@@ -282,15 +307,16 @@ class ExportHulldxfOperator (bpy.types.Operator):
 
 	def execute(self, context):
 
-		measure_helper.export_dxf("plates2.dxf")
+		if measure_helper.export_dxf("plates2.dxf") is False:
+			self.report({'INFO'}, "DXF export failed - check export DXF addon is installed?")
 
 		return {'FINISHED'}
 
 
 class DeleteFacesOperator (bpy.types.Operator):
-	"""LaserClean-Delete faces not complying with normal direction - basically flattens objects for laser cutting"""
+	"""LaserClean - Delete all faces not complying with normal direction in preparation for laser cutting"""
 	bl_idname = "wm.flatten_faces"
-	bl_label = "FlattenFaces"
+	bl_label = "LaserClean"
 
 	def execute(self, context):
 
@@ -459,14 +485,16 @@ class OBJECT_PT_utility_panel (Panel):
 		rowsub.operator( "wm.solidifyselections")
 		layout.prop( mytool, "solidify_thickness")
 
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.cleanupmeshes")
-		
+
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.bendstress")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.insideshrink")
 		rowsub.operator( "wm.shrinkoutliner")
+
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.cutwindows")
+		rowsub.operator( "wm.aluminumplates")
 
 
 
@@ -491,23 +519,21 @@ class OBJECT_PT_production_panel (Panel):
 		row = layout.row()
 		row.label(text="Output:")
 		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.exportcsv")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.exporthulldxf")
-
+		rowsub.operator( "wm.apply_all_bool")		
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.separatematerial")
 		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.apply_all_bool")
-		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.flattenplates")
-
+		rowsub.operator( "wm.unfold")
 		rowsub = layout.row(align=True)
 		rowsub.operator("wm.flatten_faces")
-		layout.prop( mytool, "cleanup_choice", text="Cleanup") 
-		
+		layout.prop( mytool, "cleanup_choice", text="Keep") 
 
 		rowsub = layout.row(align=True)
-		rowsub.operator( "wm.cutwindows")
-		rowsub.operator( "wm.aluminumplates")
+		rowsub.operator( "wm.cleanupmeshes")
+		rowsub.operator( "wm.hollowout")
+		
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.exportcsv")
+		rowsub = layout.row(align=True)
+		rowsub.operator( "wm.exporthulldxf")
 
