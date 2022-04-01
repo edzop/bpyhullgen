@@ -29,7 +29,7 @@ the_hull.make_hull_object()
 
 the_hull.bulkhead_count=0
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side",
 	length=the_hull.hull_length,
 	width=-1,

@@ -33,7 +33,7 @@ the_hull=hull_maker.hull_maker(length=12,width=1,height=0.8)
 the_hull.make_hull_object()
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side1",
 	length=the_hull.hull_length*1.3,
 	width=1,
@@ -47,7 +47,7 @@ new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side2",
 	length=the_hull.hull_length*1.3,
 	width=1,

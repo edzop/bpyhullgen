@@ -31,7 +31,7 @@ the_hull.make_hull_object()
 
 the_hull.bulkhead_count=0
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="wall",
 	length=the_hull.hull_length,
 	width=-1,
@@ -48,7 +48,7 @@ new_chine.add_longitudinal_definition(new_longitudinal)
 the_hull.add_chine(new_chine)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="low",
 	length=the_hull.hull_length,
 	width=-1,
@@ -64,7 +64,7 @@ new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="top",
 	length=the_hull.hull_length,
 	width=-1,

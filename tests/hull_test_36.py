@@ -39,7 +39,7 @@ the_hull.bulkhead_start_location=-4
 
 the_hull.make_hull_object()
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side",
 	length=the_hull.hull_length*1.1,
 	width=1.2,
@@ -50,7 +50,7 @@ new_longitudinal=chine_helper.longitudinal_definition(z_offset=-0.3,width=-0.2,t
 new_chine.add_longitudinal_definition(new_longitudinal)
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="mid",
 	length=the_hull.hull_length*1.1,
 	width=1.4,
@@ -61,7 +61,7 @@ new_chine.add_longitudinal_definition(chine_helper.longitudinal_definition(z_off
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="upper",
 	length=the_hull.hull_length*1.2,
 	width=1.1,
@@ -76,7 +76,7 @@ the_hull.add_chine(new_chine)
 #window_helper.make_window_on_chine(new_chine,-1.5,0.34)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="low",
 	length=the_hull.hull_length*1.2,
 	width=1.6,
@@ -91,7 +91,7 @@ new_chine.curve_twist=[0,30,-50]
 #new_chine.longitudinal_z_offset=-0.4
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="roof",
 	length=the_hull.hull_length*1.25,
 	width=0.8,

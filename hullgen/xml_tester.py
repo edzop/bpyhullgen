@@ -7,7 +7,7 @@ the_hull=hull_maker.hull_maker(width=3,length=7,height=2)
 
 for v in range(0,3):
 
-    new_chine=chine_helper.chine_helper(the_hull,
+    new_chine=chine_helper.chine_definition(the_hull,
 	    name="side_%d"%v,length=9+v,width=1.6+v)
 
     new_chine.extrude_width=v+6

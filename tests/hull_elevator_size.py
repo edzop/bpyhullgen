@@ -27,7 +27,7 @@ the_hull=hull_maker.hull_maker(width=1,length=1.95,height=1)
 the_hull.make_hull_object()
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side",
 	length=the_hull.hull_length*2.0,
 	width=0.35,
@@ -36,7 +36,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="low",
 	length=the_hull.hull_length*2.0,
 	width=0.35,
@@ -47,7 +47,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 the_hull.add_chine(new_chine)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="upper",
 	length=the_hull.hull_length*2.0,
 	width=0.35,
@@ -58,7 +58,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 the_hull.add_chine(new_chine)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="roof",
 	length=the_hull.hull_length*3.0,
 	width=-0.35,

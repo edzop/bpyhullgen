@@ -20,6 +20,7 @@ import bpy
 import math
 from math import radians, degrees
 import bmesh
+import itertools
 
 from ..hullgen import curve_helper
 from ..bpyutils import material_helper
@@ -48,6 +49,8 @@ class hull_maker:
 	modshape_collection_name="modshapes"
 
 	hull_object=None
+
+	hull_core_object=None
 
 	curve_resolution=24
 	
@@ -96,13 +99,16 @@ class hull_maker:
 		if self.hull_object != None:
 			delete_list.append(self.hull_object)
 
+		if self.hull_core_object != None:
+			delete_list.append(self.hull_core_object)
+
 		for modshape in self.modshapes:
 			for mod_object in modshape.mod_objects:
 				delete_list.append(mod_object)
 
 
 		for bh in self.bulkhead_instances:
-			delete_list.append(bh.bulkhead_void_object)
+			delete_list.append(bh.bulkhead_floor_object)
 			delete_list.append(bh.bulkhead_object)
 
 			if bh.bulkhead_overcut_object!=None:
@@ -110,18 +116,18 @@ class hull_maker:
 
 
 		for chine in self.chine_list:
-			for chine_instance in chine.chine_instances:
 
+			for chine_instance in itertools.chain(chine.chine_instances,chine.chine_core_instances):
 				delete_list.append(chine_instance.curve_object)
 				delete_list.append(chine_instance.curve_backup)
 				
 				for lg in chine_instance.longitudinal_slicers:
 					delete_list.append(lg)
 
-				for lg in chine_instance.longitudinal_slicers:
+				for lg in chine_instance.longitudinal_slicers_slot_gap_objects:
 					delete_list.append(lg)
 
-				for lg in chine_instance.longitudinal_slicers_slot_gap_objects:
+				for lg in chine_instance.longitudinal_slicers_end_cut_objects:
 					delete_list.append(lg)
 
 				for lg in chine_instance.longitudinal_objects:
@@ -142,13 +148,14 @@ class hull_maker:
 			objs = bpy.data.objects
 
 			for ob in delete_list:
-
-				try: 
-					objs.remove(ob, do_unlink=True)
-				except:
-					print("Object already removed!")
+				if ob is not None:
+					try: 
+						objs.remove(ob, do_unlink=True)
+					except:
+						print("Object already removed!")
 
 		self.hull_object=None
+		self.hull_core_object=None
 
 		self.keel_list.clear()
 		self.bulkhead_definitions.clear()
@@ -186,16 +193,22 @@ class hull_maker:
 	def make_hull_object(self):
 		self.hull_object=geometry_helper.make_cube(self.hull_name,size=(self.hull_length, self.hull_width, self.hull_height))
 
+		hull_core_name="%s_core"%self.hull_name
+		self.hull_core_object=geometry_helper.make_cube(hull_core_name,size=(self.hull_length, self.hull_width, self.hull_height))
+
 		#self.hull_object.display_type="WIRE"
 		
 
+
 		material_helper.assign_material(self.hull_object,material_helper.get_material_hull())
+		material_helper.assign_material(self.hull_core_object,material_helper.get_material_bool())
+
 
 		view_collection_hull=bpy_helper.make_collection("hull",bpy.context.scene.collection.children)
+		
 		bpy_helper.move_object_to_collection(view_collection_hull,self.hull_object)
+		bpy_helper.move_object_to_collection(view_collection_hull,self.hull_core_object)
 
-
-		return self.hull_object
 
 	def add_modshape(self,modshape):
 		self.modshapes.append(modshape)
@@ -243,21 +256,20 @@ class hull_maker:
 
 			# If it's not watertight - there is a void in middle
 			if bulkhead_definition.watertight==False:
-				material_helper.assign_material(bh.bulkhead_void_object,material_helper.get_material_bool())
 				
 				floor_height_z=bulkhead_definition.floor_height
 
 				# floor height
 				if floor_height_z!=False:
 
-					floor_bool_name="floor_bool_%s"%floor_height_z
+					floor_bool_name="floor_bool_%0.03f"%bh.bulkhead_definition.station
 
 					ob = bpy.data.objects.get(floor_bool_name)
 
 					if ob is None:
 						ob = geometry_helper.make_cube(name=floor_bool_name,
-							location=[0,0,0],
-							size=[self.hull_length,self.hull_width,self.hull_height])
+							location=[bulkhead_definition.station,0,0],
+							size=[bulkhead_definition.thickness,self.hull_width,self.hull_height])
 
 						ob.location.z=0-(self.hull_height/2)+floor_height_z
 						ob.hide_viewport=True
@@ -266,8 +278,10 @@ class hull_maker:
 						view_collection_cleaner=bpy_helper.make_collection(self.cleaner_collection_name,bpy.context.scene.collection.children)
 						bpy_helper.move_object_to_collection(view_collection_cleaner,ob)
 
+
+					bh.bulkhead_floor_object=ob
 						
-					modifier=bh.bulkhead_void_object.modifiers.new(name="floor", type='BOOLEAN')
+					modifier=self.hull_core_object.modifiers.new(name="floor", type='BOOLEAN')
 					modifier.object=ob
 					modifier.operation="DIFFERENCE"
 
@@ -276,12 +290,12 @@ class hull_maker:
 
 			material_helper.assign_material(bh.bulkhead_object,material_helper.get_material_bulkhead())
 
-			if bh.bulkhead_void_object!=None:
-				bpy_helper.select_object(bh.bulkhead_void_object,True)
+			#if bh.bulkhead_void_object!=None:
+			#	bpy_helper.select_object(bh.bulkhead_void_object,True)
 			
-				bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
+			#	bpy_helper.bmesh_recalculate_normals(bh.bulkhead_void_object)
 				
-				bpy_helper.hide_object(bh.bulkhead_void_object)
+			#	bpy_helper.hide_object(bh.bulkhead_void_object)
 
 			if bh.bulkhead_overcut_object!=None:
 				bpy_helper.hide_object(bh.bulkhead_overcut_object)
@@ -373,6 +387,8 @@ class hull_maker:
 		if self.hide_hull:
 			self.hull_object.hide_viewport=True
 
+		self.hull_core_object.hide_viewport=True
+
 		time_string = performance_timer.get_elapsed_string()
 
 		return time_string
@@ -405,9 +421,10 @@ class hull_maker:
 	def make_bulkhead_booleans(self):
 	
 		for bh in self.bulkhead_instances:
-			bool_void = bh.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center_%d"%bh.bulkhead_definition.station)
-			bool_void.object = bh.bulkhead_void_object
-			bool_void.operation = 'DIFFERENCE'
+			if not bh.bulkhead_definition.watertight:
+				bool_void = bh.bulkhead_object.modifiers.new(type="BOOLEAN", name="void.center_%d"%bh.bulkhead_definition.station)
+				bool_void.object = self.hull_core_object
+				bool_void.operation = 'DIFFERENCE'
 
 
 	def make_longitudinal_booleans(self):
@@ -492,10 +509,20 @@ class hull_maker:
 	def make_chine_hull_booleans(self):
 
 		for chine_object in self.chine_list:	
+
+			# Add bool modifiers for hull object (exterior walls)
 			for chine_instance in chine_object.chine_instances:		
 				slicename="slice.%s"%chine_instance.curve_object.name
 
 				bool_new = self.hull_object.modifiers.new(type="BOOLEAN", name=slicename)
+				bool_new.object = chine_instance.curve_object
+				bool_new.operation = 'DIFFERENCE'
+
+			# Add bool modifiers for hull core (bulkhead void area)
+			for chine_instance in chine_object.chine_core_instances:		
+				slicename="slice.%s"%chine_instance.curve_object.name
+
+				bool_new = self.hull_core_object.modifiers.new(type="BOOLEAN", name=slicename)
 				bool_new.object = chine_instance.curve_object
 				bool_new.operation = 'DIFFERENCE'
 

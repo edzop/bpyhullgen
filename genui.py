@@ -285,6 +285,15 @@ class hullgendef_chine_Properties(PropertyGroup):
 		max = 1
 		)
 
+	core_offset : FloatProperty(
+		name = "core offset",
+		description = "Core Offset",
+		default = 0.1,
+		min = 0,
+		max = 1
+		)
+
+
 	active_longitudinal_index: IntProperty(default=-1)
 
 	longitudinals: CollectionProperty(
@@ -967,6 +976,8 @@ def update_properties_from_hull(the_hull,context):
 		chine_prop.a0=chine.asymmetry[0]
 		chine_prop.a1=chine.asymmetry[1]
 
+		chine_prop.core_offset=chine.chine_core_offset
+
 		chine_prop.pos=chine.offset
 
 		chine_prop.symmetrical=chine.symmetrical
@@ -1067,7 +1078,7 @@ def update_hull_from_properties(the_hull,context):
 		width=chineprop.width
 		length=chineprop.length
 
-		new_chine=chine_helper.chine_helper(the_hull,
+		new_chine=chine_helper.chine_definition(the_hull,
 			name=chineprop.name,
 			length=length,
 			width=width,
@@ -1076,6 +1087,8 @@ def update_hull_from_properties(the_hull,context):
 			symmetrical=chineprop.symmetrical,
 			asymmetry=[chineprop.a0,chineprop.a1]
 		)
+
+		new_chine.chine_core_offset=chineprop.core_offset
 
 		the_hull.add_chine(new_chine)
 
@@ -1352,6 +1365,9 @@ class OBJECT_PT_hullgen_panel (Panel):
 				row = layout.row()
 				row.prop(chine_item,"a0")
 				row.prop(chine_item,"a1")
+
+				row = layout.row()
+				row.prop(chine_item,"core_offset")
 
 				if len(chine_item.longitudinals)>0:
 

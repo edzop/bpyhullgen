@@ -36,7 +36,7 @@ the_hull.start_bulkhead_location=-3
 the_hull.hull_output_scale=1/16
 the_hull.target_screw_size=4.1 # mm
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="side",
 	length=the_hull.hull_length*1.2,
 	width=1,
@@ -50,7 +50,7 @@ new_chine.add_longitudinal_definition(new_longitudinal)
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="upper",
 	length=the_hull.hull_length*1.3,
 	width=1,
@@ -61,7 +61,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 
 the_hull.add_chine(new_chine)
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="mid",
 	length=the_hull.hull_length*1.3,
 	width=1,
@@ -73,7 +73,7 @@ new_chine=chine_helper.chine_helper(the_hull,
 the_hull.add_chine(new_chine)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="low",
 	length=the_hull.hull_length*1.4,
 	width=1,
@@ -88,7 +88,7 @@ new_chine.add_longitudinal_definition(new_longitudinal)
 the_hull.add_chine(new_chine)
 
 
-new_chine=chine_helper.chine_helper(the_hull,
+new_chine=chine_helper.chine_definition(the_hull,
 	name="roof",
 	length=the_hull.hull_length*1.4,
 	width=0.8,

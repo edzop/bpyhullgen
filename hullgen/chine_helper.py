@@ -56,7 +56,7 @@ class longitudinal_definition:
 		self.slicer_ratio=slicer_ratio
 
 
-class chine_instance_definition:
+class chine_instance:
 	curve_object=None
 	curve_backup=None
 	inverted=True
@@ -65,6 +65,7 @@ class chine_instance_definition:
 	longitudinal_slicers=None
 
 	longitudinal_slicers_slot_gap_objects=None
+	longitudinal_slicers_end_cut_objects=None
 
 	def __init__(self,curve_object,curve_backup,inverted):
 		self.curve_object=curve_object
@@ -73,6 +74,7 @@ class chine_instance_definition:
 		self.longitudinal_objects=[]
 		self.longitudinal_slicers=[]
 		self.longitudinal_slicers_slot_gap_objects=[]
+		self.longitudinal_slicers_end_cut_objects=[]
 
 	def add_longitudinal_instance(self,longitudinal_object,longitudinal_slicer):
 		self.longitudinal_objects.append(longitudinal_object)
@@ -80,7 +82,7 @@ class chine_instance_definition:
 
 
 
-class chine_helper:
+class chine_definition:
 
 	rotation=[0,0,0]
 	offset=[0,0,0]
@@ -105,8 +107,10 @@ class chine_helper:
 
 	longitudinal_definitions=None
 
-
 	chine_instances=None
+
+	chine_core_instances=None
+	chine_core_offset=0.1
 
 	longitudinal_screw_positions=None
  
@@ -122,6 +126,9 @@ class chine_helper:
 	def add_chine_instance(self,new_instance):
 		self.chine_instances.append(new_instance)
 
+	def add_chine_core_instance(self,new_instance):
+		self.chine_core_instances.append(new_instance)
+
 	def add_longitudinal_definition(self,new_element):
 		self.longitudinal_definitions.append(new_element)
 
@@ -133,6 +140,7 @@ class chine_helper:
 		self.longitudinal_screw_positions=[]
 		self.longitudinal_definitions=[]
 		self.chine_instances=[]
+		self.chine_core_instances=[]
 
 		self.name=name
 		self.curve_length=length
@@ -422,8 +430,6 @@ class chine_helper:
 		
 		chine_instance.add_longitudinal_instance(longitudinal_plane,slicer_plane)
 
-
-
 		# chop ends off if needed (based on X limits)
 		if longitudinal_element.limit_x_max!=0 and longitudinal_element.limit_x_min!=0:
 
@@ -469,6 +475,10 @@ class chine_helper:
 			bool_new.object = object_end_clean_max
 			bool_new.operation = 'DIFFERENCE'
 
+			chine_instance.longitudinal_slicers_end_cut_objects.append(object_end_clean_max)
+			chine_instance.longitudinal_slicers_end_cut_objects.append(object_end_clean_min)
+
+
 		if self.the_hull.slot_gap>0:
 			
 			bpy_helper.select_object(slicer_plane,True)
@@ -487,7 +497,7 @@ class chine_helper:
 
 			slicer_stop_gap_object.location.y=y_offset
 			
-			chine_instance.longitudinal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
+			#chine_instance.longitudinal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
 			
 			chine_instance.longitudinal_slicers_slot_gap_objects.append(slicer_stop_gap_object)
 			bpy_helper.move_object_to_collection(self.view_collection_longitudinals,slicer_stop_gap_object)
@@ -502,15 +512,13 @@ class chine_helper:
 
 	
 
-	def make_single_chine(self,twist=None,inverted=False):
+	def make_single_chine(self,twist=None,inverted=False,name_prefix="chine_",core_offset=0):
 
 		theCurveHelper = curve_helper.Curve_Helper(curve_resolution=self.the_hull.curve_resolution)
 
 		theCurveHelper.asymmetry=self.asymmetry
 
 		bpy.ops.object.select_all(action='DESELECT')
-
-		name_prefix="chine_"
 
 		curve_name=name_prefix+self.name
 
@@ -555,13 +563,17 @@ class chine_helper:
 		bpy_helper.hide_object(theCurveHelper.curve_backup)
 
 
-		chine_instance=chine_instance_definition(curve_object,theCurveHelper.curve_backup,inverted)
+		new_chine_instance=chine_instance(curve_object,theCurveHelper.curve_backup,inverted)
 
-		self.add_chine_instance(chine_instance)
+		if core_offset==0:
+			self.add_chine_instance(new_chine_instance)
 
-		for i in range(len(self.longitudinal_definitions)):
-			if self.longitudinal_elements_enabled==True:
-				self.make_longitudinal_element(chine_instance,self.longitudinal_definitions[i],i)
+			for i in range(len(self.longitudinal_definitions)):
+				if self.longitudinal_elements_enabled==True:
+					self.make_longitudinal_element(new_chine_instance,self.longitudinal_definitions[i],i)
+
+		else:
+			self.add_chine_core_instance(new_chine_instance)
 
 		# Can only do rotation after we generate the longitudinal elements because the slicers
 		# depend on zero rotation 
@@ -572,13 +584,17 @@ class chine_helper:
 							self.rotation[2],
 							]
 
-			geometry_helper.set_rotation_degrees(curve_object,rotation_opposite)
+			if core_offset==0:
+				geometry_helper.set_rotation_degrees(curve_object,rotation_opposite)
 			curve_object.location.x=self.offset[0]
-			curve_object.location.y=-self.offset[1]
+			curve_object.location.y=-self.offset[1]+core_offset
 			curve_object.location.z=self.offset[2]
 		else:
-			geometry_helper.set_rotation_degrees(curve_object,self.rotation)
+			if core_offset==0:
+				geometry_helper.set_rotation_degrees(curve_object,self.rotation)
+
 			curve_object.location=self.offset
+			curve_object.location.y=-self.offset[1]-core_offset
 
 
 
@@ -589,16 +605,23 @@ class chine_helper:
 		# ================================================================================================ 
 		# First curve is Left Side or non-symmetrical "single side"
 		# ================================================================================================
-		newcurve=self.make_single_chine(twist,False)
+		base_curve=self.make_single_chine(twist=twist,inverted=False,name_prefix="chine_",core_offset=0)
+		
+		core_curve=self.make_single_chine(twist=twist,inverted=False,name_prefix="chine_bh_",core_offset=-self.chine_core_offset)
 
+		core_curve.parent=base_curve
 
 
 		# ================================================================================================ 
 		# Second curve is Right Side
 		# ================================================================================================
 		if self.symmetrical:
-			newcurve=self.make_single_chine(twist,True)
+			base_curve=self.make_single_chine(twist=twist,inverted=True,name_prefix="chine_",core_offset=0)
+
+			core_curve=self.make_single_chine(twist=twist,inverted=True,name_prefix="chine_bh_",core_offset=-self.chine_core_offset)
 			#self.curve_objects.append(newcurve)
+
+			core_curve.parent=base_curve
 
 
 	def make_segmented_longitudinals(self,z_offset,radius=0,angle=0,start_bulkhead=1,end_bulkhead=4,double_thick=True):

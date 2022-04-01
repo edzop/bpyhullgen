@@ -206,6 +206,8 @@ def read_hull(filename):
                 rotation=[0,0,0]
                 asymmetry=[0,0]
 
+                chine_core_offset=0
+
                 longitudinal_defs=[]
 
                 for subelem in chine_elem:
@@ -215,6 +217,7 @@ def read_hull(filename):
                         width=parse_float_val(subelem,"width",width)
                         height=parse_float_val(subelem,"height",height)
                         extrude_width=parse_float_val(subelem,"extrude_width",extrude_width)
+                        chine_core_offset=parse_float_val(subelem,"chine_core_offset",chine_core_offset)
 
                     if subelem.tag=="asymmetry":
                         asymmetry[0]=parse_float_val(subelem,"a0",0)
@@ -253,7 +256,7 @@ def read_hull(filename):
                             longitudinal_defs.append(longitudinal_definition)
 
 
-                new_chine=chine_helper.chine_helper(newhull,
+                new_chine=chine_helper.chine_definition(newhull,
                     name=name,length=length,width=width,
                     symmetrical=symmetrical,
                     asymmetry=asymmetry)
@@ -262,6 +265,7 @@ def read_hull(filename):
                 new_chine.offset=offset
                 new_chine.rotation=rotation
                 new_chine.extrude_width=extrude_width
+                new_chine.chine_core_offset=chine_core_offset
 
                 for ld in longitudinal_defs:
                     new_chine.add_longitudinal_definition(ld)
@@ -370,6 +374,7 @@ def write_xml(the_hull,filename):
         node_curve.set("width", format_float(chine.curve_width))
         node_curve.set("height", format_float(chine.curve_height))
         node_curve.set("extrude_width", format_float(chine.extrude_width))
+        node_curve.set("chine_core_offset",format_float(chine.chine_core_offset))
 
         node_offset = ET.SubElement(node_chine, "offset")
         node_offset.set('x',format_float(chine.offset[0]))
@@ -384,6 +389,8 @@ def write_xml(the_hull,filename):
         node_asymmetry = ET.SubElement(node_chine, "asymmetry")
         node_asymmetry.set('a0',format_float(chine.asymmetry[0]))
         node_asymmetry.set("a1", format_float(chine.asymmetry[1]))
+
+        
 
         node_longitudinals = ET.SubElement(node_chine, 'longitudinals')
 

@@ -41,9 +41,9 @@ class bulkhead:
 
     bulkhead_overcut_object=None
 
-    bulkhead_void_object=None
+    bulkhead_floor_object=None
     bulkhead_collection=None
-    bulkhead_void_collection=None
+    #bulkhead_void_collection=None
     bulkhead_definition=None
 
 
@@ -114,6 +114,9 @@ class bulkhead:
             self.bulkhead_overcut_object=bpy.context.view_layer.objects.active
             self.bulkhead_overcut_object.name="Bulkhead.s%06.2f_overcut"%(self.bulkhead_definition.station)
 
+            #self.bulkhead_overcut_object.parent=self.bulkhead_object
+
+
             #bpy_helper.parent_objects_keep_transform(self.bulkhead_object,self.bulkhead_overcut_object)
 
             bpy_helper.select_object(self.bulkhead_overcut_object,True)
@@ -121,44 +124,10 @@ class bulkhead:
             #self.bulkhead_overcut_object.parent=self.bulkhead_object
             bpy.ops.transform.resize(value=[self.the_hull_definition.slicer_overcut_ratio,1,1])
 
+            bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_overcut_object)
+
         bpy_helper.select_object(self.bulkhead_object,True)
 
-
-        if self.bulkhead_definition.watertight==False:
-
-            bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
-                                            TRANSFORM_OT_translate={"value":(0, 0, 0)})
-
-            self.bulkhead_void_object=bpy.context.view_layer.objects.active
-
-            bpy_helper.select_object(self.bulkhead_void_object,True)
-
-            self.bulkhead_void_object.name="Bulkhead.s%06.2f_void"%(self.bulkhead_definition.station)
-
-            # get truple of current size
-            bulkhead_size=self.bulkhead_void_object.dimensions.xyz
-
-            if bulkhead_size[0]==0 or bulkhead_size[1]==0 or bulkhead_size[2]==0:
-                print("Something went wrong... bulkhead size==0")
-            else:
-
-                minimum_support_size=0.2
-                rescale_factor=[1,1,1]
-
-                rescale_factor[0]=1.3
-                rescale_factor[1]=(bulkhead_size[1]-(minimum_support_size*2))*1/bulkhead_size[1]
-                rescale_factor[2]=(bulkhead_size[2]-(minimum_support_size*2))*1/bulkhead_size[2]
-
-                bpy.ops.transform.resize(value=rescale_factor)
-
-                bpy.ops.object.transform_apply(scale=True)
-
-                bpy_helper.select_object(self.bulkhead_void_object,True)
-
-                bpy_helper.parent_objects_keep_transform(parent=self.bulkhead_object,child=self.bulkhead_void_object)
-
-                bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_void_object)
-  
 
         bpy_helper.move_object_to_collection(self.bulkhead_collection,self.bulkhead_object)
 
