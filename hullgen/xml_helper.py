@@ -206,7 +206,7 @@ def read_hull(filename):
                 rotation=[0,0,0]
                 asymmetry=[0,0]
 
-                chine_core_offset=0
+                chine_core_offset=0.1
 
                 longitudinal_defs=[]
 
