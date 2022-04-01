@@ -586,6 +586,7 @@ class chine_definition:
 
 			if core_offset==0:
 				geometry_helper.set_rotation_degrees(curve_object,rotation_opposite)
+
 			curve_object.location.x=self.offset[0]
 			curve_object.location.y=-self.offset[1]+core_offset
 			curve_object.location.z=self.offset[2]
@@ -594,7 +595,7 @@ class chine_definition:
 				geometry_helper.set_rotation_degrees(curve_object,self.rotation)
 
 			curve_object.location=self.offset
-			curve_object.location.y=-self.offset[1]-core_offset
+			curve_object.location.y=self.offset[1]-core_offset
 
 
 
