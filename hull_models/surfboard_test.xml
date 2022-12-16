@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<hull>
+	<size length="2.000" width="1.000" height="3.600"/>
+	<materials structural_thickness="0.060" slicer_overcut_ratio="1.100" slot_gap="0.050"/>
+	<generate bulkheads="1" keels="1" longitudinals="1" hide_hull="0"/>
+	<bulkheads/>
+	<keels/>
+	<modshapes/>
+	<chines>
+		<chine name="side_rail" symmetrical="1">
+			<curve length="2.100" width="0.200" height="3.600" extrude_width="10.800" chine_core_offset="0.100"/>
+			<offset x="0.000" y="0.000" z="0.000"/>
+			<rotation x="0.000" y="0.000" z="0.000"/>
+			<asymmetry a0="0.000" a1="0.000"/>
+			<longitudinals/>
+		</chine>
+		<chine name="top_deck" symmetrical="1">
+			<curve length="2.300" width="0.200" height="3.600" extrude_width="10.800" chine_core_offset="0.100"/>
+			<offset x="0.000" y="0.000" z="0.000"/>
+			<rotation x="-90.000" y="0.000" z="0.000"/>
+			<asymmetry a0="0.000" a1="0.000"/>
+			<longitudinals/>
+		</chine>
+		<chine name="bottom" symmetrical="1">
+			<curve length="2.300" width="0.200" height="3.600" extrude_width="10.800" chine_core_offset="0.100"/>
+			<offset x="0.000" y="0.000" z="0.000"/>
+			<rotation x="90.000" y="0.000" z="0.000"/>
+			<asymmetry a0="0.400" a1="0.000"/>
+			<longitudinals/>
+		</chine>
+	</chines>
+</hull>
