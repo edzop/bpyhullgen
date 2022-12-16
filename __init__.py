@@ -100,7 +100,6 @@ classes = (
     ui.OBJECT_PT_utility_panel,
     ui.SolidifySelectedObjectsOperator,
     ui.SeparateMaterialOperator,
-    ui.GenSceneOperator,
     ui.ApplyAllBoolOperator,
     ui.DeleteAllOperator,
     ui.BendStressOperator,

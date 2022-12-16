@@ -118,23 +118,6 @@ class hullgen_Properties (PropertyGroup):
     )
 
 
-# ------------------------------------------------------------------------
-#    Build
-# ------------------------------------------------------------------------
-
-class GenSceneOperator (bpy.types.Operator):
-	"""Quick generate background backdrop for rendering"""
-	bl_idname = "wm.genscene"
-	bl_label = "GenScene"
-
-	def execute(self, context):
-
-		backdrop=geometry_helper.make_backdrop()
-		mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
-		material_helper.assign_material(backdrop,mat)
-
-		return {'FINISHED'}
-
 
 # ------------------------------------------------------------------------
 #    Apply All Bool
@@ -477,7 +460,6 @@ class OBJECT_PT_utility_panel (Panel):
 		row.label(text="Scene:")
 		rowsub = layout.row(align=True)
 		rowsub.operator( "wm.deleteall")
-		rowsub.operator( "wm.genscene")
 
 		row = layout.row()
 		row.label(text="Modify:")

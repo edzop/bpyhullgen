@@ -86,39 +86,6 @@ def get_color_from_hash_string(input_string,add_alpha_value=True):
 		
 	return color_value_list
 
-
-def make_backdrop():
-	bpy.ops.mesh.primitive_plane_add(size=80, enter_editmode=False, location=(0, 0, -2))
-
-	bpy.ops.object.mode_set(mode='EDIT')
-	bpy.ops.mesh.select_mode(type="EDGE")
-	bpy.ops.mesh.select_all(action='DESELECT')
-	bpy.ops.object.mode_set(mode='OBJECT')
-
-	ob = bpy.context.active_object
-	ob.data.edges[3].select=True
-	ob.name="Floor"
-
-	bpy.ops.object.mode_set(mode='EDIT')
-	bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":(0, 0, 40)})
-
-	bpy.ops.mesh.select_all(action='DESELECT')
-
-	bpy.ops.object.mode_set(mode='OBJECT')
-	ob.data.edges[3].select=True
-	bpy.ops.object.mode_set(mode='EDIT')
-
-	bpy.ops.mesh.bevel(offset=20, offset_pct=0, segments=10, release_confirm=True)
-
-	bpy.ops.object.mode_set(mode='OBJECT')
-	bpy.ops.object.shade_smooth()
-
-	mat = material_helper.make_metalic_material("backdrop",[.6,.6,.6,1])
-	material_helper.assign_material(ob,mat)
-
-
-	return ob
-
 def add_info_text(info_text):
 	bpy.ops.object.text_add(enter_editmode=False, location=(0, 0, 0))
 	new_txt=bpy.context.view_layer.objects.active
