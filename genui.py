@@ -349,7 +349,7 @@ class hullgendef_hull_Properties(PropertyGroup):
 		name = "Hull Width",
 		description = "Width of Hull in meters",
 		default = 3,
-		min = 1,
+		min = 0.1,
 		max = 250.0
 		)
 
