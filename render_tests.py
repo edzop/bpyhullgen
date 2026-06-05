@@ -28,7 +28,34 @@ target_file = os.environ.get("TARGET_FILE")
 
 print("Working file: '%s'"%target_file)
 
+# Remove the default startup cube so it doesn't show up in the renders.
+# A fresh Blender install starts with Camera/Cube/Light; the test scenes build
+# their own geometry and never use this cube.
+if "Cube" in bpy.data.objects:
+    bpy.data.objects.remove(bpy.data.objects["Cube"], do_unlink=True)
+
 exec(open(target_file).read())
+
+def enable_gpu():
+    # Render on the GPU when one is available, preferring OPTIX on NVIDIA and
+    # falling back through the other GPU backends, then CPU as a last resort.
+    prefs=bpy.context.preferences.addons['cycles'].preferences
+    for backend in ('OPTIX','CUDA','HIP','ONEAPI','METAL'):
+        try:
+            prefs.compute_device_type=backend
+        except TypeError:
+            continue
+        prefs.refresh_devices()
+        gpus=[d for d in prefs.devices if d.type==backend]
+        if gpus:
+            for d in prefs.devices:
+                d.use=(d.type==backend)
+            print("Cycles rendering on GPU (%s): %s"%(backend,[d.name for d in gpus]))
+            return 'GPU'
+    print("No GPU found, Cycles rendering on CPU")
+    return 'CPU'
+
+cycles_device=enable_gpu()
 
 def do_render():
 
@@ -41,7 +68,8 @@ def do_render():
     bpy.context.scene.render.resolution_percentage=100
 
     bpy.context.scene.render.engine="CYCLES"
-    bpy.context.scene.cycles.samples=200
+    bpy.context.scene.cycles.device=cycles_device
+    bpy.context.scene.cycles.samples=100
 
     try:
         render_result = bpy.ops.render.render(animation=False, write_still=False, layer="", scene="")

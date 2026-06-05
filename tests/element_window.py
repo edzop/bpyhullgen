@@ -2,10 +2,12 @@
 from bpyhullgen.hullgen import window_helper
 from bpyhullgen.hullgen import render_helper
 
-window_helper.make_window(centerpoint=(-5,-3,0),diameter=2)
-window_helper.make_window(centerpoint=(4,-3,0),diameter=1)
+window_maker=window_helper.window()
 
-window_helper.make_window("w3",centerpoint=(0,3,0),diameter=3)
+window_maker.make_window(centerpoint=(-5,-3,0),diameter=2)
+window_maker.make_window(centerpoint=(4,-3,0),diameter=1)
+
+window_maker.make_window("w3",centerpoint=(0,3,0),diameter=3)
 
 framedata=[
 [ 1, [1.018093,-5.219674,31.418840],[-0.386264,0.628492,0.313842] ],

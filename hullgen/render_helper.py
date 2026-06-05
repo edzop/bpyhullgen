@@ -24,12 +24,21 @@ def create_auto_save_nodes(target_file):
 
     scene.render.use_compositing=True
 
-    # make sure we have node tree
-    if scene.node_tree==None:
-        scene.use_nodes=True
+    # make sure we have a compositing node tree.
+    # Blender 5.0+ exposes it as a standalone datablock (scene.compositing_node_group);
+    # earlier versions used scene.use_nodes / scene.node_tree.
+    if hasattr(scene,"compositing_node_group"):
+        node_tree=scene.compositing_node_group
+        if node_tree==None:
+            node_tree=bpy.data.node_groups.new("Compositing Nodes","CompositorNodeTree")
+            scene.compositing_node_group=node_tree
+    else:
+        if scene.node_tree==None:
+            scene.use_nodes=True
+        node_tree=scene.node_tree
 
-    if scene.node_tree:
-        nodes = scene.node_tree.nodes
+    if node_tree:
+        nodes = node_tree.nodes
         auto_save_output_label="auto_save"
 
         # remove previously auto created denoise nodes to prevent duplicates
@@ -43,9 +52,6 @@ def create_auto_save_nodes(target_file):
 
         output_file_node = nodes.new("CompositorNodeOutputFile")
         output_file_node.location=(600,0)
-        output_file_node.inputs[0].name="filename"
-        current_path=os.path.split(os.path.abspath(target_file))
-        output_file_node.base_path = "%s/output/"%(current_path[0])
         output_file_node.label=auto_save_output_label
 
         denoise_node = nodes.new("CompositorNodeDenoise")
@@ -53,24 +59,47 @@ def create_auto_save_nodes(target_file):
 
         bpy.context.scene.render.use_file_extension=True
 
+        current_path=os.path.split(os.path.abspath(target_file))
+        output_dir="%s/output/"%(current_path[0])
+
         blend_file = os.path.basename(target_file)
         base_output_file=os.path.splitext(blend_file)[0]
-    
-        output_file_node.file_slots[0].path="%s_"%(base_output_file)
-        output_file_node.file_slots[0].use_node_format=False
-        output_file_node.file_slots[0].format.file_format="PNG"
-        
+
         doDenoise=True
+        image_source = denoise_node.outputs[0] if doDenoise else render_layer_node.outputs['Image']
 
-        if doDenoise==True:
-            output_file_node.file_slots.new("%s_##"%(base_output_file))
-            output_file_node.file_slots[1].use_node_format=False
-            output_file_node.file_slots[1].format.file_format="PNG"
-            scene.node_tree.links.new(denoise_node.outputs[0],output_file_node.inputs[1])
+        if hasattr(output_file_node,"file_output_items"):
+            # Blender 5.0+ : File Output node uses a directory + file_output_items
+            # collection (each item adds an input socket); base_path/file_slots are gone.
+            output_file_node.directory=output_dir
+            # media_type defaults to MULTI_LAYER_IMAGE (one combined .exr named by
+            # file_name); switch to IMAGE so each item writes its own PNG per frame
+            if hasattr(output_file_node.format,"media_type"):
+                output_file_node.format.media_type="IMAGE"
+            output_file_node.format.file_format="PNG"
+            # file_name is prefixed to every item; clear it so the per-item name drives
+            # the output. "####" expands to the zero padded frame number.
+            output_file_node.file_name=""
+            output_file_node.file_output_items.clear()
+            output_file_node.file_output_items.new("RGBA","%s_####"%(base_output_file))
+            node_tree.links.new(image_source,output_file_node.inputs[0])
         else:
-            scene.node_tree.links.new(render_layer_node.outputs['Image'],output_file_node.inputs[0])
+            # legacy File Output node (< Blender 5.0)
+            output_file_node.inputs[0].name="filename"
+            output_file_node.base_path=output_dir
+            output_file_node.file_slots[0].path="%s_"%(base_output_file)
+            output_file_node.file_slots[0].use_node_format=False
+            output_file_node.file_slots[0].format.file_format="PNG"
 
-        scene.node_tree.links.new(render_layer_node.outputs['Image'],denoise_node.inputs["Image"])
+            if doDenoise==True:
+                output_file_node.file_slots.new("%s_##"%(base_output_file))
+                output_file_node.file_slots[1].use_node_format=False
+                output_file_node.file_slots[1].format.file_format="PNG"
+                node_tree.links.new(denoise_node.outputs[0],output_file_node.inputs[1])
+            else:
+                node_tree.links.new(render_layer_node.outputs['Image'],output_file_node.inputs[0])
+
+        node_tree.links.new(render_layer_node.outputs['Image'],denoise_node.inputs["Image"])
 
 
 
